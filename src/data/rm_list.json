@@ -1,0 +1,6 @@
+[
+  { "bank": "HDFC Bank", "branch": "Gurgaon", "rm": "Sandeep Varma", "contact": "+91 98765 43210" },
+  { "bank": "ICICI Bank", "branch": "Delhi", "rm": "Anjali Mehta", "contact": "+91 98765 43211" },
+  { "bank": "SBI", "branch": "Mumbai", "rm": "Vikram Singh", "contact": "+91 98765 43212" },
+  { "bank": "Axis Bank", "branch": "Noida", "rm": "Pooja Sharma", "contact": "+91 98765 43213" }
+]

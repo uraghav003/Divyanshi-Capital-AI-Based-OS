@@ -1,0 +1,8 @@
+{
+  "name": "Divyanshi Capital AI Based OS",
+  "description": "Enterprise RM Operating System with Master Spreadsheet Data Sync, AI Document Intelligence, and Neural Lead Automation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

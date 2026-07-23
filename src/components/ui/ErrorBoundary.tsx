@@ -179,12 +179,22 @@ export class ErrorBoundary extends Component<Props, State> {
     this.handleIncomingError(error, errorInfo);
   }
 
+  customErrorHandler = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    const { error, errorInfo } = customEvent.detail || {};
+    if (error) {
+      this.handleIncomingError(error, errorInfo);
+    }
+  }
+
   componentDidMount() {
     window.addEventListener('unhandledrejection', this.promiseRejectionHandler);
+    window.addEventListener('dc-custom-error', this.customErrorHandler);
   }
 
   componentWillUnmount() {
     window.removeEventListener('unhandledrejection', this.promiseRejectionHandler);
+    window.removeEventListener('dc-custom-error', this.customErrorHandler);
     this.clearTimers();
   }
 
@@ -203,7 +213,7 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ isAnalyzing: true, aiAnalysis: null });
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-3.6-flash",
         contents: [{ role: "user", parts: [{ text: `An error occurred in the application. Provide a brief, highly technical root cause analysis and a suggested fix in 2-3 sentences. Do not use markdown wrappers. 
         
 Error Message: ${error.message}
@@ -223,6 +233,8 @@ Component Stack: ${errorInfo?.componentStack || 'N/A'}` }] }],
     if (this.state.hasError) {
       const error = this.state.error;
       const isNeutralized = this.state.isNeutralized;
+      const isWebSocketError = error?.message?.includes('WebSocket') || error?.message?.toLowerCase().includes('handshake');
+      const isTokenMismatch = error?.message?.toLowerCase().includes('token mismatch') || error?.message?.includes('DC_INTERNAL_TOKEN') || error?.message?.includes('MALLIK_API_KEY');
       const isApiError = error instanceof ApiError || (error?.message && error.message.includes('Server error'));
       const isNetworkError = error?.message?.includes('Network Error') || error?.message?.includes('Failed to fetch');
       const isTimeout = (error instanceof ApiError && (error.status === 504 || error.status === 408)) || error?.message?.includes('timeout') || error?.message?.includes('Timeout');
@@ -238,6 +250,12 @@ Component Stack: ${errorInfo?.componentStack || 'N/A'}` }] }],
       if (isNeutralized) {
         title = 'System Feature Auto-Neutralized';
         Icon = ShieldAlert;
+      } else if (isTokenMismatch) {
+        title = 'Authentication Token Mismatch';
+        Icon = ShieldAlert;
+      } else if (isWebSocketError) {
+        title = 'WebSocket Handshake Failure';
+        Icon = WifiOff;
       } else if (isUnauthorized) {
         title = 'Unauthorized Access';
         Icon = ShieldAlert;

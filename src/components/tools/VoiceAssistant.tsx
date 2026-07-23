@@ -55,10 +55,53 @@ export function VoiceAssistant({ setActiveTab }: { setActiveTab: (tab: string) =
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<BlobPart[]>([]);
 
+  const retryCountRef = useRef<number>(0);
+  const closedByUserRef = useRef<boolean>(false);
+  const reconnectTimeoutRef = useRef<any>(null);
+
+  const safeSend = (ws: WebSocket | null, data: string) => {
+    if (!ws) return;
+    if (ws.readyState === WebSocket.OPEN) {
+      try {
+        ws.send(data);
+      } catch (e) {
+        console.error("safeSend error:", e);
+      }
+    }
+  };
+
+  const safeClose = (ws: WebSocket | null) => {
+    if (!ws) return;
+    if (ws.readyState === WebSocket.OPEN) {
+      try {
+        ws.close();
+      } catch (e) {
+        console.error("safeClose error:", e);
+      }
+    } else if (ws.readyState === WebSocket.CONNECTING) {
+      const onCloseDeferred = () => {
+        try {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.close();
+          }
+        } catch (e) {
+          console.error("Deferred safeClose error:", e);
+        }
+      };
+      ws.addEventListener('open', onCloseDeferred, { once: true });
+    }
+  };
+
   const stopListening = () => {
     setIsListening(false);
+    closedByUserRef.current = true;
+    retryCountRef.current = 0;
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
     if (wsRef.current) {
-      wsRef.current.close();
+      safeClose(wsRef.current);
       wsRef.current = null;
     }
     
@@ -138,19 +181,106 @@ export function VoiceAssistant({ setActiveTab }: { setActiveTab: (tab: string) =
     }
   };
 
+  const connectWebSocket = (processor: ScriptProcessorNode, outputAudioCtx: AudioContext) => {
+    if (closedByUserRef.current) return;
+
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/live`;
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    processor.onaudioprocess = (e) => {
+      const base64 = pcmToBase64(e.inputBuffer.getChannelData(0));
+      safeSend(ws, JSON.stringify({ audio: base64 }));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+          const msg = JSON.parse(event.data);
+          if (msg.audio) {
+            const pcm = base64ToPcm(msg.audio);
+            const buffer = outputAudioCtx.createBuffer(1, pcm.length, 24000);
+            buffer.getChannelData(0).set(pcm);
+            
+            const playSource = outputAudioCtx.createBufferSource();
+            playSource.buffer = buffer;
+            playSource.connect(outputAudioCtx.destination);
+            
+            const currentTime = outputAudioCtx.currentTime;
+            if (nextStartTimeRef.current < currentTime) {
+              nextStartTimeRef.current = currentTime + 0.1;
+            }
+            playSource.start(nextStartTimeRef.current);
+            nextStartTimeRef.current += buffer.duration;
+          }
+          if (msg.interrupted) {
+             nextStartTimeRef.current = outputAudioCtx.currentTime;
+          }
+      } catch(e) {
+          console.error(e);
+      }
+    };
+
+    ws.onopen = () => {
+      retryCountRef.current = 0;
+    };
+    
+    ws.onerror = (e) => {
+        console.error("WS error:", e);
+    };
+    
+    ws.onclose = () => {
+        if (!closedByUserRef.current) {
+          if (retryCountRef.current >= 3) {
+            console.error("WebSocket connection failed permanently after 3 attempts.");
+            setError("WebSocket Handshake Failure: Unable to establish connection to server (Max 3 attempts exceeded).");
+            stopListening();
+            
+            // Dispatch custom event to notify ErrorBoundary specifically of the WS failure
+            window.dispatchEvent(new CustomEvent('dc-custom-error', {
+              detail: {
+                error: new Error('WebSocket Handshake Failure: The Live voice assistant WebSocket connection could not be established after 3 attempts in the production build lifecycle.')
+              }
+            }));
+            return;
+          }
+
+          const backoffDelay = Math.min(1000 * Math.pow(2, retryCountRef.current), 15000);
+          console.log(`WebSocket closed. Reconnecting in ${backoffDelay}ms (attempt ${retryCountRef.current + 1})...`);
+          
+          if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current);
+          }
+          
+          reconnectTimeoutRef.current = setTimeout(() => {
+            retryCountRef.current += 1;
+            connectWebSocket(processor, outputAudioCtx);
+          }, backoffDelay);
+        } else {
+          cleanupAudio();
+        }
+    };
+  };
+
   const startListening = async () => {
     setError(null);
     setSummaryData(null);
     setIsListening(true);
     nextStartTimeRef.current = 0;
     audioChunksRef.current = [];
+    closedByUserRef.current = false;
+    retryCountRef.current = 0;
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
     
     try {
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${wsProtocol}//${window.location.host}/live`;
-      const ws = new WebSocket(wsUrl);
-      wsRef.current = ws;
-
       const inputAudioCtx = new AudioContext({ sampleRate: 16000 });
       inputCtxRef.current = inputAudioCtx;
       const outputAudioCtx = new AudioContext({ sampleRate: 24000 });
@@ -180,49 +310,7 @@ export function VoiceAssistant({ setActiveTab }: { setActiveTab: (tab: string) =
       source.connect(processor);
       processor.connect(inputAudioCtx.destination);
 
-      processor.onaudioprocess = (e) => {
-        if (ws.readyState === WebSocket.OPEN) {
-          const base64 = pcmToBase64(e.inputBuffer.getChannelData(0));
-          ws.send(JSON.stringify({ audio: base64 }));
-        }
-      };
-
-      ws.onmessage = (event) => {
-        try {
-            const msg = JSON.parse(event.data);
-            if (msg.audio) {
-              const pcm = base64ToPcm(msg.audio);
-              const buffer = outputAudioCtx.createBuffer(1, pcm.length, 24000);
-              buffer.getChannelData(0).set(pcm);
-              
-              const playSource = outputAudioCtx.createBufferSource();
-              playSource.buffer = buffer;
-              playSource.connect(outputAudioCtx.destination);
-              
-              const currentTime = outputAudioCtx.currentTime;
-              if (nextStartTimeRef.current < currentTime) {
-                nextStartTimeRef.current = currentTime + 0.1;
-              }
-              playSource.start(nextStartTimeRef.current);
-              nextStartTimeRef.current += buffer.duration;
-            }
-            if (msg.interrupted) {
-               nextStartTimeRef.current = outputAudioCtx.currentTime;
-            }
-        } catch(e) {
-            console.error(e);
-        }
-      };
-      
-      ws.onerror = (e) => {
-          console.error("WS error:", e);
-          setError("WebSocket connection failed. Verify API Keys are set and valid.");
-          stopListening();
-      };
-      
-      ws.onclose = () => {
-          stopListening();
-      };
+      connectWebSocket(processor, outputAudioCtx);
 
     } catch (err: any) {
       console.error(err);

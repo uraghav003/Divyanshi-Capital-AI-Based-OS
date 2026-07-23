@@ -10,7 +10,9 @@ import { BulbhulChat } from '@/components/ai/BulbhulChat';
 import { BulbhulDebugger } from '@/components/ai/BulbhulDebugger';
 import { GenieAlerts } from '@/components/ai/GenieAlerts';
 import { Inbox } from '@/components/tools/Inbox';
+import { GoogleMeet } from '@/components/tools/GoogleMeet';
 import { PersonalFiles } from '@/components/tools/PersonalFiles';
+import { TokenBoundErrorBoundary } from '@/components/auth/TokenBoundErrorBoundary';
 import { IframeModule } from '@/components/layout/IframeModule';
 import { QuickLog } from '@/components/tools/QuickLog';
 import { VoiceAssistant } from '@/components/tools/VoiceAssistant';
@@ -23,6 +25,8 @@ import { MessageCircle, Mail as MailIcon, Globe, Phone, Send } from 'lucide-reac
 import { SystemIntelligenceCore } from '@/components/layout/SystemIntelligenceCore';
 import { GlobalConnectionBanner } from '@/components/layout/GlobalConnectionBanner';
 import { apiFetch } from '@/lib/api';
+import { CommandPalette } from '@/components/ui/CommandPalette';
+import { EmployeeSyncProvider, SyncManager } from '@/lib/sync';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(() => {
@@ -69,6 +73,20 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [triggerSource, setTriggerSource] = useState<string | null>(null);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
 
   useEffect(() => {
@@ -136,6 +154,15 @@ export default function App() {
     };
   }, [user]);
 
+  useEffect(() => {
+    if (user) {
+      // Verifies integrity of ALL_EMPLOYEES and PERSONAL_FILE_ID mappings against backend before dashboard fully loads
+      SyncManager.verifyIntegrity(true).catch((err) => {
+        console.error('[SyncManager Initial Verification Error]:', err);
+      });
+    }
+  }, [user?.id]);
+
   const handleTriggerSmartForm = (source: string) => {
     setTriggerSource(source);
     setActiveTab('entry');
@@ -156,8 +183,14 @@ export default function App() {
         return <Dashboard user={user} />;
       case 'inbox':
         return <Inbox user={user} />;
+      case 'meet':
+        return <GoogleMeet user={user} />;
       case 'personal':
-        return <PersonalFiles user={user} onTriggerSmartForm={handleTriggerSmartForm} />;
+        return (
+          <TokenBoundErrorBoundary>
+            <PersonalFiles user={user} onTriggerSmartForm={handleTriggerSmartForm} />
+          </TokenBoundErrorBoundary>
+        );
       case 'entry':
         return <IframeModule page="form" manager_email_id={user.email} />;
       case 'marketing':
@@ -193,6 +226,7 @@ export default function App() {
     switch (activeTab) {
       case 'dashboard': return 'Enterprise Dashboard';
       case 'inbox': return 'Enterprise Inbox';
+      case 'meet': return 'Google Meet Center';
       case 'personal': return 'Personal Files & Activity';
       case 'entry': return 'Smart Form';
       case 'marketing': return 'AI Marketing & Automation Hub';
@@ -210,67 +244,75 @@ export default function App() {
   };
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <TooltipProvider>
-        <div className="flex h-screen bg-gray-50 dark:bg-navy-950 overflow-hidden relative">
-          <SystemIntelligenceCore />
-          <GlobalConnectionBanner />
-          <Sidebar 
-            activeTab={activeTab} 
-            setActiveTab={setActiveTab} 
-            role={user.role} 
-            onLogout={handleLogout} 
-          />
-          
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <Header user={user} title={getTitle()} />
+    <EmployeeSyncProvider>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <TooltipProvider>
+          <div className="flex h-screen bg-gray-50 dark:bg-navy-950 overflow-hidden relative">
+            <SystemIntelligenceCore />
+            <GlobalConnectionBanner />
+            <Sidebar 
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab} 
+              role={user.role} 
+              onLogout={handleLogout} 
+            />
             
-            <main className="flex-1 overflow-y-auto bg-gray-50/50">
-              {renderContent()}
-            </main>
-          </div>
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Header user={user} title={getTitle()} onOpenCommandPalette={() => setIsCommandPaletteOpen(true)} />
+              
+              <main className="flex-1 overflow-y-auto bg-gray-50/50">
+                {renderContent()}
+              </main>
+            </div>
 
-                    <div className="fixed bottom-8 right-8 flex flex-col gap-4 z-50">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => window.open('https://t.me/divyanshicapital', '_blank')}
-              className="w-14 h-14 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-2xl shadow-blue-500/40 group relative"
-            >
-              <Send size={24} className="ml-1" />
-              <span className="absolute right-full mr-4 px-3 py-1 bg-navy-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Telegram Support</span>
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => window.location.href = 'tel:+917838074351'}
-              className="w-14 h-14 bg-rose-500 text-white rounded-full flex items-center justify-center shadow-2xl shadow-rose-500/40 group relative"
-            >
-              <Phone size={24} />
-              <span className="absolute right-full mr-4 px-3 py-1 bg-navy-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Call Support</span>
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => window.open('https://wa.me/917838074351', '_blank')}
-              className="w-14 h-14 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-2xl shadow-emerald-500/40 group relative"
-            >
-              <MessageCircle size={28} />
-              <span className="absolute right-full mr-4 px-3 py-1 bg-navy-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">WhatsApp Support</span>
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => window.location.href = 'mailto:upendra.raghav@divyanshicapital.com'}
-              className="w-14 h-14 bg-navy-900 text-white rounded-full flex items-center justify-center shadow-2xl shadow-navy-900/40 group relative"
-            >
-              <MailIcon size={28} />
-              <span className="absolute right-full mr-4 px-3 py-1 bg-navy-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Enterprise Mail</span>
-            </motion.button>
+                      <div className="fixed bottom-8 right-8 flex flex-col gap-4 z-50">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => window.open('https://t.me/divyanshicapital', '_blank')}
+                className="w-14 h-14 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-2xl shadow-blue-500/40 group relative"
+              >
+                <Send size={24} className="ml-1" />
+                <span className="absolute right-full mr-4 px-3 py-1 bg-navy-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Telegram Support</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => window.location.href = 'tel:+917838074351'}
+                className="w-14 h-14 bg-rose-500 text-white rounded-full flex items-center justify-center shadow-2xl shadow-rose-500/40 group relative"
+              >
+                <Phone size={24} />
+                <span className="absolute right-full mr-4 px-3 py-1 bg-navy-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Call Support</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => window.open('https://wa.me/917838074351', '_blank')}
+                className="w-14 h-14 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-2xl shadow-emerald-500/40 group relative"
+              >
+                <MessageCircle size={28} />
+                <span className="absolute right-full mr-4 px-3 py-1 bg-navy-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">WhatsApp Support</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => window.location.href = 'mailto:upendra.raghav@divyanshicapital.com'}
+                className="w-14 h-14 bg-navy-900 text-white rounded-full flex items-center justify-center shadow-2xl shadow-navy-900/40 group relative"
+              >
+                <MailIcon size={28} />
+                <span className="absolute right-full mr-4 px-3 py-1 bg-navy-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Enterprise Mail</span>
+              </motion.button>
+            </div>
+            <Toaster position="top-right" />
+            <CommandPalette 
+              isOpen={isCommandPaletteOpen} 
+              onClose={() => setIsCommandPaletteOpen(false)} 
+              setActiveTab={setActiveTab} 
+              user={user} 
+            />
           </div>
-          <Toaster position="top-right" />
-        </div>
-      </TooltipProvider>
-    </ThemeProvider>
+        </TooltipProvider>
+      </ThemeProvider>
+    </EmployeeSyncProvider>
   );
 }

@@ -4,6 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mallik Hub V2</title>
+    <script>
+      (function() {
+        if (typeof window !== 'undefined' && window.WebSocket) {
+          const originalClose = WebSocket.prototype.close;
+          WebSocket.prototype.close = function(code, reason) {
+            if (this.readyState === WebSocket.OPEN) {
+              return originalClose.call(this, code, reason);
+            } else if (this.readyState === WebSocket.CONNECTING) {
+              const handleOpen = () => {
+                try {
+                  if (this.readyState === WebSocket.OPEN) {
+                    originalClose.call(this, code, reason);
+                  }
+                } catch (e) {}
+              };
+              this.addEventListener('open', handleOpen, { once: true });
+            }
+          };
+        }
+      })();
+    </script>
 </head>
 <body class="bg-slate-50 dark:bg-navy-950 min-h-screen transition-colors duration-300">
     <div id="root"></div>

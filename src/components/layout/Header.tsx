@@ -27,9 +27,10 @@ import { motion } from 'motion/react';
 interface HeaderProps {
   user: User;
   title: string;
+  onOpenCommandPalette?: () => void;
 }
 
-export function Header({ user, title }: HeaderProps) {
+export function Header({ user, title, onOpenCommandPalette }: HeaderProps) {
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [syncStatus, setSyncStatus] = useState<'connected' | 'disconnected' | 'syncing'>('syncing');
@@ -302,12 +303,19 @@ export function Header({ user, title }: HeaderProps) {
            </Button>
         </div>
 
-        <div className="relative w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-          <Input 
-            placeholder="Search leads, clients, or employees..." 
-            className="pl-10 bg-gray-50 dark:bg-navy-800 border-none rounded-xl focus-visible:ring-orange-500/20 dark:text-white"
-          />
+        <div 
+          onClick={onOpenCommandPalette}
+          className="relative w-96 cursor-pointer group"
+        >
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-brand-orange transition-colors" size={18} />
+          <div className="pl-11 pr-3.5 py-2.5 bg-gray-50 dark:bg-navy-950 rounded-xl text-sm text-gray-400 dark:text-gray-500 select-none flex items-center justify-between border border-transparent hover:border-gray-100 dark:hover:border-navy-800 transition-all shadow-inner">
+            <span>Search menu or clients...</span>
+            <div className="flex items-center gap-1">
+              <span className="text-[9px] font-mono bg-gray-200 dark:bg-navy-850 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400 font-bold border border-gray-300 dark:border-navy-750">
+                {typeof window !== 'undefined' && navigator?.userAgent?.indexOf('Mac') !== -1 ? '⌘K' : 'Ctrl+K'}
+              </span>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">

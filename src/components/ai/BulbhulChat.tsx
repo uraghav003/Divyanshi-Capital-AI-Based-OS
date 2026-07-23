@@ -46,7 +46,7 @@ export function BulbhulChat({ user }: { user: UserType }) {
       }));
       chatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
 
-      let modelId = 'gemini-3.5-flash';
+      let modelId = 'gemini-3.6-flash';
       if (modelMode === 'pro') modelId = 'gemini-3.1-pro-preview';
       if (modelMode === 'lite') modelId = 'gemini-3.1-flash-lite';
 

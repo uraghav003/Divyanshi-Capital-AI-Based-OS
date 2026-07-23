@@ -16,7 +16,8 @@ import {
   Phone,
   Mic,
   Brain,
-  Github
+  Github,
+  Video
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,7 @@ export function Sidebar({ activeTab, setActiveTab, role, onLogout }: SidebarProp
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'personal', label: 'Personal Files', icon: FolderOpen },
+    { id: 'meet', label: 'Google Meet', icon: Video },
     { id: 'inbox', label: 'Inbox', icon: Mail },
     { id: 'intelligence', label: 'Neural Intel', icon: Brain },
     { id: 'entry', label: 'Smart Form', icon: FileText },

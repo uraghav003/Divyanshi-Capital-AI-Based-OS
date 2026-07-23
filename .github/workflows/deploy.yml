@@ -23,6 +23,17 @@ jobs:
       - name: Push to Google Apps Script
         env:
           CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          SCRIPT_ID: ${{ secrets.SCRIPT_ID }}
         run: |
+          if [ -z "$CLASPRC_JSON" ]; then
+            echo "Error: CLASPRC_JSON secret is missing. Please define it in your GitHub repository secrets."
+            exit 1
+          fi
+          if [ -z "$SCRIPT_ID" ]; then
+            echo "Error: SCRIPT_ID secret is missing. Please define it in your GitHub repository secrets."
+            exit 1
+          fi
           echo "$CLASPRC_JSON" > ~/.clasprc.json
+          echo "{\"scriptId\":\"$SCRIPT_ID\",\"rootDir\":\"./\"}" > .clasp.json
           clasp push -f
+

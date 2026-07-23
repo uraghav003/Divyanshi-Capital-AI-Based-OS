@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { ResponsiveContainer, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, Area, PieChart, Pie, Cell } from 'recharts';
+import { toast } from 'sonner';
 
 import {
   ExternalLink,
@@ -28,7 +29,15 @@ import {
   Filter,
   Target,
   ArrowRight,
-  Send
+  Send,
+  RefreshCw,
+  Edit3,
+  Plus,
+  Check,
+  ShieldCheck,
+  FileText,
+  Settings,
+  Sparkles
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -39,6 +48,8 @@ import { ShareSmartForm } from './ShareSmartForm';
 import { LeadPipeline } from './LeadPipeline';
 import { BankRMDirectory } from '../tools/BankRMDirectory';
 import { User, TeamMember } from '@/types';
+import { useEmployeeSync } from '@/lib/sync';
+import { HrDiscrepancyPanel } from './HrDiscrepancyPanel';
 import { motion } from 'motion/react';
 import { ConnectionHealth } from './ConnectionHealth';
 import { ActivityFeed, mockActivities } from './ActivityFeed';
@@ -57,6 +68,54 @@ export function Dashboard({ user }: { user: User }) {
   const [activeTab, setActiveTab] = useState('overview');
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const {
+    employees,
+    isSyncing,
+    lastSyncedAt,
+    triggerSync: fetchEmployees,
+    setEmployees
+  } = useEmployeeSync();
+
+  const [editingEmployee, setEditingEmployee] = useState<any | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const isEditingExisting = !!editingEmployee && employees.some(e => e.empCode === editingEmployee.empCode && e.empCode !== '');
+
+  const handleSaveEmployee = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEmployee || !editingEmployee.empCode || !editingEmployee.employeeName) {
+      toast.error('Employee Code and Full Name are mandatory.');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const res = await apiFetch('/api/dc/employee-save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employee: editingEmployee })
+      });
+      const result = await res.json();
+      if (result.ok) {
+        toast.success(`Saved mappings for employee ${editingEmployee.empCode}`);
+        setEditingEmployee(null);
+        if (Array.isArray(result.data)) {
+          setEmployees(result.data);
+          localStorage.setItem('dc_employee_sync_data', JSON.stringify(result.data));
+        } else {
+          fetchEmployees(true);
+        }
+      } else {
+        toast.error(result.error || 'Failed to save employee mappings');
+      }
+    } catch (err) {
+      toast.error('Failed to commit employee record due to connection limitations.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     async function loadDashboard() {
@@ -79,7 +138,64 @@ export function Dashboard({ user }: { user: User }) {
   }, [user.id]);
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500">Loading Enterprise Workspace...</div>;
+    return (
+      <div className="p-8 space-y-8 max-w-[1600px] mx-auto animate-pulse">
+        {/* Top Header Skeleton */}
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <div className="h-9 w-64 bg-gray-200 dark:bg-navy-800 rounded-xl" />
+            <div className="h-4 w-48 bg-gray-200 dark:bg-navy-800 rounded-lg" />
+          </div>
+          <div className="h-10 w-96 bg-gray-200 dark:bg-navy-800 rounded-2xl" />
+        </div>
+
+        {/* Quick Action Buttons Skeleton */}
+        <div className="flex gap-3">
+          <div className="h-12 w-28 bg-gray-200 dark:bg-navy-800 rounded-2xl" />
+          <div className="h-12 w-36 bg-gray-200 dark:bg-navy-800 rounded-2xl" />
+          <div className="h-12 w-24 bg-gray-200 dark:bg-navy-800 rounded-2xl" />
+          <div className="h-12 w-28 bg-gray-200 dark:bg-navy-800 rounded-2xl" />
+        </div>
+
+        {/* KPI Grid Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white dark:bg-navy-900 p-6 rounded-3xl h-36 flex flex-col justify-between shadow-sm">
+              <div className="flex justify-between items-start">
+                <div className="w-12 h-12 bg-gray-200 dark:bg-navy-800 rounded-2xl" />
+                <div className="w-16 h-6 bg-gray-200 dark:bg-navy-800 rounded-lg" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-24 bg-gray-200 dark:bg-navy-800 rounded-md" />
+                <div className="h-7 w-20 bg-gray-200 dark:bg-navy-800 rounded-lg" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Personal & Team Performance Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="bg-navy-900 p-6 rounded-3xl h-96 flex flex-col justify-between shadow-sm">
+            <div className="space-y-3">
+              <div className="h-6 w-48 bg-white/10 rounded-lg" />
+              <div className="h-4 w-32 bg-white/10 rounded-md" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="h-20 bg-white/5 rounded-2xl" />
+              <div className="h-20 bg-white/5 rounded-2xl" />
+            </div>
+            <div className="h-12 bg-white/5 rounded-2xl" />
+          </div>
+          <div className="lg:col-span-2 bg-white dark:bg-navy-900 p-6 rounded-3xl h-96 flex flex-col justify-between shadow-sm">
+            <div className="space-y-3">
+              <div className="h-6 w-40 bg-gray-200 dark:bg-navy-800 rounded-lg" />
+              <div className="h-4 w-60 bg-gray-200 dark:bg-navy-800 rounded-md" />
+            </div>
+            <div className="h-64 bg-gray-100 dark:bg-navy-800/50 rounded-2xl" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const kpis = dashboardData?.kpis || [];
@@ -98,7 +214,10 @@ export function Dashboard({ user }: { user: User }) {
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-3xl font-sans font-bold text-gray-900 dark:text-white tracking-tight">Enterprise Overview</h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Real-time performance and system metrics</p>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Real-time data connection active" />
+              <p className="text-gray-500 dark:text-gray-400">Real-time performance and system metrics</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white dark:bg-navy-900 p-1 rounded-2xl shadow-sm border border-gray-100 dark:border-navy-800">
@@ -114,6 +233,10 @@ export function Dashboard({ user }: { user: User }) {
                 <TabsTrigger value="rms" className="rounded-xl data-[state=active]:bg-navy-900 data-[state=active]:text-white gap-2 h-10 px-4">
                   <Contact2 size={16} />
                   RM Directory
+                </TabsTrigger>
+                <TabsTrigger value="hr-sync" className="rounded-xl data-[state=active]:bg-navy-900 data-[state=active]:text-white gap-2 h-10 px-4">
+                  <Users size={16} />
+                  HR Staff Sync
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -427,6 +550,356 @@ export function Dashboard({ user }: { user: User }) {
 
       <TabsContent value="rms" className="mt-0 outline-none">
         <BankRMDirectory />
+      </TabsContent>
+
+      <TabsContent value="hr-sync" className="mt-0 outline-none space-y-8">
+        {user.role === 'MD' && (
+          <HrDiscrepancyPanel 
+            employees={employees}
+            isSyncing={isSyncing}
+            lastSyncedAt={lastSyncedAt}
+            onRefresh={() => fetchEmployees(false)}
+            onSelectEmployee={(emp) => setEditingEmployee(emp)}
+            onSetSearchQuery={(q) => setSearchQuery(q)}
+          />
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main List Section */}
+          <div className={cn("space-y-6", editingEmployee ? "lg:col-span-2" : "lg:col-span-3")}>
+            <Card className="border-none shadow-sm rounded-3xl p-6 bg-white dark:bg-navy-900">
+              <CardHeader className="px-0 pt-0 pb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-2xl font-sans font-bold dark:text-white flex items-center gap-2">
+                      <ShieldCheck className="text-emerald-500 w-6 h-6" />
+                      Staff Identity & File Mapping Ledger
+                    </CardTitle>
+                    <CardDescription className="dark:text-gray-400 mt-1">
+                      Manage corporate avatars, system roles, email bindings, and Google Drive PERSONAL_FILE_ID mappings.
+                    </CardDescription>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <Button 
+                      onClick={() => fetchEmployees(false)} 
+                      disabled={isSyncing}
+                      variant="outline"
+                      className="rounded-xl h-10 px-4 gap-2 text-xs font-semibold dark:border-navy-800 dark:hover:bg-navy-800 dark:text-white"
+                    >
+                      <RefreshCw size={14} className={cn(isSyncing && "animate-spin")} />
+                      Sync Ledger
+                    </Button>
+                    <Button 
+                      onClick={() => setEditingEmployee({
+                        empCode: '',
+                        employeeName: '',
+                        role: 'SALES',
+                        department: 'Sales',
+                        employeeEmailId: '',
+                        mobile: '',
+                        activeStatus: 'ACTIVE',
+                        accessLevel: 2,
+                        personalFileId: '',
+                        avatarSeed: ''
+                      })}
+                      className="bg-navy-900 dark:bg-white text-white dark:text-navy-900 hover:bg-navy-800 dark:hover:bg-gray-100 rounded-xl h-10 px-4 gap-2 text-xs font-bold shadow-sm"
+                    >
+                      <Plus size={14} />
+                      Add Employee
+                    </Button>
+                  </div>
+                </div>
+
+                {lastSyncedAt && (
+                  <p className="text-[10px] font-mono text-gray-400 uppercase tracking-wider mt-4 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Ledger State: Fully Synchronized · Last Sync: {new Date(lastSyncedAt).toLocaleString()}
+                  </p>
+                )}
+              </CardHeader>
+
+              {/* Search Bar */}
+              <div className="relative mb-6">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Filter employees by name, ID, department, or mapped file..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-gray-50 dark:bg-navy-950 border border-gray-100 dark:border-navy-850 rounded-2xl pl-12 pr-4 h-12 text-sm focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-white dark:text-white"
+                />
+              </div>
+
+              {/* Grid / Table */}
+              <div className="overflow-x-auto rounded-2xl border border-gray-100 dark:border-navy-800/50">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50/50 dark:bg-navy-950/50 text-gray-400 font-mono text-[10px] uppercase tracking-wider border-b border-gray-100 dark:border-navy-800/50">
+                      <th className="p-4">Staff Member</th>
+                      <th className="p-4">Employee ID</th>
+                      <th className="p-4">Role & Dept</th>
+                      <th className="p-4">Personal File Mapping</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-navy-800/40">
+                    {employees
+                      .filter(emp => {
+                        const query = searchQuery.toLowerCase();
+                        return (
+                          emp.employeeName?.toLowerCase().includes(query) ||
+                          emp.empCode?.toLowerCase().includes(query) ||
+                          emp.department?.toLowerCase().includes(query) ||
+                          emp.employeeEmailId?.toLowerCase().includes(query) ||
+                          emp.personalFileId?.toLowerCase().includes(query)
+                        );
+                      })
+                      .map((emp) => (
+                        <tr key={emp.empCode} className="hover:bg-gray-50/40 dark:hover:bg-navy-950/20 transition-colors">
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-navy-800 p-0.5 border border-brand-orange/10 shrink-0">
+                                <img
+                                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${emp.avatarSeed || emp.employeeName}`}
+                                  alt={emp.employeeName}
+                                  className="w-full h-full rounded-full"
+                                />
+                              </div>
+                              <div>
+                                <p className="font-sans font-bold text-gray-900 dark:text-white text-sm">{emp.employeeName}</p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500 font-mono mt-0.5">{emp.employeeEmailId}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4 font-mono text-xs font-bold text-gray-600 dark:text-gray-300">
+                            {emp.empCode}
+                          </td>
+                          <td className="p-4">
+                            <div className="space-y-1">
+                              <Badge className={cn(
+                                "rounded-md border-none font-sans text-[10px] font-bold py-0.5 px-2",
+                                emp.role === 'MD' ? "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400" :
+                                emp.role === 'COORDINATOR' ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400" :
+                                "bg-orange-50 dark:bg-orange-500/10 text-brand-orange"
+                              )}>
+                                {emp.role}
+                              </Badge>
+                              <p className="text-xs text-gray-400 dark:text-gray-500">{emp.department}</p>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <FileText className="text-gray-400 shrink-0" size={14} />
+                              <span className="font-mono text-[11px] text-gray-600 dark:text-gray-300 truncate max-w-[160px]" title={emp.personalFileId}>
+                                {emp.personalFileId}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <Badge className={cn(
+                              "rounded-full border-none text-[9px] font-bold px-2 py-0.5",
+                              emp.activeStatus === 'ACTIVE' ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-gray-100 dark:bg-navy-800 text-gray-400"
+                            )}>
+                              {emp.activeStatus}
+                            </Badge>
+                          </td>
+                          <td className="p-4 text-right">
+                            <Button
+                              onClick={() => setEditingEmployee(emp)}
+                              variant="ghost"
+                              size="sm"
+                              className="rounded-lg h-8 w-8 p-0 dark:hover:bg-navy-800 text-gray-500 hover:text-navy-900 dark:hover:text-white"
+                            >
+                              <Edit3 size={14} />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+
+          {/* Edit / Add Sheet Section */}
+          {editingEmployee && (
+            <div className="lg:col-span-1">
+              <Card className="border-none shadow-xl rounded-3xl p-6 bg-white dark:bg-navy-900 border border-gray-100 dark:border-navy-850 sticky top-6">
+                <CardHeader className="px-0 pt-0 pb-6 border-b border-gray-100 dark:border-navy-800/60">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-sans font-bold dark:text-white">
+                      {isEditingExisting ? `Modify Employee ${editingEmployee.empCode}` : "New Employee Ledger"}
+                    </CardTitle>
+                    <button 
+                      onClick={() => setEditingEmployee(null)}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-white font-sans text-sm font-semibold"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </CardHeader>
+
+                <form onSubmit={handleSaveEmployee} className="pt-6 space-y-4">
+                  {/* Dynamic Seed Avatar Preview */}
+                  <div className="flex flex-col items-center p-4 bg-gray-50 dark:bg-navy-950 rounded-2xl border border-gray-100 dark:border-navy-850">
+                    <div className="w-20 h-20 rounded-full border-2 border-brand-orange/20 p-0.5 mb-3">
+                      <img 
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${editingEmployee.avatarSeed || editingEmployee.employeeName || 'Placeholder'}`} 
+                        alt="Avatar Preview" 
+                        className="w-full h-full rounded-full"
+                      />
+                    </div>
+                    <p className="text-[10px] text-gray-400 uppercase font-mono tracking-wider">Live Neural Avatar Preview</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Employee Code</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. DC015"
+                      value={editingEmployee.empCode}
+                      onChange={(e) => setEditingEmployee({ ...editingEmployee, empCode: e.target.value.toUpperCase() })}
+                      disabled={isEditingExisting} // Freeze code for existing employees
+                      className="w-full bg-white dark:bg-navy-950 border border-gray-200 dark:border-navy-800 rounded-xl px-3 h-10 text-xs focus:ring-1 focus:ring-brand-orange dark:text-white disabled:opacity-60"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Full Name</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Rahul Verma"
+                      value={editingEmployee.employeeName}
+                      onChange={(e) => setEditingEmployee({ ...editingEmployee, employeeName: e.target.value })}
+                      className="w-full bg-white dark:bg-navy-950 border border-gray-200 dark:border-navy-800 rounded-xl px-3 h-10 text-xs focus:ring-1 focus:ring-brand-orange dark:text-white"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Role</label>
+                      <select 
+                        value={editingEmployee.role}
+                        onChange={(e) => setEditingEmployee({ ...editingEmployee, role: e.target.value })}
+                        className="w-full bg-white dark:bg-navy-950 border border-gray-200 dark:border-navy-800 rounded-xl px-2 h-10 text-xs focus:ring-1 focus:ring-brand-orange dark:text-white"
+                      >
+                        <option value="MD">MD</option>
+                        <option value="SALES">SALES</option>
+                        <option value="COORDINATOR">COORDINATOR</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Department</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. Sales, HR, Finance"
+                        value={editingEmployee.department}
+                        onChange={(e) => setEditingEmployee({ ...editingEmployee, department: e.target.value })}
+                        className="w-full bg-white dark:bg-navy-950 border border-gray-200 dark:border-navy-800 rounded-xl px-3 h-10 text-xs focus:ring-1 focus:ring-brand-orange dark:text-white"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Active Status & Access Level Dropdowns */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Active Status</label>
+                      <select 
+                        value={editingEmployee.activeStatus || 'ACTIVE'}
+                        onChange={(e) => setEditingEmployee({ ...editingEmployee, activeStatus: e.target.value })}
+                        className="w-full bg-white dark:bg-navy-950 border border-gray-200 dark:border-navy-800 rounded-xl px-2 h-10 text-xs focus:ring-1 focus:ring-brand-orange dark:text-white"
+                      >
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Access Level</label>
+                      <select 
+                        value={editingEmployee.accessLevel || 2}
+                        onChange={(e) => setEditingEmployee({ ...editingEmployee, accessLevel: parseInt(e.target.value, 10) })}
+                        className="w-full bg-white dark:bg-navy-950 border border-gray-200 dark:border-navy-800 rounded-xl px-2 h-10 text-xs focus:ring-1 focus:ring-brand-orange dark:text-white"
+                      >
+                        <option value={1}>1 - Staff Only</option>
+                        <option value={2}>2 - Team Head</option>
+                        <option value={3}>3 - Director / MD</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Email Address</label>
+                    <input 
+                      type="email" 
+                      placeholder="e.g. rahul@divyanshicapital.com"
+                      value={editingEmployee.employeeEmailId}
+                      onChange={(e) => setEditingEmployee({ ...editingEmployee, employeeEmailId: e.target.value })}
+                      className="w-full bg-white dark:bg-navy-950 border border-gray-200 dark:border-navy-800 rounded-xl px-3 h-10 text-xs focus:ring-1 focus:ring-brand-orange dark:text-white"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Mobile Number</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. +91-9876543210"
+                      value={editingEmployee.mobile}
+                      onChange={(e) => setEditingEmployee({ ...editingEmployee, mobile: e.target.value })}
+                      className="w-full bg-white dark:bg-navy-950 border border-gray-200 dark:border-navy-800 rounded-xl px-3 h-10 text-xs focus:ring-1 focus:ring-brand-orange dark:text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Personal File ID Mapping (Google Drive)</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. DRIVE-FILE-ID or 1Mk9..."
+                      value={editingEmployee.personalFileId}
+                      onChange={(e) => setEditingEmployee({ ...editingEmployee, personalFileId: e.target.value })}
+                      className="w-full bg-white dark:bg-navy-950 border border-gray-200 dark:border-navy-800 rounded-xl px-3 h-10 text-xs focus:ring-1 focus:ring-brand-orange dark:text-white font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Avatar seed (Dicebear)</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Rahul, Sparkles"
+                      value={editingEmployee.avatarSeed}
+                      onChange={(e) => setEditingEmployee({ ...editingEmployee, avatarSeed: e.target.value })}
+                      className="w-full bg-white dark:bg-navy-950 border border-gray-200 dark:border-navy-800 rounded-xl px-3 h-10 text-xs focus:ring-1 focus:ring-brand-orange dark:text-white"
+                    />
+                  </div>
+
+                  <div className="flex gap-2 pt-4">
+                    <Button 
+                      type="submit" 
+                      disabled={isSaving}
+                      className="flex-1 bg-brand-orange hover:bg-brand-orange/90 text-white rounded-xl h-10 text-xs font-bold"
+                    >
+                      {isSaving ? "Saving Mappings..." : "Save Mapping Ledger"}
+                    </Button>
+                    <Button 
+                      type="button" 
+                      onClick={() => setEditingEmployee(null)}
+                      variant="outline"
+                      className="rounded-xl h-10 px-4 text-xs font-semibold dark:border-navy-800 dark:hover:bg-navy-800 dark:text-white"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </Card>
+            </div>
+          )}
+        </div>
       </TabsContent>
     </Tabs>
   </div>

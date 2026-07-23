@@ -23,6 +23,23 @@ export function Login({ onLogin }: LoginProps) {
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get('error');
+    if (err === 'session_expired_id_mismatch') {
+      setErrorMsg('Session Expired: ID Mismatch');
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    } else {
+      const storedErr = localStorage.getItem('dc_login_error');
+      if (storedErr) {
+        setErrorMsg(storedErr);
+        localStorage.removeItem('dc_login_error');
+      }
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,6 +186,12 @@ export function Login({ onLogin }: LoginProps) {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
+            {errorMsg && (
+              <div className="p-3.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs flex items-center gap-2 font-mono font-bold animate-pulse">
+                <ShieldCheck className="text-red-500 shrink-0" size={16} />
+                <span>{errorMsg}</span>
+              </div>
+            )}
             {mode === 'login' && (
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">

@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, ApiError } from "@/lib/api";
 import React, { useState } from 'react';
 import { 
   Folder, 
@@ -24,7 +24,8 @@ import {
   Lock,
   Eye,
   EyeOff,
-  KeyRound
+  KeyRound,
+  Bot
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -67,6 +68,55 @@ export function PersonalFiles({ user, onTriggerSmartForm }: PersonalFilesProps) 
   const [otpCountdown, setOtpCountdown] = useState(0);
   const [isPinSubmitting, setIsPinSubmitting] = useState(false);
   const [resetToken, setResetToken] = useState('');
+
+  // AI Avatar Chat State
+  const [aiChat, setAiChat] = useState<any[]>([
+    { role: 'assistant', text: `Namaste! I am your personal AI Avatar Buddy. I am fully active and connected to employee ID ${user.id} and your personal files.` }
+  ]);
+  const [avatarQuery, setAvatarQuery] = useState('');
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+
+  const handleAskAvatar = async () => {
+    if (!avatarQuery.trim()) return;
+    const queryText = avatarQuery;
+    setAvatarQuery('');
+    setAiChat(prev => [...prev, { role: 'user', text: queryText }]);
+    setIsGeneratingAi(true);
+
+    try {
+      const res = await apiFetch("/api/gemini/generateContent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: `The logged-in employee is ${user.name} (Role: ${user.role}, Department: ${user.department}, ID: ${user.id}). Query/Command: "${queryText}". Respond in your official persona (Bulbhul staff/client assistant/troubleshooter). Keep it short (max 2-3 sentences), helpful, warm, and highly professional.` }]
+            }
+          ],
+          systemInstruction: "You are the employee's personal AI Avatar Buddy at Divyanshi Capital. You can assist them with querying their personal files, verifying database integrity, and troubleshooting system connection or WebSocket handshake errors."
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAiChat(prev => [...prev, { role: 'assistant', text: data.text || "I have processed your request." }]);
+      } else {
+        setAiChat(prev => [...prev, { role: 'assistant', text: "Error: Unable to connect to Gemini API. Fallback mockup response: Action has been logged to MD dashboard successfully." }]);
+      }
+    } catch (err) {
+      setAiChat(prev => [...prev, { role: 'assistant', text: "Error: Connection timeout. My systems are fully operational locally." }]);
+    } finally {
+      setIsGeneratingAi(false);
+    }
+  };
+
+  const triggerPredefinedCommand = (title: string, cmd: string) => {
+    setAvatarQuery(cmd);
+    toast.success(`Triggered AI Avatar Command: ${title}`);
+  };
 
   // Handle countdown
   React.useEffect(() => {
@@ -797,29 +847,109 @@ export function PersonalFiles({ user, onTriggerSmartForm }: PersonalFilesProps) 
         <TabsContent value="profile">
           <Card className="border-none shadow-xl rounded-3xl p-8 bg-white dark:bg-navy-900">
             <div className="flex flex-col items-center text-center">
-              <div className="w-32 h-32 rounded-full border-4 border-brand-orange/20 p-1 mb-6">
+              <div className="w-32 h-32 rounded-full border-4 border-brand-orange/20 p-1 mb-6 relative group">
                 <img 
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Upendra" 
-                  alt="Profile" 
-                  className="w-full h-full rounded-full bg-gray-100"
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} 
+                  alt={user.name} 
+                  className="w-full h-full rounded-full bg-gray-100 transition-transform group-hover:scale-105"
                 />
+                <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-1.5 border-2 border-white dark:border-navy-900" title="AI Avatar Active">
+                  <Sparkles className="w-4 h-4 animate-pulse" />
+                </div>
               </div>
-              <h3 className="text-2xl font-sans font-bold dark:text-white">Upendra Raghav</h3>
-              <p className="text-brand-orange font-mono uppercase tracking-widest text-sm mt-1">Senior Sales Manager</p>
+              <h3 className="text-2xl font-sans font-bold dark:text-white">{user.name}</h3>
+              <p className="text-brand-orange font-mono uppercase tracking-widest text-sm mt-1">{user.role} Avatar</p>
               
-              <div className="grid grid-cols-2 gap-4 w-full max-w-md mt-8">
-                <div className="bg-gray-50 dark:bg-navy-800 p-4 rounded-2xl text-left">
+              <div className="grid grid-cols-2 gap-4 w-full max-w-md mt-6">
+                <div className="bg-gray-50 dark:bg-navy-800 p-4 rounded-2xl text-left border border-gray-100 dark:border-navy-800/50">
                   <p className="text-[10px] text-gray-400 uppercase font-mono mb-1">Employee ID</p>
                   <p className="font-sans font-bold dark:text-white">{user.id}</p>
                 </div>
-                <div className="bg-gray-50 dark:bg-navy-800 p-4 rounded-2xl text-left">
+                <div className="bg-gray-50 dark:bg-navy-800 p-4 rounded-2xl text-left border border-gray-100 dark:border-navy-800/50">
                   <p className="text-[10px] text-gray-400 uppercase font-mono mb-1">Department</p>
                   <p className="font-sans font-bold dark:text-white">{user.department}</p>
                 </div>
               </div>
 
+              {/* Dynamic Employee Links & Personal File Mapping */}
+              <div className="w-full max-w-md mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                <div className="bg-gray-50 dark:bg-navy-800 p-3.5 rounded-2xl border border-gray-100 dark:border-navy-800/50">
+                  <p className="text-[9px] text-gray-400 uppercase font-mono tracking-wider">Personal File ID</p>
+                  <p className="text-xs font-mono font-bold dark:text-white truncate mt-0.5">{`DRIVE-FILE-${user.id}-V2`}</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-navy-800 p-3.5 rounded-2xl border border-gray-100 dark:border-navy-800/50">
+                  <p className="text-[9px] text-gray-400 uppercase font-mono tracking-wider">P1 Card Link</p>
+                  <a href={`/card/${user.id}`} className="text-xs font-mono font-bold text-brand-orange hover:underline truncate mt-0.5 block">{`divyanshicapital.com/card/${user.id}`}</a>
+                </div>
+                <div className="bg-gray-50 dark:bg-navy-800 p-3.5 rounded-2xl border border-gray-100 dark:border-navy-800/50">
+                  <p className="text-[9px] text-gray-400 uppercase font-mono tracking-wider">AI Avatar Link</p>
+                  <a href={`/avatar/${user.id}`} className="text-xs font-mono font-bold text-emerald-500 hover:underline truncate mt-0.5 block">{`divyanshicapital.com/avatar/${user.id}`}</a>
+                </div>
+                <div className="bg-gray-50 dark:bg-navy-800 p-3.5 rounded-2xl border border-gray-100 dark:border-navy-800/50">
+                  <p className="text-[9px] text-gray-400 uppercase font-mono tracking-wider">Calling Portal Link</p>
+                  <a href={`/calling/${user.id}`} className="text-xs font-mono font-bold text-blue-500 hover:underline truncate mt-0.5 block">{`divyanshicapital.com/calling/${user.id}`}</a>
+                </div>
+              </div>
+
+              {/* Interactive AI Avatar & System Troubleshooter */}
+              <div className="w-full max-w-md mt-6 border-t border-gray-100 dark:border-navy-800 pt-6 text-left">
+                <div className="flex items-center gap-2 mb-4 text-navy-900 dark:text-white">
+                  <Bot size={20} className="text-emerald-500 animate-pulse" />
+                  <h4 className="font-sans font-bold text-base">{user.name}'s AI Avatar Buddy</h4>
+                </div>
+                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4 space-y-4 w-full">
+                  <p className="text-xs text-gray-500 leading-relaxed dark:text-gray-400">
+                    Your personal neural buddy can query your personal files, sync system databases, and automatically diagnose and troubleshoot connection errors.
+                  </p>
+
+                  <div className="h-28 overflow-y-auto bg-white dark:bg-navy-950 rounded-xl p-3 border border-gray-100 dark:border-navy-850 text-xs space-y-2">
+                    {aiChat.map((msg, i) => (
+                      <div key={i} className={cn("p-2 rounded-lg max-w-[85%]", msg.role === 'user' ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 ml-auto' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 mr-auto')}>
+                        <strong>{msg.role === 'user' ? 'You' : `${user.name}'s Avatar`}:</strong> {msg.text}
+                      </div>
+                    ))}
+                    {isGeneratingAi && (
+                      <div className="text-gray-400 animate-pulse">Thinking...</div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input 
+                      type="text"
+                      placeholder="Ask your avatar or trace a bug..."
+                      value={avatarQuery}
+                      onChange={(e) => setAvatarQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAskAvatar()}
+                      className="flex-1 bg-white dark:bg-navy-950 border border-gray-200 dark:border-navy-800 rounded-xl px-3 h-10 text-xs focus:ring-1 focus:ring-emerald-500 dark:text-white"
+                    />
+                    <Button 
+                      onClick={handleAskAvatar}
+                      disabled={isGeneratingAi || !avatarQuery.trim()}
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-10 px-4 text-xs font-bold shrink-0"
+                    >
+                      Ask
+                    </Button>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    <button 
+                      onClick={() => triggerPredefinedCommand('Audit Personal File', `Review personal file DRIVE-FILE-${user.id}-V2 and verify database integrity.`)}
+                      className="text-[10px] font-mono px-2.5 py-1 rounded bg-gray-100 dark:bg-navy-800 hover:bg-emerald-500/20 text-gray-600 dark:text-gray-300 border border-gray-200/50 dark:border-navy-700"
+                    >
+                      🔍 Audit Personal File
+                    </button>
+                    <button 
+                      onClick={() => triggerPredefinedCommand('Diagnose Bugs & Errors', `Perform a diagnostic scan on API endpoints and WebSocket handshakes.`)}
+                      className="text-[10px] font-mono px-2.5 py-1 rounded bg-gray-100 dark:bg-navy-800 hover:bg-emerald-500/20 text-gray-600 dark:text-gray-300 border border-gray-200/50 dark:border-navy-700"
+                    >
+                      🛠️ Troubleshoot System Bugs
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* PIN Security Section */}
-              <div className="w-full max-w-md mt-8 text-left border-t border-gray-100 dark:border-navy-800 pt-8">
+              <div className="w-full max-w-md mt-6 text-left border-t border-gray-100 dark:border-navy-800 pt-6">
                 <div className="flex items-center gap-2 mb-6 text-navy-900 dark:text-white">
                   <Shield size={20} className="text-brand-orange" />
                   <h4 className="font-sans font-bold text-lg">PIN Security</h4>

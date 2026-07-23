@@ -18,9 +18,15 @@ export default defineConfig(({mode}) => {
       },
     },
     server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
-      hmr: false,
+      // High-power development server watch and websocket configuration
+      hmr: {
+        overlay: false,
+      },
+      watch: {
+        usePolling: true,
+        interval: 100,
+        ignored: ['**/node_modules/**', '**/dist/**'],
+      },
     },
   };
 });

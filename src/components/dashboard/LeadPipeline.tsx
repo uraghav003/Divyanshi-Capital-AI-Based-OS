@@ -31,9 +31,39 @@ const COLUMNS = [
 ];
 
 export function LeadPipeline({ leads = [] }: { leads?: any[] }) {
-  const getLeadsByStatus = (status: string) => leads.filter(l => l.status === status);
+  const normalizedLeads = leads.map((l: any, idx) => {
+    if (l && l.id && l.client && l.status) return l;
 
-  const handleAdvanceStatus = (leadId: string, currentStatus: string) => {
+    const clientName = l.CLIENT_NAME || l.FULL_NAME || l.CUSTOMER_NAME || l.client || `Client #${idx + 1}`;
+    const statusRaw = String(l.CASE_STATUS || l.status || 'fresh').toLowerCase();
+    
+    let status = 'fresh';
+    if (statusRaw.includes('disbursed') || statusRaw.includes('disburs')) status = 'disbursed';
+    else if (statusRaw.includes('approved') || statusRaw.includes('approv')) status = 'approved';
+    else if (statusRaw.includes('query') || statusRaw.includes('hold')) status = 'query';
+    else if (statusRaw.includes('login') || statusRaw.includes('done') || statusRaw.includes('progress')) status = 'login';
+    
+    const amount = l.REQUIRED_LOAN_AMOUNT || l.REQUESTED_AMOUNT || l.amount || 'N/A';
+    const formattedAmount = typeof amount === 'number' 
+      ? `₹${amount.toLocaleString('en-IN')}` 
+      : String(amount).startsWith('₹') ? amount : `₹${amount}`;
+
+    return {
+      id: l.SOURCE_NAME || l.CLIENT_ID || l.id || `lead-${idx}`,
+      client: clientName,
+      type: l.LOAN_TYPE || l.type || 'Personal Loan',
+      bank: l.PREFERRED_BANK || l.BANK || l.bank || 'Any',
+      amount: formattedAmount,
+      owner: l.SALES_NAME || l.owner || 'System AI',
+      date: l.TIMESTAMP ? new Date(l.TIMESTAMP).toLocaleDateString('en-IN') : (l.date || 'Today'),
+      status: status,
+      rawStatus: l.CASE_STATUS || l.status
+    };
+  });
+
+  const getLeadsByStatus = (status: string) => normalizedLeads.filter(l => l.status === status);
+
+  const handleAdvanceStatus = (sourceName: string, currentStatus: string) => {
     toast.error('Status updates must be done via the main CRM portal');
   };
 

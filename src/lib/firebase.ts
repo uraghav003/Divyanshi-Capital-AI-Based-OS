@@ -8,6 +8,9 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 provider.addScope('https://www.googleapis.com/auth/gmail.readonly');
 provider.addScope('https://www.googleapis.com/auth/gmail.send');
+provider.addScope('https://www.googleapis.com/auth/meetings.space.created');
+provider.addScope('https://www.googleapis.com/auth/meetings.space.readonly');
+provider.addScope('https://www.googleapis.com/auth/meetings.space.settings');
 
 let isSigningIn = false;
 let cachedAccessToken: string | null = null;

@@ -1,0 +1,6 @@
+# Ignore everything by default
+**/*
+
+# Do not ignore Code.gs and appsscript.json
+!Code.gs
+!appsscript.json

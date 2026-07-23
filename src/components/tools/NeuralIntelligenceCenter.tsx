@@ -30,6 +30,17 @@ interface LearningData {
   repoSource: string;
 }
 
+interface BlockedAttempt {
+  id: string;
+  timestamp: string;
+  ip: string;
+  method: string;
+  url: string;
+  userAgent: string;
+  detectedSignature: string;
+  reason: string;
+}
+
 interface AuditData {
   auditId: string;
   status: 'SECURE' | 'ALERT';
@@ -37,6 +48,7 @@ interface AuditData {
   threatLevel: number;
   protections: string[];
   details: string;
+  blockedAttempts?: BlockedAttempt[];
 }
 
 interface AutomationProposal {
@@ -202,6 +214,45 @@ export function NeuralIntelligenceCenter() {
               </div>
             </div>
           </div>
+
+          {/* Intercepted Threat Attempts List */}
+          {audit?.blockedAttempts && audit.blockedAttempts.length > 0 && (
+            <div className="pt-4 border-t border-gray-100 dark:border-navy-800 space-y-3">
+              <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
+                Neural Interceptor: Intercepted Platform Connections ({audit.blockedAttempts.length})
+              </span>
+              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                {audit.blockedAttempts.map((attempt) => (
+                  <div key={attempt.id} className="p-3 bg-red-500/5 dark:bg-rose-500/5 rounded-2xl border border-red-500/10 dark:border-rose-500/10 flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400">{attempt.id}</span>
+                        <span className="text-[10px] font-mono text-gray-400">{new Date(attempt.timestamp).toLocaleTimeString()}</span>
+                        <span className="px-1.5 py-0.5 bg-rose-500/10 text-[9px] font-mono font-bold text-rose-600 rounded">
+                          {attempt.method}
+                        </span>
+                      </div>
+                      <p className="text-[11px] font-mono text-gray-600 dark:text-gray-300 mt-1 truncate max-w-[280px] md:max-w-[400px]" title={attempt.url}>
+                        Path: {attempt.url}
+                      </p>
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[240px] md:max-w-[350px]" title={attempt.userAgent}>
+                        Agent: {attempt.userAgent}
+                      </p>
+                    </div>
+                    <div className="text-left sm:text-right shrink-0">
+                      <span className="text-[10px] font-sans font-bold text-rose-500 block">
+                        {attempt.detectedSignature}
+                      </span>
+                      <span className="text-[9px] font-mono text-gray-400 block mt-0.5">
+                        IP: {attempt.ip}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </Card>
 

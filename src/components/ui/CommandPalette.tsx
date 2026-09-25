@@ -13,7 +13,6 @@ import {
   Bell, 
   Mic, 
   ShieldCheck, 
-  Github, 
   Crown, 
   User, 
   Building, 
@@ -26,7 +25,12 @@ import {
   FileSpreadsheet, 
   Copy, 
   ArrowUpRight,
-  ExternalLink
+  ExternalLink,
+  Activity,
+  Tag,
+  KanbanSquare,
+  Contact2,
+  Users
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -51,6 +55,7 @@ interface ClientFile {
   status: 'In Progress' | 'Disbursed' | 'Approved' | 'Processing';
   underwriter: string;
   underwriterCode: string;
+  folderUrl?: string;
   documents: { name: string; status: 'Verified' | 'Pending' | 'Under Review' }[];
 }
 
@@ -170,18 +175,16 @@ export function CommandPalette({ isOpen, onClose, setActiveTab, user }: CommandP
 
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', category: 'Navigation', icon: LayoutDashboard, desc: 'Enterprise Analytics, KPIs & Charts' },
+    { id: 'tasks', label: 'Priority Tasks', category: 'Navigation', icon: Tag, desc: 'Daily Actionable Checklist & Escalations' },
+    { id: 'pipeline', label: 'Lead Pipeline', category: 'Navigation', icon: KanbanSquare, desc: 'Kanban Stage Processing & Tracking' },
+    { id: 'rms', label: 'Bank RM Directory', category: 'Navigation', icon: Contact2, desc: 'Lender Policy & RM Contact Grid' },
+    { id: 'hr-sync', label: 'HR Staff Sync', category: 'Navigation', icon: Users, desc: 'Staff Database & Personal Files' },
     { id: 'personal', label: 'Personal Files', category: 'Navigation', icon: FolderOpen, desc: 'Sales Activity, Drive Links, Sec PIN' },
-    { id: 'inbox', label: 'Inbox', category: 'Navigation', icon: Mail, desc: 'Incoming Emails, Enquiries & Leads' },
-    { id: 'intelligence', label: 'Neural Intel', category: 'Navigation', icon: Brain, desc: 'Self-Learning OS & Audits' },
     { id: 'entry', label: 'Smart Form', category: 'Navigation', icon: FileText, desc: 'Raw Lead Onboarding Portal' },
     { id: 'calling', label: 'Calling', category: 'Navigation', icon: Phone, desc: 'DC_CALLING_APP Outbound Module' },
-    { id: 'marketing', label: 'AI Marketing & Auto', category: 'Navigation', icon: Megaphone, desc: 'External Marketing Campaigns' },
     { id: 'bulbul', label: 'Bulbhul AI Advisor', category: 'Navigation', icon: MessageSquare, desc: 'In-app Conversational Banker Assistant' },
-    { id: 'debugger', label: 'Data Debugger', category: 'Navigation', icon: Terminal, desc: 'Diagnostic & Neutralization Logs' },
-    { id: 'genie', label: 'Genie Alerts', category: 'Navigation', icon: Bell, desc: 'Real-time Lead Flow Notifications' },
     { id: 'voice', label: 'Voice Assistant', category: 'Navigation', icon: Mic, desc: 'Siri-style Audio Interaction' },
-    { id: 'cards', label: 'Business Cards', category: 'Navigation', icon: ShieldCheck, desc: 'Employee Brand ID Cards' },
-    { id: 'github', label: 'GitHub Sync', category: 'Navigation', icon: Github, desc: 'Code Repository Management' }
+    { id: 'system_health', label: 'System Health Dashboard', category: 'Diagnostics', icon: Activity, desc: 'API Latency, Sync Matrix & Real-time Telemetry' }
   ];
 
   if (user.role === 'MD') {
@@ -203,6 +206,37 @@ export function CommandPalette({ isOpen, onClose, setActiveTab, user }: CommandP
   );
 
   const totalFilteredCount = filteredNav.length + filteredClients.length;
+
+  const handleSelectItem = (item: typeof navigationItems[0]) => {
+    if (item.id === 'system_health') {
+      window.dispatchEvent(new CustomEvent('dc-open-system-health'));
+      onClose();
+      return;
+    }
+    if (['tasks', 'pipeline', 'rms', 'hr-sync'].includes(item.id)) {
+      setActiveTab('dashboard');
+      window.dispatchEvent(new CustomEvent('dc-switch-dash-tab', { detail: { tab: item.id } }));
+      toast.success(`Switched to ${item.label}`);
+      onClose();
+      return;
+    }
+    if (item.id === 'personal') {
+      setActiveTab('dashboard');
+      window.dispatchEvent(new CustomEvent('dc-switch-dash-tab', { detail: { tab: 'hr-sync' } }));
+      toast.success(`Switched to Personal Files`);
+      onClose();
+      return;
+    }
+    if (item.id === 'voice') {
+      setActiveTab('bulbul');
+      toast.success(`Switched to Bulbhul AI Advisor`);
+      onClose();
+      return;
+    }
+    setActiveTab(item.id);
+    toast.success(`Switched to ${item.label}`);
+    onClose();
+  };
 
   // Keyboard controls
   useEffect(() => {
@@ -267,13 +301,13 @@ export function CommandPalette({ isOpen, onClose, setActiveTab, user }: CommandP
   const triggerSelection = () => {
     if (selectedIndex < filteredNav.length) {
       const item = filteredNav[selectedIndex];
-      setActiveTab(item.id);
-      toast.success(`Switched to ${item.label}`);
-      onClose();
+      handleSelectItem(item);
     } else {
       const clientIndex = selectedIndex - filteredNav.length;
       const client = filteredClients[clientIndex];
-      setSelectedClient(client);
+      if (client) {
+        setSelectedClient(client);
+      }
     }
   };
 
@@ -402,7 +436,13 @@ export function CommandPalette({ isOpen, onClose, setActiveTab, user }: CommandP
                         <div className="flex flex-wrap gap-2">
                           <button
                             onClick={() => {
-                              setActiveTab('personal');
+                              if (selectedClient.folderUrl) {
+                                window.open(selectedClient.folderUrl, '_blank');
+                              } else {
+                                setActiveTab('dashboard');
+                                window.dispatchEvent(new CustomEvent('dc-switch-dash-tab', { detail: { tab: 'hr-sync' } }));
+                                toast.info(`Viewing documentation for ${selectedClient.name}`);
+                              }
                               onClose();
                             }}
                             className="bg-navy-900 dark:bg-white text-white dark:text-navy-900 px-4 py-2 rounded-xl text-xs font-bold font-sans hover:bg-navy-800 dark:hover:bg-gray-100 flex items-center gap-2 transition-all active:scale-95 shadow-sm"
@@ -527,7 +567,7 @@ export function CommandPalette({ isOpen, onClose, setActiveTab, user }: CommandP
                                   key={item.id}
                                   data-active={isActive}
                                   onMouseEnter={() => setSelectedIndex(idx)}
-                                  onClick={triggerSelection}
+                                  onClick={() => handleSelectItem(item)}
                                   className={cn(
                                     "w-full text-left p-3.5 rounded-2xl flex items-center justify-between transition-all group",
                                     isActive 

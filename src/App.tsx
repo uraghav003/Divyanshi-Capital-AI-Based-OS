@@ -1,32 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
-import { MarketingAutomation } from '@/components/tools/MarketingAutomation';
-import { Dashboard } from '@/components/dashboard/Dashboard';
-import { BulbhulChat } from '@/components/ai/BulbhulChat';
-import { BulbhulDebugger } from '@/components/ai/BulbhulDebugger';
-import { GenieAlerts } from '@/components/ai/GenieAlerts';
-import { Inbox } from '@/components/tools/Inbox';
-import { GoogleMeet } from '@/components/tools/GoogleMeet';
-import { PersonalFiles } from '@/components/tools/PersonalFiles';
 import { TokenBoundErrorBoundary } from '@/components/auth/TokenBoundErrorBoundary';
 import { IframeModule } from '@/components/layout/IframeModule';
-import { QuickLog } from '@/components/tools/QuickLog';
-import { VoiceAssistant } from '@/components/tools/VoiceAssistant';
-import { NeuralIntelligenceCenter } from '@/components/tools/NeuralIntelligenceCenter';
-import { GitHubIntegration } from '@/components/tools/GitHubIntegration';
 import { Login } from '@/components/auth/Login';
 import { User } from '@/types';
 import { motion } from 'motion/react';
-import { MessageCircle, Mail as MailIcon, Globe, Phone, Send } from 'lucide-react';
+import { MessageCircle, Mail as MailIcon, Phone, Send, Loader2 } from 'lucide-react';
 import { SystemIntelligenceCore } from '@/components/layout/SystemIntelligenceCore';
 import { GlobalConnectionBanner } from '@/components/layout/GlobalConnectionBanner';
 import { apiFetch } from '@/lib/api';
 import { CommandPalette } from '@/components/ui/CommandPalette';
 import { EmployeeSyncProvider, SyncManager } from '@/lib/sync';
+import { SettingsProvider } from '@/lib/settings';
+import { SettingsModal } from '@/components/layout/SettingsModal';
+
+// Lazy loaded modules for optimal performance
+const Dashboard = lazy(() => import('@/components/dashboard/Dashboard').then(m => ({ default: m.Dashboard })));
+const BulbhulChat = lazy(() => import('@/components/ai/BulbhulChat').then(m => ({ default: m.BulbhulChat })));
+const SmartForm = lazy(() => import('@/components/tools/SmartForm').then(m => ({ default: m.SmartForm })));
+
+// Preload strategy for critical components to eliminate latency
+const preloadCriticalModules = () => {
+  import('@/components/dashboard/Dashboard');
+  import('@/components/ai/BulbhulChat');
+  import('@/components/tools/SmartForm');
+};
 
 export default function App() {
   const [user, setUser] = useState<User | null>(() => {
@@ -74,6 +76,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [triggerSource, setTriggerSource] = useState<string | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -156,10 +159,30 @@ export default function App() {
 
   useEffect(() => {
     if (user) {
+      // Preload critical components after initial render for lightning-fast navigation
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => preloadCriticalModules(), { timeout: 2000 });
+      } else {
+        setTimeout(preloadCriticalModules, 1000);
+      }
+
       // Verifies integrity of ALL_EMPLOYEES and PERSONAL_FILE_ID mappings against backend before dashboard fully loads
       SyncManager.verifyIntegrity(true).catch((err) => {
-        console.error('[SyncManager Initial Verification Error]:', err);
+        console.debug('[SyncManager Initial Verification]:', err.message);
       });
+      SyncManager.startHealthPing(30000);
+      
+      const handleRecover = () => {
+        console.debug('[App] Recovery event triggered, forcing sync verification...');
+        SyncManager.verifyIntegrity(true);
+        SyncManager.ping();
+      };
+      window.addEventListener('backend-connection-recover', handleRecover);
+
+      return () => {
+        SyncManager.stopHealthPing();
+        window.removeEventListener('backend-connection-recover', handleRecover);
+      };
     }
   }, [user?.id]);
 
@@ -181,42 +204,14 @@ export default function App() {
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard user={user} />;
-      case 'inbox':
-        return <Inbox user={user} />;
-      case 'meet':
-        return <GoogleMeet user={user} />;
-      case 'personal':
-        return (
-          <TokenBoundErrorBoundary>
-            <PersonalFiles user={user} onTriggerSmartForm={handleTriggerSmartForm} />
-          </TokenBoundErrorBoundary>
-        );
       case 'entry':
-        return <IframeModule page="form" manager_email_id={user.email} />;
-      case 'marketing':
-        return <MarketingAutomation user={user} />;
+        return <SmartForm user={user} />;
       case 'bulbul':
         return <BulbhulChat user={user} />;
-      case 'debugger':
-        return <BulbhulDebugger />;
-      case 'genie':
-        return <GenieAlerts />;
-      case 'cards':
-        return <IframeModule page="card" emp={user.id} />;
       case 'calling':
         return <IframeModule page="calling" emp={user.id} />;
-            case 'voice':
-        return <VoiceAssistant setActiveTab={setActiveTab} />;
-      case 'intelligence':
-        return (
-          <div className="p-8 max-w-4xl mx-auto">
-            <NeuralIntelligenceCenter />
-          </div>
-        );
       case 'master_control':
         return <IframeModule page="get_master_control" />;
-      case 'github':
-        return <GitHubIntegration user={user} />;
       default:
         return <Dashboard user={user} />;
     }
@@ -225,47 +220,51 @@ export default function App() {
   const getTitle = () => {
     switch (activeTab) {
       case 'dashboard': return 'Enterprise Dashboard';
-      case 'inbox': return 'Enterprise Inbox';
-      case 'meet': return 'Google Meet Center';
-      case 'personal': return 'Personal Files & Activity';
       case 'entry': return 'Smart Form';
-      case 'marketing': return 'AI Marketing & Automation Hub';
       case 'bulbul': return 'Bulbhul AI Advisor';
-      case 'debugger': return 'Data Debugger';
-      case 'genie': return 'Genie Proactive Alerts';
-      case 'cards': return 'Business Cards';
       case 'calling': return 'Calling Module';
-      case 'voice': return 'Voice Assistant';
-      case 'intelligence': return 'Neural Intelligence & Self-Learning';
       case 'master_control': return 'Master Control';
-      case 'github': return 'GitHub Integration & Repository Sync';
       default: return 'Divyanshi Capital';
     }
   };
 
   return (
     <EmployeeSyncProvider>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <TooltipProvider>
-          <div className="flex h-screen bg-gray-50 dark:bg-navy-950 overflow-hidden relative">
-            <SystemIntelligenceCore />
-            <GlobalConnectionBanner />
-            <Sidebar 
-              activeTab={activeTab} 
-              setActiveTab={setActiveTab} 
-              role={user.role} 
-              onLogout={handleLogout} 
-            />
-            
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <Header user={user} title={getTitle()} onOpenCommandPalette={() => setIsCommandPaletteOpen(true)} />
+      <SettingsProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <TooltipProvider>
+            <div className="flex h-screen bg-gray-50 dark:bg-navy-950 overflow-hidden relative">
+              <SystemIntelligenceCore />
+              <GlobalConnectionBanner />
+              <Sidebar 
+                activeTab={activeTab} 
+                setActiveTab={setActiveTab} 
+                role={user.role} 
+                onLogout={handleLogout} 
+              />
               
-              <main className="flex-1 overflow-y-auto bg-gray-50/50">
-                {renderContent()}
-              </main>
-            </div>
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <Header 
+                  user={user} 
+                  title={getTitle()} 
+                  onOpenCommandPalette={() => setIsCommandPaletteOpen(true)} 
+                  onOpenSettings={() => setIsSettingsOpen(true)}
+                  onLogout={handleLogout}
+                />
+                
+                <main className="flex-1 overflow-y-auto bg-gray-50/50">
+                  <Suspense fallback={
+                    <div className="flex flex-col items-center justify-center h-full p-12 space-y-4">
+                      <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+                      <p className="text-sm font-medium text-gray-500">Loading module workspace...</p>
+                    </div>
+                  }>
+                    {renderContent()}
+                  </Suspense>
+                </main>
+              </div>
 
-                      <div className="fixed bottom-8 right-8 flex flex-col gap-4 z-50">
+              <div className="fixed bottom-8 right-8 flex flex-col gap-4 z-50">
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -310,9 +309,11 @@ export default function App() {
               setActiveTab={setActiveTab} 
               user={user} 
             />
+            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
           </div>
         </TooltipProvider>
       </ThemeProvider>
+      </SettingsProvider>
     </EmployeeSyncProvider>
   );
 }

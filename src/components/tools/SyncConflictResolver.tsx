@@ -63,16 +63,21 @@ export function SyncConflictResolver({ isOpen, onClose, onResolve }: SyncConflic
     }
   ];
 
-  const handleResolveAll = (source: 'local' | 'remote') => {
+  const handleResolveAll = async (source: 'local' | 'remote') => {
     setIsResolving(true);
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/dc/master-resolve', { method: 'POST' });
+      const data = await response.json();
       onResolve(source);
       toast.success(`System synchronized using ${source === 'local' ? 'Local Workspace' : 'Master Sheet'} as source of truth.`, {
         icon: <Sparkles className="text-brand-orange" />
       });
+    } catch (e) {
+      toast.error('Failed to resolve conflicts securely.');
+    } finally {
       setIsResolving(false);
       onClose();
-    }, 1500);
+    }
   };
 
   return (

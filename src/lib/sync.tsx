@@ -59,14 +59,14 @@ export function EmployeeSyncProvider({ children }: { children: React.ReactNode }
       const lastSyncTime = new Date(lastSyncedAt).getTime();
       const now = Date.now();
       if (now - lastSyncTime < CACHE_EXPIRY_MS) {
-        console.log('[EmployeeSync] Skipping redundant API fetch. Local cache is warm.');
+        console.debug('[EmployeeSync] Skipping redundant API fetch. Local cache is warm.');
         return;
       }
     }
 
     // Coalesce / request deduplication check
     if (activePromiseRef.current) {
-      console.log('[EmployeeSync] Coalescing duplicate sync request into ongoing batch fetch.');
+      console.debug('[EmployeeSync] Coalescing duplicate sync request into ongoing batch fetch.');
       return activePromiseRef.current;
     }
 
@@ -92,8 +92,8 @@ export function EmployeeSyncProvider({ children }: { children: React.ReactNode }
             toast.error('Sync completed but received fallback data.');
           }
         }
-      } catch (err) {
-        console.error('[EmployeeSync] Failed to sync employees from Apps Script:', err);
+      } catch (err: any) {
+        console.warn('[EmployeeSync] Failed to sync employees, using local cache.', err.message);
         if (!silent) {
           toast.error('Network Timeout: Reverted to cached mappings.');
         }
@@ -195,12 +195,13 @@ export interface SyncHealthReport {
 export class SyncManager {
   private static cachedReport: SyncHealthReport | null = null;
   private static lastChecked: string = '';
+  private static pendingVerification: Promise<SyncHealthReport> | null = null;
 
   /**
    * Verifies the integrity of ALL_EMPLOYEES roster and PERSONAL_FILE_ID mappings against the backend.
    * Can be run pre-dashboard load to ensure maximum security and ledger compliance.
    */
-  public static async verifyIntegrity(force = false): Promise<SyncHealthReport> {
+  public static async verifyIntegrity(force = false, retryCount = 0): Promise<SyncHealthReport> {
     if (!force && this.cachedReport && this.lastChecked) {
       const elapsed = Date.now() - new Date(this.lastChecked).getTime();
       if (elapsed < 30 * 1000) { // 30s cache
@@ -208,40 +209,67 @@ export class SyncManager {
       }
     }
 
-    try {
-      const response = await apiFetch('/api/dc/sync-integrity');
-      if (!response.ok) {
-        throw new Error(`Sync verification failed: ${response.statusText}`);
-      }
-      const data = await response.json();
-      if (!data.ok) {
-        throw new Error(data.error || 'Failed to complete ledger integrity audit.');
-      }
-
-      const report: SyncHealthReport = {
-        timestamp: data.timestamp,
-        summary: data.summary,
-        discrepancies: data.discrepancies
-      };
-
-      this.cachedReport = report;
-      this.lastChecked = new Date().toISOString();
-      
-      // Save report in local storage for access by UI monitors
-      localStorage.setItem('dc_sync_health_report', JSON.stringify(report));
-      localStorage.setItem('dc_sync_health_checked_at', this.lastChecked);
-
-      // Dispatch a custom event to notify components that sync health has been updated
-      window.dispatchEvent(new CustomEvent('dc-sync-health-updated', { detail: report }));
-
-      return report;
-    } catch (error) {
-      console.error('[SyncManager] Failed to verify roster integrity:', error);
-      // Fallback local analysis if backend fails
-      const fallback = this.getLocalFallbackReport();
-      this.cachedReport = fallback;
-      return fallback;
+    if (!force && this.pendingVerification) {
+      return this.pendingVerification;
     }
+
+    const execVerification = async (): Promise<SyncHealthReport> => {
+      try {
+        const response = await apiFetch('/api/dc/sync-integrity');
+        if (!response.ok) {
+          throw new Error(`Sync verification failed: ${response.statusText}`);
+        }
+        const data = await response.json();
+        if (!data.ok) {
+          throw new Error(data.error || 'Failed to complete ledger integrity audit.');
+        }
+
+        const report: SyncHealthReport = {
+          timestamp: data.timestamp,
+          summary: data.summary,
+          discrepancies: data.discrepancies
+        };
+
+        this.cachedReport = report;
+        this.lastChecked = new Date().toISOString();
+        
+        // Save report in local storage for access by UI monitors
+        localStorage.setItem('dc_sync_health_report', JSON.stringify(report));
+        localStorage.setItem('dc_sync_health_checked_at', this.lastChecked);
+
+        // Dispatch a custom event to notify components that sync health has been updated
+        window.dispatchEvent(new CustomEvent('dc-sync-health-updated', { detail: report }));
+
+        return report;
+      } catch (error) {
+        console.debug(`[SyncManager] Roster integrity verification deferred (Attempt ${retryCount + 1}):`, error instanceof Error ? error.message : error);
+        
+        if (retryCount < 3) { // Max 3 retries
+          const backoffDelay = Math.pow(2, retryCount) * 1000 + Math.random() * 500;
+          console.debug(`[SyncManager] Retrying verifyIntegrity in ${Math.round(backoffDelay)}ms...`);
+          await new Promise(resolve => setTimeout(resolve, backoffDelay));
+          // Use force=true for the retry so it doesn't immediately return a potentially stuck pendingVerification
+          return this.verifyIntegrity(true, retryCount + 1);
+        }
+
+        // Fallback local analysis if backend fails
+        const fallback = this.getLocalFallbackReport();
+        this.cachedReport = fallback;
+        return fallback;
+      } finally {
+        if (this.pendingVerification === execPromise) {
+          this.pendingVerification = null;
+        }
+      }
+    };
+
+    const execPromise = execVerification();
+    
+    if (!force) {
+      this.pendingVerification = execPromise;
+    }
+    
+    return execPromise;
   }
 
   /**
@@ -270,7 +298,6 @@ export class SyncManager {
         emps = JSON.parse(cachedEmployeesStr) || [];
       } catch {}
     }
-
     const activeStaff = emps.filter(e => e.activeStatus === 'ACTIVE');
     const inactiveStaff = emps.filter(e => e.activeStatus === 'INACTIVE');
 
@@ -328,6 +355,87 @@ export class SyncManager {
         invalidEmail
       }
     };
+  }
+
+  private static pingInterval: NodeJS.Timeout | null = null;
+  private static isConnected: boolean = true;
+  private static failedPings: number = 0;
+  private static pendingPing: Promise<boolean> | null = null;
+
+  /**
+   * Starts a real-time periodic health check ping.
+   */
+  public static startHealthPing(intervalMs = 30000) {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+    }
+    
+    // Initial ping
+    this.ping();
+    
+    this.pingInterval = setInterval(() => {
+      this.ping();
+    }, intervalMs);
+  }
+
+  public static stopHealthPing() {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
+  }
+
+  public static async ping(): Promise<boolean> {
+    if (this.pendingPing) {
+      return this.pendingPing;
+    }
+
+    const execPing = async (): Promise<boolean> => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        const res = await apiFetch('/api/dc/health', { 
+          method: 'GET',
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (res.ok) {
+          this.failedPings = 0;
+          if (!this.isConnected) {
+            this.isConnected = true;
+            window.dispatchEvent(new CustomEvent('backend-connection', { detail: 'connected' }));
+            toast.success('System connection restored.', {
+              description: 'Real-time synchronization active.',
+            });
+          }
+          return true;
+        } else {
+          throw new Error('Health check returned non-ok status');
+        }
+      } catch (error) {
+        this.failedPings++;
+        if (this.isConnected && this.failedPings >= 2) { // Allow 1 transient failure before marking disconnected
+          this.isConnected = false;
+          window.dispatchEvent(new CustomEvent('backend-connection', { detail: 'disconnected' }));
+          toast.error('Silent connection failure detected', {
+            description: 'The applet lost connection to the core servers. Working offline.',
+            duration: Infinity,
+          });
+        }
+        return false;
+      } finally {
+        if (this.pendingPing === execPromise) {
+          this.pendingPing = null;
+        }
+      }
+    };
+
+    const execPromise = execPing();
+    this.pendingPing = execPromise;
+    return execPromise;
   }
 }
 

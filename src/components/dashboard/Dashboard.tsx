@@ -37,7 +37,9 @@ import {
   ShieldCheck,
   FileText,
   Settings,
-  Sparkles
+  Sparkles,
+  Tag,
+  Download
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -52,8 +54,10 @@ import { useEmployeeSync } from '@/lib/sync';
 import { HrDiscrepancyPanel } from './HrDiscrepancyPanel';
 import { motion } from 'motion/react';
 import { ConnectionHealth } from './ConnectionHealth';
+import { exportDeropoCSV } from '@/lib/export';
 import { ActivityFeed, mockActivities } from './ActivityFeed';
 import { PredictiveTaskEngine } from '../tools/PredictiveTaskEngine';
+import { TaskPriorityQueue } from './TaskPriorityQueue';
 
 const ICONS = {
   Users,
@@ -66,8 +70,15 @@ const COLORS = ['#f97316', '#3b82f6', '#10b981', '#8b5cf6'];
 
 export function Dashboard({ user }: { user: User }) {
   const [activeTab, setActiveTab] = useState('overview');
-  const [dashboardData, setDashboardData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<any>(() => {
+    try {
+      const cached = localStorage.getItem(`dc_dash_cache_${user.id}`);
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [loading, setLoading] = useState(!dashboardData);
 
   const {
     employees,
@@ -120,16 +131,19 @@ export function Dashboard({ user }: { user: User }) {
   useEffect(() => {
     async function loadDashboard() {
       try {
-        setLoading(true);
+        if (!dashboardData) setLoading(true);
         const res = await apiFetch(`/api/dc/dashboard/${user.id}`);
         const result = await res.json();
         if (result.ok) {
           setDashboardData(result.data);
+          try {
+            localStorage.setItem(`dc_dash_cache_${user.id}`, JSON.stringify(result.data));
+          } catch {}
         } else {
-          console.error("Dashboard error:", result.error);
+          console.debug("Dashboard fetch status:", result.error);
         }
-      } catch (err) {
-        console.error("Failed to fetch dashboard", err);
+      } catch (err: any) {
+        console.debug("Failed to fetch dashboard, using fallback.", err.message);
       } finally {
         setLoading(false);
       }
@@ -137,7 +151,20 @@ export function Dashboard({ user }: { user: User }) {
     loadDashboard();
   }, [user.id]);
 
-  if (loading) {
+  useEffect(() => {
+    const handleSwitchDashTab = (e: Event) => {
+      const customEvent = e as CustomEvent<{ tab: string }>;
+      if (customEvent.detail?.tab) {
+        setActiveTab(customEvent.detail.tab);
+      }
+    };
+    window.addEventListener('dc-switch-dash-tab', handleSwitchDashTab);
+    return () => {
+      window.removeEventListener('dc-switch-dash-tab', handleSwitchDashTab);
+    };
+  }, []);
+
+  if (loading && !dashboardData) {
     return (
       <div className="p-8 space-y-8 max-w-[1600px] mx-auto animate-pulse">
         {/* Top Header Skeleton */}
@@ -209,33 +236,37 @@ export function Dashboard({ user }: { user: User }) {
       {/* Live Offer Marquee */}
       <LiveOfferMarquee />
 
-      <div className="p-8 space-y-8 max-w-[1600px] mx-auto">
+      <div className="p-4 sm:p-6 space-y-5 max-w-[1600px] mx-auto">
         {/* Top Floating Actions */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-3xl font-sans font-bold text-gray-900 dark:text-white tracking-tight">Enterprise Overview</h2>
-            <div className="flex items-center gap-2 mt-1">
+            <h2 className="text-2xl font-sans font-bold text-gray-900 dark:text-white tracking-tight">Enterprise Overview</h2>
+            <div className="flex items-center gap-2 mt-0.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Real-time data connection active" />
-              <p className="text-gray-500 dark:text-gray-400">Real-time performance and system metrics</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Real-time performance and system metrics</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white dark:bg-navy-900 p-1 rounded-2xl shadow-sm border border-gray-100 dark:border-navy-800">
+          <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1 sm:pb-0">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white dark:bg-navy-900 p-1 rounded-xl shadow-sm border border-gray-100 dark:border-navy-800">
               <TabsList className="bg-transparent border-none gap-1">
-                <TabsTrigger value="overview" className="rounded-xl data-[state=active]:bg-navy-900 data-[state=active]:text-white gap-2 h-10 px-4">
-                  <LayoutDashboard size={16} />
+                <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-navy-900 data-[state=active]:text-white gap-1.5 h-8 px-3 text-xs">
+                  <LayoutDashboard size={14} />
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="pipeline" className="rounded-xl data-[state=active]:bg-navy-900 data-[state=active]:text-white gap-2 h-10 px-4">
-                  <KanbanSquare size={16} />
+                <TabsTrigger value="tasks" className="rounded-lg data-[state=active]:bg-navy-900 data-[state=active]:text-white gap-1.5 h-8 px-3 text-xs">
+                  <Tag size={14} />
+                  Priority Tasks
+                </TabsTrigger>
+                <TabsTrigger value="pipeline" className="rounded-lg data-[state=active]:bg-navy-900 data-[state=active]:text-white gap-1.5 h-8 px-3 text-xs">
+                  <KanbanSquare size={14} />
                   Pipeline
                 </TabsTrigger>
-                <TabsTrigger value="rms" className="rounded-xl data-[state=active]:bg-navy-900 data-[state=active]:text-white gap-2 h-10 px-4">
-                  <Contact2 size={16} />
+                <TabsTrigger value="rms" className="rounded-lg data-[state=active]:bg-navy-900 data-[state=active]:text-white gap-1.5 h-8 px-3 text-xs">
+                  <Contact2 size={14} />
                   RM Directory
                 </TabsTrigger>
-                <TabsTrigger value="hr-sync" className="rounded-xl data-[state=active]:bg-navy-900 data-[state=active]:text-white gap-2 h-10 px-4">
-                  <Users size={16} />
+                <TabsTrigger value="hr-sync" className="rounded-lg data-[state=active]:bg-navy-900 data-[state=active]:text-white gap-1.5 h-8 px-3 text-xs">
+                  <Users size={14} />
                   HR Staff Sync
                 </TabsTrigger>
               </TabsList>
@@ -244,48 +275,58 @@ export function Dashboard({ user }: { user: User }) {
         </div>
 
         <Tabs value={activeTab} className="w-full">
-          <TabsContent value="overview" className="space-y-8 mt-0 outline-none">
-            <div className="flex gap-3">
+          <TabsContent value="overview" className="space-y-5 mt-0 outline-none">
+            <div className="flex flex-wrap gap-2.5">
               <Button 
-                className="bg-blue-500 hover:bg-blue-600 text-white rounded-2xl px-6 h-12 gap-2 shadow-lg shadow-blue-500/20"
+                className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl px-4 h-9 text-xs gap-1.5 shadow-sm"
                 onClick={() => window.open('https://t.me/divyanshicapital', '_blank')}
               >
-                <Send size={20} className="ml-1" />
+                <Send size={15} />
                 Telegram
               </Button>
               <Button 
-                className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl px-6 h-12 gap-2 shadow-lg shadow-emerald-500/20"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl px-4 h-9 text-xs gap-1.5 shadow-sm"
                 onClick={() => window.open('https://wa.me/917838074351', '_blank')}
               >
-                <MessageCircle size={20} />
+                <MessageCircle size={15} />
                 WhatsApp Genie
               </Button>
               <Button 
-                className="bg-rose-500 hover:bg-rose-600 text-white rounded-2xl px-6 h-12 gap-2 shadow-lg shadow-rose-500/20"
+                className="bg-rose-500 hover:bg-rose-600 text-white rounded-xl px-4 h-9 text-xs gap-1.5 shadow-sm"
                 onClick={() => window.location.href = 'tel:+917838074351'}
               >
-                <Phone size={20} />
+                <Phone size={15} />
                 Call
               </Button>
               <Button 
-                className="bg-navy-900 hover:bg-navy-800 text-white rounded-2xl px-6 h-12 gap-2 shadow-lg shadow-navy-900/20"
+                className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl px-4 h-9 text-xs gap-1.5 shadow-sm"
                 onClick={() => window.location.href = 'mailto:upendra.raghav@divyanshicapital.com'}
               >
-                <Mail size={20} />
+                <Mail size={15} />
                 Inbox
               </Button>
+              {user.role === 'MD' && (
+                <Button 
+                  className="bg-orange-600 hover:bg-orange-700 text-white rounded-xl px-4 h-9 text-xs gap-1.5 shadow-sm"
+                  onClick={() => exportDeropoCSV(liveLeads)}
+                  title="Export leads formatted for Deropo Marketing Campaign"
+                >
+                  <Download size={15} />
+                  Deropo CSV Export
+                </Button>
+              )}
             </div>
 
             {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {kpis.map((kpi: any, i: number) => {
             const Icon = ICONS[kpi.icon as keyof typeof ICONS] || Users;
             return (
-            <Card key={i} className="border-none shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all duration-300 bg-white dark:bg-navy-900">
-              <CardContent className="p-6">
+            <Card key={i} className="border-none shadow-sm rounded-2xl overflow-hidden group hover:shadow-md transition-all duration-300 bg-white dark:bg-navy-900">
+              <CardContent className="p-4 sm:p-5">
                 <div className="flex items-start justify-between">
-                  <div className={cn("p-3 rounded-2xl", kpi.bg, "dark:bg-opacity-10")}>
-                    <Icon className={kpi.color} size={24} />
+                  <div className={cn("p-2.5 rounded-xl", kpi.bg, "dark:bg-opacity-10")}>
+                    <Icon className={kpi.color} size={20} />
                   </div>
                   {kpi.change ? (
                     <Badge variant="outline" className={cn(
@@ -302,9 +343,9 @@ export function Dashboard({ user }: { user: User }) {
                     </Badge>
                   )}
                 </div>
-                <div className="mt-4">
-                  <p className="text-sm font-sans font-medium text-gray-500 dark:text-gray-400">{kpi.label}</p>
-                  <h3 className="text-3xl font-sans font-bold text-gray-900 dark:text-white mt-1">{kpi.value}</h3>
+                <div className="mt-3">
+                  <p className="text-xs font-sans font-medium text-gray-500 dark:text-gray-400">{kpi.label}</p>
+                  <h3 className="text-2xl font-sans font-bold text-gray-900 dark:text-white mt-0.5">{kpi.value}</h3>
                 </div>
               </CardContent>
             </Card>
@@ -447,8 +488,8 @@ export function Dashboard({ user }: { user: User }) {
                 </div>
               </div>
             </CardHeader>
-            <div className="h-[350px] w-full" style={{ minHeight: 200 }}>
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="w-full h-[350px] min-h-[200px] min-w-0">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
@@ -493,6 +534,10 @@ export function Dashboard({ user }: { user: User }) {
             <ActivityFeed />
           </div>
 
+          <div className="lg:col-span-2">
+            <TaskPriorityQueue />
+          </div>
+
           {/* Side Info */}
           <div className="space-y-8 lg:col-start-3 lg:row-start-1 lg:row-span-2">
             <PredictiveTaskEngine activities={mockActivities} />
@@ -502,8 +547,8 @@ export function Dashboard({ user }: { user: User }) {
               <CardHeader className="px-0 pt-0 pb-4">
                 <CardTitle className="text-lg font-sans font-bold dark:text-white">Loan Distribution</CardTitle>
               </CardHeader>
-              <div className="h-[200px] w-full" style={{ minHeight: 200 }}>
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="w-full h-[200px] min-h-[200px] min-w-0">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                   <PieChart>
                     <Pie
                       data={pieData}
@@ -544,8 +589,12 @@ export function Dashboard({ user }: { user: User }) {
         </div>
       </TabsContent>
 
+      <TabsContent value="tasks" className="mt-0 outline-none">
+        <TaskPriorityQueue />
+      </TabsContent>
+
       <TabsContent value="pipeline" className="mt-0 outline-none">
-        <LeadPipeline leads={liveLeads} />
+        <LeadPipeline leads={liveLeads} userRole={user.role} />
       </TabsContent>
 
       <TabsContent value="rms" className="mt-0 outline-none">

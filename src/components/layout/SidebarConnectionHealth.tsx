@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
+import { SyncManager } from '@/lib/sync';
 
 type ConnectionState = 'connected' | 'disconnected' | 'connecting';
 
@@ -11,41 +12,33 @@ export function SidebarConnectionHealth() {
 
   const checkHealth = async () => {
     setStatus('connecting');
-    setTimeout(() => window.dispatchEvent(new CustomEvent('backend-connection', { detail: 'connecting' })), 0);
     
     try {
-      // Small timeout to prevent endless hanging if completely offline
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const isOk = await SyncManager.ping();
       
-      const res = await apiFetch('/api/dc/health', { 
-        signal: controller.signal,
-        headers: { 'Cache-Control': 'no-cache' }
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (res.ok) {
+      if (isOk) {
         setStatus('connected');
-        setTimeout(() => window.dispatchEvent(new CustomEvent('backend-connection', { detail: 'connected' })), 0);
       } else {
         setStatus('disconnected');
-        setTimeout(() => window.dispatchEvent(new CustomEvent('backend-connection', { detail: 'disconnected' })), 0);
       }
     } catch (error) {
       setStatus('disconnected');
-      setTimeout(() => window.dispatchEvent(new CustomEvent('backend-connection', { detail: 'disconnected' })), 0);
     } finally {
       setLastChecked(new Date());
     }
   };
 
   useEffect(() => {
+    // Initial status fetch
     checkHealth();
     
-    // Poll every 30 seconds
-    const interval = setInterval(checkHealth, 30000);
-    return () => clearInterval(interval);
+    const handleStatus = (e: any) => {
+      setStatus(e.detail);
+      setLastChecked(new Date());
+    };
+    
+    window.addEventListener('backend-connection', handleStatus);
+    return () => window.removeEventListener('backend-connection', handleStatus);
   }, []);
 
   return (

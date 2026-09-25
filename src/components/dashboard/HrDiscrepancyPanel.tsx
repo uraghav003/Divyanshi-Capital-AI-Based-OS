@@ -65,7 +65,7 @@ export function HrDiscrepancyPanel({
 
   React.useEffect(() => {
     if (!syncReport) {
-      SyncManager.verifyIntegrity().then(setSyncReport).catch(console.error);
+      SyncManager.verifyIntegrity().then(setSyncReport).catch(err => console.warn('Failed to verify integrity:', err.message));
     }
 
     const handleSyncUpdate = (e: Event) => {

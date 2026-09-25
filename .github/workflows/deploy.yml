@@ -20,7 +20,7 @@ jobs:
       - name: Install Clasp
         run: npm install -g @google/clasp
 
-      - name: Push to Google Apps Script
+      - name: Configure Clasp Credentials
         env:
           CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
           SCRIPT_ID: ${{ secrets.SCRIPT_ID }}
@@ -33,7 +33,16 @@ jobs:
             echo "Error: SCRIPT_ID secret is missing. Please define it in your GitHub repository secrets."
             exit 1
           fi
+          
+          # Write the credentials to the home directory
           echo "$CLASPRC_JSON" > ~/.clasprc.json
+          
+          # Write the project configuration
           echo "{\"scriptId\":\"$SCRIPT_ID\",\"rootDir\":\"./\"}" > .clasp.json
-          clasp push -f
+
+      - name: Verify Clasp Authentication
+        run: clasp login --status
+
+      - name: Push to Google Apps Script
+        run: clasp push -f
 

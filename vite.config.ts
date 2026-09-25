@@ -6,22 +6,45 @@ import {defineConfig, loadEnv} from 'vite';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(), 
+      tailwindcss()
+    ],
     define: {
-      'process.env.NEXT_PUBLIC_SUPABASE_URL': JSON.stringify(env.NEXT_PUBLIC_SUPABASE_URL),
       'process.env.P1_EXEC_URL': JSON.stringify(env.P1_EXEC_URL),
-      'process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY': JSON.stringify(env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
       },
     },
-    server: {
-      // High-power development server watch and websocket configuration
-      hmr: {
-        overlay: false,
+    build: {
+      target: 'esnext',
+      chunkSizeWarningLimit: 1200,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
+                return 'vendor-react';
+              }
+              if (id.includes('recharts')) {
+                return 'vendor-charts';
+              }
+              if (id.includes('lucide-react') || id.includes('motion') || id.includes('@radix-ui') || id.includes('sonner')) {
+                return 'vendor-ui';
+              }
+              if (id.includes('react-markdown')) {
+                return 'vendor-markdown';
+              }
+              return 'vendor-misc';
+            }
+          },
+        },
       },
+    },
+    server: {
+      hmr: false,
       watch: {
         usePolling: true,
         interval: 100,

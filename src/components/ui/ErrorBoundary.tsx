@@ -1,6 +1,7 @@
 import { apiFetch } from '@/lib/api';
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, ServerCrash, WifiOff, ShieldAlert, Clock, Hourglass, Bot, Sparkles, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from './button';
 import { ApiError } from '@/lib/api';
 import { ai } from '@/lib/gemini';
@@ -19,6 +20,7 @@ interface State {
   isAutoRetrying: boolean;
   countdown: number;
   isNeutralized: boolean;
+  recoveryKey: number;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -36,11 +38,12 @@ export class ErrorBoundary extends Component<Props, State> {
     retryCount: 0,
     isAutoRetrying: false,
     countdown: 0,
-    isNeutralized: false
+    isNeutralized: false,
+    recoveryKey: 0
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error, aiAnalysis: null, isAnalyzing: false, retryCount: 0, isAutoRetrying: false, countdown: 0, isNeutralized: false };
+    return { hasError: true, error, aiAnalysis: null, isAnalyzing: false, retryCount: 0, isAutoRetrying: false, countdown: 0, isNeutralized: false, recoveryKey: 0 };
   }
 
   checkDuplicateError = (error: Error): boolean => {
@@ -77,15 +80,30 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   handleIncomingError = (error: Error, errorInfo?: ErrorInfo) => {
+    const isWebSocketError = error?.message?.includes('WebSocket') || error?.message?.toLowerCase().includes('handshake');
+    
+    if (isWebSocketError) {
+      console.warn('Ignored benign WebSocket error:', error.message);
+      return;
+    }
+
+    // Show a real-time toast to the user
+    toast.error(`Error: ${error.message || 'Unknown error occurred'}`, {
+      description: 'The system has logged this failure and is attempting recovery.',
+      duration: 5000,
+    });
+
     if (this.checkDuplicateError(error)) {
        this.setState({ isNeutralized: true, hasError: true, error, isAutoRetrying: false });
        this.clearTimers();
        return;
     }
 
-    // Automatic redirect for 401 Unauthorized
-    if (error instanceof ApiError && error.status === 401) {
+    // Automatic recovery for 401 Unauthorized
+    if ((error instanceof ApiError && error.status === 401) || error?.message?.includes('401')) {
       localStorage.removeItem('dc_session');
+      localStorage.removeItem('dc_token');
+      this.setState({ isNeutralized: true, hasError: false, error: null });
       if (window.location.pathname !== '/') {
         window.location.href = '/';
       }
@@ -187,14 +205,28 @@ export class ErrorBoundary extends Component<Props, State> {
     }
   }
 
+  backendConnectionHandler = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    if (customEvent.detail === 'disconnected') {
+      toast.error('Global Recovery Initiated', {
+        description: 'Attempting to re-initialize core application state due to silent failure...',
+        duration: 5000,
+      });
+      // Increment recoveryKey to force unmount/remount of the children
+      this.setState(prev => ({ recoveryKey: prev.recoveryKey + 1, hasError: false, error: null, isAutoRetrying: false }));
+    }
+  }
+
   componentDidMount() {
     window.addEventListener('unhandledrejection', this.promiseRejectionHandler);
     window.addEventListener('dc-custom-error', this.customErrorHandler);
+    window.addEventListener('backend-connection', this.backendConnectionHandler);
   }
 
   componentWillUnmount() {
     window.removeEventListener('unhandledrejection', this.promiseRejectionHandler);
     window.removeEventListener('dc-custom-error', this.customErrorHandler);
+    window.removeEventListener('backend-connection', this.backendConnectionHandler);
     this.clearTimers();
   }
 
@@ -213,7 +245,7 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ isAnalyzing: true, aiAnalysis: null });
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-3.6-flash",
+        model: "gemini-3.8-flash",
         contents: [{ role: "user", parts: [{ text: `An error occurred in the application. Provide a brief, highly technical root cause analysis and a suggested fix in 2-3 sentences. Do not use markdown wrappers. 
         
 Error Message: ${error.message}
@@ -449,6 +481,6 @@ Component Stack: ${errorInfo?.componentStack || 'N/A'}` }] }],
       );
     }
 
-    return this.props.children;
+    return <React.Fragment key={this.state.recoveryKey}>{this.props.children}</React.Fragment>;
   }
 }

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Loader2, ExternalLink, ShieldAlert, RefreshCw } from 'lucide-react';
+import React from 'react';
+import { ExternalLink, ShieldCheck, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface IframeModuleProps {
   page: string;
@@ -9,9 +10,6 @@ interface IframeModuleProps {
 }
 
 export function IframeModule({ page, emp, manager_email_id }: IframeModuleProps) {
-  const [loading, setLoading] = useState(true);
-  const [iframeError, setIframeError] = useState(false);
-
   // Construct URL query params
   const params = new URLSearchParams();
   params.append('page', page);
@@ -25,76 +23,39 @@ export function IframeModule({ page, emp, manager_email_id }: IframeModuleProps)
   };
 
   return (
-    <div className="w-full h-full relative flex flex-col bg-gray-50 dark:bg-navy-950">
-      {/* Top Navigation & Status Bar */}
-      <div className="bg-white dark:bg-navy-900 border-b border-gray-100 dark:border-navy-800 px-4 py-2.5 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span className="text-xs font-mono font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-            Module: {page.replace(/_/g, ' ')}
-          </span>
+    <div className="w-full h-full relative flex flex-col items-center justify-center bg-gray-50 dark:bg-navy-950 p-6">
+      <Card className="max-w-md w-full bg-white dark:bg-navy-900 border-none shadow-xl rounded-3xl overflow-hidden">
+        <div className="bg-navy-900 p-6 flex flex-col items-center text-center">
+          <div className="w-16 h-16 bg-brand-orange/20 rounded-2xl flex items-center justify-center mb-4 text-brand-orange">
+            <ShieldCheck size={32} />
+          </div>
+          <h2 className="text-xl font-bold text-white font-sans capitalize">
+            {page.replace(/_/g, ' ')} Module
+          </h2>
+          <p className="text-gray-400 text-sm mt-2 font-medium">
+            Secure External Application
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => {
-              setLoading(true);
-              setIframeError(false);
-            }}
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2.5 text-xs text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-          >
-            <RefreshCw size={13} className="mr-1.5" />
-            Reload
-          </Button>
-          <Button
+        
+        <CardContent className="p-8 flex flex-col items-center text-center space-y-6">
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+            For security and performance, this module runs in a dedicated secure window. Click below to launch your session.
+          </p>
+          
+          <Button 
             onClick={handleOpenExternal}
-            variant="outline"
-            size="sm"
-            className="h-8 px-3 text-xs font-medium border-gray-200 dark:border-navy-800 hover:bg-brand-orange/10 hover:text-brand-orange text-gray-700 dark:text-gray-200"
+            className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-bold text-sm h-12 rounded-xl group"
           >
-            <ExternalLink size={13} className="mr-1.5" />
-            Open in New Tab
+            Launch Module
+            <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
-        </div>
-      </div>
-
-      {/* Main iFrame View */}
-      <div className="flex-1 w-full h-full relative">
-        {loading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 dark:bg-navy-950 z-10 gap-3">
-            <Loader2 className="w-8 h-8 text-brand-orange animate-spin" />
-            <p className="text-xs font-mono text-gray-400">Connecting to Divyanshi Capital Module...</p>
+          
+          <div className="flex items-center gap-2 text-xs text-gray-400 font-mono">
+            <ExternalLink size={12} />
+            <span>Opens in a new tab</span>
           </div>
-        )}
-
-        {iframeError ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 dark:bg-navy-950 z-10 p-6 text-center">
-            <div className="p-3 bg-red-500/10 text-red-500 rounded-2xl mb-3">
-              <ShieldAlert size={28} />
-            </div>
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Module Connection Blocked by Browser</h3>
-            <p className="text-xs text-gray-400 max-w-md mt-1 mb-4">
-              Your browser security or same-origin policy is restricting embedded loading for this external module.
-            </p>
-            <Button onClick={handleOpenExternal} className="bg-brand-orange hover:bg-brand-orange/90 text-white font-bold text-xs px-5 py-2 rounded-xl">
-              <ExternalLink size={14} className="mr-2" />
-              Open Module directly in New Tab
-            </Button>
-          </div>
-        ) : (
-          <iframe 
-            src={proxyUrl}
-            className="w-full h-full border-none"
-            onLoad={() => setLoading(false)}
-            onError={() => {
-              setLoading(false);
-              setIframeError(true);
-            }}
-            allow="microphone; camera; clipboard-write"
-          />
-        )}
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

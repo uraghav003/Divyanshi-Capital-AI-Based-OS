@@ -3,24 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mallik Hub V2</title>
+    <title>Divyanshi Capital AI Based OS</title>
+    <meta name="description" content="Enterprise RM Operating System with Master Spreadsheet Data Sync, AI Document Intelligence, and Neural Lead Automation.">
+    <meta property="og:title" content="Divyanshi Capital AI Based OS">
+    <meta property="og:description" content="Enterprise RM Operating System with Master Spreadsheet Data Sync, AI Document Intelligence, and Neural Lead Automation.">
     <script>
       (function() {
         if (typeof window !== 'undefined' && window.WebSocket) {
           const originalClose = WebSocket.prototype.close;
           WebSocket.prototype.close = function(code, reason) {
-            if (this.readyState === WebSocket.OPEN) {
-              return originalClose.call(this, code, reason);
-            } else if (this.readyState === WebSocket.CONNECTING) {
-              const handleOpen = () => {
-                try {
-                  if (this.readyState === WebSocket.OPEN) {
-                    originalClose.call(this, code, reason);
-                  }
-                } catch (e) {}
-              };
-              this.addEventListener('open', handleOpen, { once: true });
-            }
+            try {
+              if (this.readyState === WebSocket.OPEN || this.readyState === WebSocket.CONNECTING) {
+                if (this.readyState === WebSocket.OPEN) {
+                  return originalClose.call(this, code, reason);
+                } else {
+                  const handleOpen = () => {
+                    try {
+                      if (this.readyState === WebSocket.OPEN) {
+                        originalClose.call(this, code, reason);
+                      }
+                    } catch (e) {}
+                  };
+                  this.addEventListener('open', handleOpen, { once: true });
+                }
+              }
+            } catch(e) {}
           };
         }
       })();

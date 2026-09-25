@@ -1,8 +1,9 @@
 import { apiFetch } from '@/lib/api';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, RefreshCw, CheckCircle2, ShieldCheck, Zap, Info } from 'lucide-react';
+import { Sparkles, RefreshCw, CheckCircle2, ShieldCheck, Zap, Info, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SystemHealthDashboard } from './SystemHealthDashboard';
 
 const AUTO_FILL_SUGGESTIONS: Record<string, string[]> = {
   email: ['@gmail.com', '@outlook.com', '@yahoo.com', '@hotmail.com', '@icloud.com'],
@@ -18,8 +19,14 @@ export function SystemIntelligenceCore() {
   const [suggestions, setSuggestions] = useState<{ text: string, type: string, target: HTMLInputElement | null }>({ text: '', type: '', target: null });
   const [suggestionPos, setSuggestionPos] = useState({ top: 0, left: 0 });
   const [masterSync, setMasterSync] = useState<{ status: 'connected' | 'disconnected', lastSync: string | null }>({ status: 'disconnected', lastSync: null });
+  const [isHealthOpen, setIsHealthOpen] = useState(false);
+
+  const suggestionsRef = useRef(suggestions);
+  suggestionsRef.current = suggestions;
 
   useEffect(() => {
+    const handleOpenHealth = () => setIsHealthOpen(true);
+    window.addEventListener('dc-open-system-health', handleOpenHealth);
     // Initial Master Sync check
     const checkMasterSync = async () => {
       try {
@@ -37,17 +44,17 @@ export function SystemIntelligenceCore() {
 
     let timeout: NodeJS.Timeout;
     let clearMsgTimeout: NodeJS.Timeout;
-    let healthCheckInterval: NodeJS.Timeout;
 
-    const handleInput = (e: Event) => {
-      const target = e.target as HTMLInputElement | HTMLTextAreaElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-        processElement(target);
-      }
+    const showSuggestion = (target: HTMLInputElement, text: string, type: string) => {
+      const rect = target.getBoundingClientRect();
+      setSuggestionPos({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX
+      });
+      setSuggestions({ text, type, target });
     };
 
     const processElement = (target: HTMLInputElement | HTMLTextAreaElement) => {
-      // Safety check: Skip sensitive or special fields
       if (target.type === 'password' || target.type === 'hidden' || target.hasAttribute('data-no-intel')) return;
 
       let value = target.value;
@@ -55,7 +62,7 @@ export function SystemIntelligenceCore() {
       const name = (target.name || target.placeholder || '').toLowerCase();
       let corrected = false;
 
-      // Global Auto-correction Logic
+      // Email formatting & correction
       if (type === 'email') {
         const newValue = value.toLowerCase().replace(/\s/g, '');
         if (newValue !== value) {
@@ -95,43 +102,18 @@ export function SystemIntelligenceCore() {
           value = newValue;
           corrected = true;
         }
-      } else if ((name.includes('name') || name.includes('city') || name.includes('state')) && value.length === 1) {
-        const newValue = value.toUpperCase();
-        if (newValue !== value) {
-          value = newValue;
-          corrected = true;
-        }
       }
 
-      // Pattern Intelligence (Company Name auto-complete)
       if (value.toLowerCase() === 'div' || value.toLowerCase() === 'divyanshi') {
          showSuggestion(target as HTMLInputElement, 'Divyanshi Capital', 'company');
       }
 
       if (corrected) {
          target.value = value;
-         const inputEvent = new Event('input', { bubbles: true });
-         target.dispatchEvent(inputEvent);
-         
          target.classList.add('ring-2', 'ring-emerald-400/50', 'transition-all', 'duration-500');
          setTimeout(() => {
            target.classList.remove('ring-2', 'ring-emerald-400/50');
          }, 1000);
-      }
-
-      // Generic field suggestions
-      if (value.length > 1 && !suggestions.text) {
-        for (const key in AUTO_FILL_SUGGESTIONS) {
-          if (name.includes(key) || (key === 'loan_type' && name.includes('loan'))) {
-            const match = AUTO_FILL_SUGGESTIONS[key].find(s => 
-              s.toLowerCase().startsWith(value.toLowerCase()) && s.toLowerCase() !== value.toLowerCase()
-            );
-            if (match) {
-              showSuggestion(target as HTMLInputElement, match, key);
-              break;
-            }
-          }
-        }
       }
 
       if (name) {
@@ -154,35 +136,18 @@ export function SystemIntelligenceCore() {
       }, 800);
     };
 
-    // Periodic Background "Self-Heal" Scan
-    healthCheckInterval = setInterval(() => {
-       const inputs = document.querySelectorAll('input, textarea');
-       inputs.forEach(input => {
-          const el = input as HTMLInputElement;
-          if (el === document.activeElement) return; // Don't heal active element to avoid cursor jumps
-          if (el.value && el.value.length > 0) {
-             // Silently process to heal any remaining issues
-             processElement(el);
-          }
-       });
-    }, 5000);
-
-    const showSuggestion = (target: HTMLInputElement, text: string, type: string) => {
-      const rect = target.getBoundingClientRect();
-      setSuggestionPos({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX
-      });
-      setSuggestions({ text, type, target });
+    const handleInput = (e: Event) => {
+      const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+        processElement(target);
+      }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab' && suggestions.text && suggestions.target) {
+      const current = suggestionsRef.current;
+      if (e.key === 'Tab' && current.text && current.target) {
         e.preventDefault();
-        suggestions.target.value = suggestions.text;
-        // Trigger a fake input event to ensure React state updates
-        const event = new Event('input', { bubbles: true });
-        suggestions.target.dispatchEvent(event);
+        current.target.value = current.text;
         setSuggestions({ text: '', type: '', target: null });
       } else if (e.key === 'Escape') {
         setSuggestions({ text: '', type: '', target: null });
@@ -192,14 +157,16 @@ export function SystemIntelligenceCore() {
     document.addEventListener('input', handleInput);
     document.addEventListener('paste', handleInput);
     document.addEventListener('keydown', handleKeyDown);
+
     return () => {
+      window.removeEventListener('dc-open-system-health', handleOpenHealth);
       document.removeEventListener('input', handleInput);
       document.removeEventListener('paste', handleInput);
       document.removeEventListener('keydown', handleKeyDown);
       clearTimeout(timeout);
       clearTimeout(clearMsgTimeout);
     };
-  }, [suggestions]);
+  }, []);
 
   return (
     <>
@@ -242,22 +209,40 @@ export function SystemIntelligenceCore() {
         )}
       </AnimatePresence>
       
-      {/* Master Data Connection Heartbeat */}
-      <div className="fixed bottom-4 right-4 z-[90] flex items-center gap-2 px-3 py-1.5 bg-white/80 dark:bg-navy-900/80 backdrop-blur-md rounded-full border border-gray-100 dark:border-navy-800 shadow-lg pointer-events-none">
+      {/* Master Data Connection Heartbeat - Interactive trigger for System Health Dashboard */}
+      <button
+        type="button"
+        onClick={() => setIsHealthOpen(true)}
+        className="fixed bottom-4 left-72 z-40 hidden md:flex items-center gap-2 px-3.5 py-1.5 bg-white/95 dark:bg-navy-900/95 backdrop-blur-md rounded-full border border-gray-200/80 dark:border-navy-800 shadow-md hover:shadow-lg hover:border-emerald-300 dark:hover:border-emerald-500/40 transition-all duration-200 cursor-pointer group pointer-events-auto select-none"
+        title="Open Real-Time System Health & Telemetry Dashboard"
+      >
         <div className={cn(
-          "w-1.5 h-1.5 rounded-full",
-          masterSync.status === 'connected' ? "bg-emerald-500 animate-pulse" : "bg-gray-300"
+          "w-2 h-2 rounded-full transition-all duration-300",
+          masterSync.status === 'connected' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)] animate-pulse" : "bg-amber-400 animate-ping"
         )} />
-        <span className="text-[10px] font-mono font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
-          {masterSync.status === 'connected' ? 'Master Node Active' : 'Master Node Syncing...'}
+        <span className="text-[10px] font-mono font-bold text-gray-600 dark:text-gray-300 uppercase tracking-widest group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+          {masterSync.status === 'connected' ? 'MASTER NODE ACTIVE' : 'MASTER NODE SYNCING...'}
         </span>
         {masterSync.lastSync && (
-          <div className="w-px h-3 bg-gray-200 dark:bg-navy-800 mx-1" />
+          <div className="w-px h-3 bg-gray-200 dark:bg-navy-800 mx-0.5" />
         )}
         <span className="text-[9px] font-mono text-gray-400 dark:text-gray-500 uppercase">
-          {masterSync.lastSync ? `Sync: ${new Date(masterSync.lastSync).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
+          {masterSync.lastSync ? `SYNC: ${new Date(masterSync.lastSync).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
         </span>
-      </div>
+        <div className="w-px h-3 bg-gray-200 dark:bg-navy-800 mx-0.5" />
+        <div className="flex items-center gap-1 text-[9px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-500/20 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-500/20 transition-colors">
+          <Activity size={10} className="animate-pulse" />
+          <span>HEALTH</span>
+        </div>
+      </button>
+
+      {/* Real-Time System Health Dashboard */}
+      <SystemHealthDashboard
+        isOpen={isHealthOpen}
+        onClose={() => setIsHealthOpen(false)}
+        masterSyncStatus={masterSync.status}
+        lastSyncTime={masterSync.lastSync}
+      />
     </>
   );
 }

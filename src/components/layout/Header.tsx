@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Bell, User as UserIcon, Clock, HelpCircle, LogOut, Settings, UserCircle, Sun, Moon, Database, RefreshCw, Sparkles, AlertTriangle, ShieldCheck, ShieldAlert, Shield } from 'lucide-react';
+import { Search, Bell, Clock, HelpCircle, LogOut, Settings, UserCircle, Sun, Moon, Database, RefreshCw, Sparkles, AlertTriangle, ShieldCheck, ShieldAlert, Shield } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { apiFetch } from '@/lib/api';
@@ -28,9 +27,11 @@ interface HeaderProps {
   user: User;
   title: string;
   onOpenCommandPalette?: () => void;
+  onOpenSettings?: () => void;
+  onLogout?: () => void;
 }
 
-export function Header({ user, title, onOpenCommandPalette }: HeaderProps) {
+export function Header({ user, title, onOpenCommandPalette, onOpenSettings, onLogout }: HeaderProps) {
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [syncStatus, setSyncStatus] = useState<'connected' | 'disconnected' | 'syncing'>('syncing');
@@ -392,12 +393,18 @@ export function Header({ user, title, onOpenCommandPalette }: HeaderProps) {
               <UserCircle size={18} />
               <span className="font-sans font-medium">My Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="rounded-xl gap-3 px-3 py-2.5 cursor-pointer focus:bg-gray-50 dark:focus:bg-navy-800 focus:text-brand-orange dark:text-gray-300">
+            <DropdownMenuItem 
+              onClick={onOpenSettings}
+              className="rounded-xl gap-3 px-3 py-2.5 cursor-pointer focus:bg-gray-50 dark:focus:bg-navy-800 focus:text-brand-orange dark:text-gray-300"
+            >
               <Settings size={18} />
               <span className="font-sans font-medium">Account Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-gray-50 dark:bg-navy-800" />
-            <DropdownMenuItem className="rounded-xl gap-3 px-3 py-2.5 cursor-pointer text-rose-500 focus:bg-rose-50 dark:focus:bg-rose-900/20 focus:text-rose-600">
+            <DropdownMenuItem 
+              onClick={onLogout}
+              className="rounded-xl gap-3 px-3 py-2.5 cursor-pointer text-rose-500 focus:bg-rose-50 dark:focus:bg-rose-900/20 focus:text-rose-600"
+            >
               <LogOut size={18} />
               <span className="font-sans font-medium">Logout</span>
             </DropdownMenuItem>

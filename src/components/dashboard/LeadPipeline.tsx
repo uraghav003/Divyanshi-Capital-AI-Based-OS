@@ -14,13 +14,15 @@ import {
   FileText,
   RefreshCw,
   TrendingUp,
-  UserCheck
+  UserCheck,
+  Download
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { exportDeropoCSV } from '@/lib/export';
 
 const COLUMNS = [
   { id: 'fresh', label: 'Fresh Leads', color: 'bg-blue-500' },
@@ -30,7 +32,7 @@ const COLUMNS = [
   { id: 'disbursed', label: 'Disbursed', color: 'bg-brand-orange' },
 ];
 
-export function LeadPipeline({ leads = [] }: { leads?: any[] }) {
+export function LeadPipeline({ leads = [], userRole }: { leads?: any[]; userRole?: string }) {
   const normalizedLeads = leads.map((l: any, idx) => {
     if (l && l.id && l.client && l.status) return l;
 
@@ -84,6 +86,16 @@ export function LeadPipeline({ leads = [] }: { leads?: any[] }) {
           <p className="text-gray-500 dark:text-gray-400 text-sm">Visual workflow of active cases. Hover or click to advance pipeline status.</p>
         </div>
         <div className="flex items-center gap-3">
+          {userRole === 'MD' && (
+            <Button
+              onClick={() => exportDeropoCSV(leads)}
+              className="bg-orange-600 hover:bg-orange-700 text-white rounded-xl gap-2 shadow-sm text-xs h-9 px-3"
+              title="Export all leads for Deropo Marketing Campaign"
+            >
+              <Download size={15} />
+              Deropo CSV Export
+            </Button>
+          )}
           <Button 
             variant="outline" 
             onClick={handleRefresh}

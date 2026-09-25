@@ -11,9 +11,8 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const urlStr = typeof input === 'string' ? input : (input instanceof Request ? input.url : input.toString());
   try {
-    
-    const urlStr = typeof input === 'string' ? input : (input instanceof Request ? input.url : input.toString());
     const isInternal = urlStr.startsWith('/api/') || urlStr.includes(window.location.origin + '/api/');
     
     if (isInternal) {
@@ -32,9 +31,8 @@ export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Pr
     }
     
     const response = await fetch(input, init);
-    const url = typeof input === 'string' ? input : (input instanceof Request ? input.url : input.toString());
 
-    if (url.includes('/api/dc/')) {
+    if (urlStr.includes('/api/dc/')) {
       const clonedResponse = response.clone();
       
       if (!response.ok) {
@@ -44,11 +42,11 @@ export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Pr
           if (data.error) {
             errorMessage = data.error;
           }
-        } catch (e) {
+        } catch {
           // Fallback to generic message
         }
         toast.error(errorMessage);
-        throw new ApiError(errorMessage, response.status, url);
+        throw new ApiError(errorMessage, response.status, urlStr);
       } else {
         // Handle 200 OK with { ok: false, error: "..." }
         try {
@@ -57,7 +55,7 @@ export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Pr
             toast.error(data.error);
             // We don't throw here to not break existing code that checks result.ok
           }
-        } catch (e) {
+        } catch {
           // Ignore json parse errors for ok responses
         }
       }
@@ -68,8 +66,7 @@ export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Pr
     if (error instanceof ApiError) {
       throw error;
     }
-    const url = typeof input === 'string' ? input : (input instanceof Request ? input.url : input.toString());
-    if (url.includes('/api/dc/')) {
+    if (urlStr.includes('/api/dc/')) {
       toast.error('Network Error: Unable to connect to the server. Please check your connection.');
     }
     throw error;

@@ -3,25 +3,58 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Save, WifiOff, CloudOff, Cloud, Activity, CheckCircle2, RotateCcw, Clock, Calculator, Check } from 'lucide-react';
+import { 
+  Loader2, 
+  Save, 
+  WifiOff, 
+  CloudOff, 
+  Cloud, 
+  Activity, 
+  CheckCircle2, 
+  RotateCcw, 
+  Clock, 
+  Calculator, 
+  Check,
+  Camera,
+  FileCheck,
+  Trash2,
+  Eye,
+  Download,
+  Sparkles,
+  Plus,
+  X
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { saveDraft, getDraft, clearDraft, enqueueSync, getSyncQueue, removeFromSyncQueue } from '@/lib/idb';
 import { apiFetch } from '@/lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSettings } from '@/lib/settings';
+import { KYCDocumentScannerModal, ScannedKYCDocument } from './KYCDocumentScannerModal';
 
 interface SmartFormProps {
   user: any;
 }
 
-const INITIAL_FORM_STATE = {
+export interface SmartFormData {
+  name: string;
+  phone: string;
+  email: string;
+  loan_type: string;
+  amount: string;
+  city: string;
+  notes: string;
+  documents: ScannedKYCDocument[];
+}
+
+const INITIAL_FORM_STATE: SmartFormData = {
   name: '',
   phone: '',
   email: '',
   loan_type: '',
   amount: '',
   city: '',
-  notes: ''
+  notes: '',
+  documents: []
 };
 
 // Loan policy rules compliant with Divyanshi Capital operating model
@@ -62,13 +95,18 @@ function calculateApproxEMI(principal: number, annualRate: number, tenureYears: 
 
 export function SmartForm({ user }: SmartFormProps) {
   const { playFeedback } = useSettings();
-  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
+  const [formData, setFormData] = useState<SmartFormData>(INITIAL_FORM_STATE);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
+
+  // Scanner modal state
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [scannerDocType, setScannerDocType] = useState('PAN Card');
+  const [previewDoc, setPreviewDoc] = useState<ScannedKYCDocument | null>(null);
 
   const DRAFT_KEY = `smart_form_draft_${user?.id || 'guest'}`;
   const LOCAL_STORAGE_KEY = `dc_smart_form_autosave_${user?.id || 'guest'}`;
@@ -77,12 +115,19 @@ export function SmartForm({ user }: SmartFormProps) {
   const formDataRef = useRef(formData);
   formDataRef.current = formData;
 
-  const lastSavedDataRef = useRef<typeof INITIAL_FORM_STATE>(INITIAL_FORM_STATE);
+  const lastSavedDataRef = useRef<SmartFormData>(INITIAL_FORM_STATE);
+
+  // Check if form data contains meaningful content to save
+  const checkHasData = useCallback((data: SmartFormData) => {
+    return Object.entries(data).some(([key, val]) => {
+      if (key === 'documents') return Array.isArray(val) && val.length > 0;
+      return typeof val === 'string' && val.trim() !== '';
+    });
+  }, []);
 
   // Core auto-save persistence handler (LocalStorage + IndexedDB)
-  const persistFormData = useCallback(async (dataToSave: typeof INITIAL_FORM_STATE) => {
-    const isNonEmpty = Object.values(dataToSave).some(val => val && val.trim() !== '');
-    if (!isNonEmpty) return;
+  const persistFormData = useCallback(async (dataToSave: SmartFormData) => {
+    if (!checkHasData(dataToSave)) return;
 
     try {
       setIsAutoSaving(true);
@@ -92,10 +137,24 @@ export function SmartForm({ user }: SmartFormProps) {
         userId: user?.id || 'guest'
       };
 
-      // 1. Persist directly to LocalStorage
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
+      // 1. Persist directly to LocalStorage (with quota fallback)
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
+      } catch (lsError) {
+        // If localStorage quota is reached due to document images, store lightweight metadata
+        try {
+          const lightweightPayload = {
+            ...payload,
+            data: {
+              ...payload.data,
+              documents: (payload.data.documents || []).map((d) => ({ ...d, dataUrl: '' }))
+            }
+          };
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(lightweightPayload));
+        } catch (e) {}
+      }
 
-      // 2. Persist to IndexedDB as secondary resilient backup
+      // 2. Persist to IndexedDB as primary high-capacity resilient backup
       await saveDraft(DRAFT_KEY, dataToSave);
 
       lastSavedDataRef.current = { ...dataToSave };
@@ -108,34 +167,42 @@ export function SmartForm({ user }: SmartFormProps) {
         setIsAutoSaving(false);
       }, 800);
     }
-  }, [DRAFT_KEY, LOCAL_STORAGE_KEY, user?.id]);
+  }, [DRAFT_KEY, LOCAL_STORAGE_KEY, user?.id, checkHasData]);
 
-  // Load initial draft from LocalStorage (fastest) or IndexedDB
+  // Load initial draft from IndexedDB (complete with documents) or LocalStorage
   useEffect(() => {
     const loadDraft = async () => {
       try {
-        let restoredData: typeof INITIAL_FORM_STATE | null = null;
+        let restoredData: SmartFormData | null = null;
         let savedTimestamp: number | null = null;
 
-        // Try local storage first
-        const rawLocal = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (rawLocal) {
-          try {
-            const parsed = JSON.parse(rawLocal);
-            if (parsed && parsed.data && Object.values(parsed.data).some(v => typeof v === 'string' && v.trim() !== '')) {
-              restoredData = parsed.data;
-              savedTimestamp = parsed.timestamp;
-            }
-          } catch (e) {
-            console.warn('Malformed localStorage draft:', e);
-          }
+        // 1. Try IndexedDB first (contains complete image data)
+        const idbDraft = await getDraft(DRAFT_KEY);
+        if (idbDraft && checkHasData(idbDraft)) {
+          restoredData = {
+            ...INITIAL_FORM_STATE,
+            ...idbDraft,
+            documents: Array.isArray(idbDraft.documents) ? idbDraft.documents : []
+          };
         }
 
-        // Fallback to IndexedDB if localStorage was empty
+        // 2. If IndexedDB had nothing, check localStorage
         if (!restoredData) {
-          const idbDraft = await getDraft(DRAFT_KEY);
-          if (idbDraft && Object.values(idbDraft).some(v => typeof v === 'string' && v.trim() !== '')) {
-            restoredData = idbDraft;
+          const rawLocal = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (rawLocal) {
+            try {
+              const parsed = JSON.parse(rawLocal);
+              if (parsed && parsed.data && checkHasData(parsed.data)) {
+                restoredData = {
+                  ...INITIAL_FORM_STATE,
+                  ...parsed.data,
+                  documents: Array.isArray(parsed.data.documents) ? parsed.data.documents : []
+                };
+                savedTimestamp = parsed.timestamp;
+              }
+            } catch (e) {
+              console.warn('Malformed localStorage draft:', e);
+            }
           }
         }
 
@@ -147,8 +214,11 @@ export function SmartForm({ user }: SmartFormProps) {
           } else {
             setLastSavedTime(new Date());
           }
+          const docCount = restoredData.documents?.length || 0;
           toast.info('Auto-Saved Draft Restored', {
-            description: 'Your previous form entries were safely recovered from local storage.'
+            description: docCount > 0 
+              ? `Recovered form entries and ${docCount} KYC scanned document${docCount > 1 ? 's' : ''}.`
+              : 'Your previous form entries were safely recovered from storage.'
           });
         }
       } catch (err) {
@@ -168,7 +238,6 @@ export function SmartForm({ user }: SmartFormProps) {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Initial check for offline sync
     if (navigator.onLine) {
       processSyncQueue();
     }
@@ -177,13 +246,13 @@ export function SmartForm({ user }: SmartFormProps) {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [LOCAL_STORAGE_KEY, DRAFT_KEY]);
+  }, [LOCAL_STORAGE_KEY, DRAFT_KEY, checkHasData]);
 
-  // Periodic Auto-Save Every 5 Seconds (5000ms) to Local Storage
+  // Periodic Auto-Save Every 5 Seconds (5000ms) to Storage
   useEffect(() => {
     const autoSaveInterval = setInterval(() => {
       const currentData = formDataRef.current;
-      const isNonEmpty = Object.values(currentData).some(v => v && v.trim() !== '');
+      const isNonEmpty = checkHasData(currentData);
       const hasChanged = JSON.stringify(currentData) !== JSON.stringify(lastSavedDataRef.current);
 
       if (isNonEmpty && hasChanged) {
@@ -192,29 +261,30 @@ export function SmartForm({ user }: SmartFormProps) {
     }, 5000);
 
     return () => clearInterval(autoSaveInterval);
-  }, [persistFormData]);
+  }, [persistFormData, checkHasData]);
 
   // Flush auto-save on page unload or visibility change to ensure zero data loss
   useEffect(() => {
     const handleBeforeUnload = () => {
       const currentData = formDataRef.current;
-      const isNonEmpty = Object.values(currentData).some(v => v && v.trim() !== '');
-      if (isNonEmpty) {
-        localStorage.setItem(
-          LOCAL_STORAGE_KEY,
-          JSON.stringify({
-            data: currentData,
-            timestamp: Date.now(),
-            userId: user?.id || 'guest'
-          })
-        );
+      if (checkHasData(currentData)) {
+        try {
+          localStorage.setItem(
+            LOCAL_STORAGE_KEY,
+            JSON.stringify({
+              data: currentData,
+              timestamp: Date.now(),
+              userId: user?.id || 'guest'
+            })
+          );
+        } catch (e) {}
       }
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         const currentData = formDataRef.current;
-        const isNonEmpty = Object.values(currentData).some(v => v && v.trim() !== '');
+        const isNonEmpty = checkHasData(currentData);
         const hasChanged = JSON.stringify(currentData) !== JSON.stringify(lastSavedDataRef.current);
         if (isNonEmpty && hasChanged) {
           persistFormData(currentData);
@@ -229,7 +299,7 @@ export function SmartForm({ user }: SmartFormProps) {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [LOCAL_STORAGE_KEY, persistFormData, user?.id]);
+  }, [LOCAL_STORAGE_KEY, persistFormData, user?.id, checkHasData]);
 
   const updatePendingCount = async () => {
     try {
@@ -277,7 +347,6 @@ export function SmartForm({ user }: SmartFormProps) {
     
     // Auto-smart sanitization
     if (name === 'phone') {
-      // Remove any non-digits, and leading +91 or 91 if full number pasted
       let digits = value.replace(/\D/g, '');
       if (digits.length === 12 && digits.startsWith('91')) {
         digits = digits.slice(2);
@@ -287,20 +356,21 @@ export function SmartForm({ user }: SmartFormProps) {
       }
       value = digits;
     } else if (name === 'name') {
-      // Smart capitalization on start of words
       value = value.replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
     }
 
+    updateFormData(name as keyof SmartFormData, value);
+  };
+
+  const handleSelectChange = (name: keyof SmartFormData, value: any) => {
     updateFormData(name, value);
   };
 
-  const handleSelectChange = (name: string, value: string) => {
-    updateFormData(name, value);
-  };
-
-  const updateFormData = (name: string, value: string) => {
-    const newData = { ...formData, [name]: value };
-    setFormData(newData);
+  const updateFormData = (name: keyof SmartFormData, value: any) => {
+    setFormData((prev) => {
+      const next = { ...prev, [name]: value };
+      return next;
+    });
     setIsDirty(true);
   };
 
@@ -312,6 +382,36 @@ export function SmartForm({ user }: SmartFormProps) {
   const handleQuickCity = (city: string) => {
     updateFormData('city', city);
     playFeedback('click');
+  };
+
+  // KYC Scanning Handlers
+  const handleOpenScanner = (docType: string = 'PAN Card') => {
+    setScannerDocType(docType);
+    setIsScannerOpen(true);
+    playFeedback('click');
+  };
+
+  const handleDocumentCaptured = (scannedDoc: ScannedKYCDocument) => {
+    setFormData((prev) => {
+      const nextDocs = [...prev.documents, scannedDoc];
+      const nextData = { ...prev, documents: nextDocs };
+      // Trigger immediate persistence for high-priority documents
+      persistFormData(nextData);
+      return nextData;
+    });
+    setIsDirty(true);
+  };
+
+  const handleRemoveDocument = (docId: string, docName: string) => {
+    playFeedback('click');
+    setFormData((prev) => {
+      const nextDocs = prev.documents.filter((d) => d.id !== docId);
+      const nextData = { ...prev, documents: nextDocs };
+      persistFormData(nextData);
+      return nextData;
+    });
+    setIsDirty(true);
+    toast.info(`Removed ${docName}`);
   };
 
   const handleClearDraft = async () => {
@@ -344,8 +444,28 @@ export function SmartForm({ user }: SmartFormProps) {
     }
 
     setIsSubmitting(true);
+    
+    // Prepare lead payload including scanned KYC documents summary and content
     const payload = {
-      ...formData,
+      name: formData.name,
+      phone: formData.phone,
+      email: formData.email,
+      loan_type: formData.loan_type,
+      amount: formData.amount,
+      city: formData.city,
+      notes: formData.notes,
+      kyc_documents: formData.documents.map((d) => ({
+        id: d.id,
+        name: d.name,
+        type: d.type,
+        filterMode: d.filterMode,
+        enhanced: d.enhanced,
+        sizeKb: d.sizeKb,
+        scannedAt: d.scannedAt,
+        dataUrl: d.dataUrl
+      })),
+      kyc_document_count: formData.documents.length,
+      kyc_document_types: formData.documents.map((d) => d.name).join(', '),
       source: "SMART_FORM",
       emp: user?.id,
       manager_email_id: user?.email
@@ -365,7 +485,9 @@ export function SmartForm({ user }: SmartFormProps) {
       try {
         await enqueueSync(payload);
         await cleanupDraft();
-        toast.success('Saved Offline', { description: 'Lead will sync automatically when connection restores.' });
+        toast.success('Saved Offline', { 
+          description: `Lead & ${formData.documents.length} KYC documents will sync automatically when connection restores.` 
+        });
         playFeedback('success');
         updatePendingCount();
       } catch (err) {
@@ -386,7 +508,7 @@ export function SmartForm({ user }: SmartFormProps) {
       
       const data = await response.json();
       if (data.ok || response.ok) {
-        toast.success('Lead submitted successfully!');
+        toast.success('Lead and KYC documents submitted successfully!');
         playFeedback('success');
         await cleanupDraft();
       } else {
@@ -406,7 +528,7 @@ export function SmartForm({ user }: SmartFormProps) {
     }
   };
 
-  const hasEnteredData = Object.values(formData).some(v => v && v.trim() !== '');
+  const hasEnteredData = checkHasData(formData);
   const parsedAmount = parseInt(formData.amount || '0', 10);
   const selectedPolicy = formData.loan_type ? LOAN_POLICIES[formData.loan_type] : null;
   const estimatedEMI = (selectedPolicy && parsedAmount > 0 && selectedPolicy.rate > 0)
@@ -421,7 +543,7 @@ export function SmartForm({ user }: SmartFormProps) {
             Smart Form
             <span className="text-xs px-2 py-0.5 rounded-md bg-brand-orange/10 text-brand-orange font-mono font-bold">AUTO-SMART</span>
           </h2>
-          <p className="text-sm text-gray-500">Capture leads securely with automatic local storage auto-save every 5s, instant banking calculators & offline sync.</p>
+          <p className="text-sm text-gray-500">Capture leads with auto-save every 5s, device camera KYC scanner, instant banking calculators & offline sync.</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-2.5">
@@ -438,7 +560,7 @@ export function SmartForm({ user }: SmartFormProps) {
                 <span>Saving in 5s...</span>
               </span>
             ) : lastSavedTime ? (
-              <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400" title={`Auto-saved to local storage at ${lastSavedTime.toLocaleTimeString()}`}>
+              <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400" title={`Auto-saved to storage at ${lastSavedTime.toLocaleTimeString()}`}>
                 <CheckCircle2 size={13} />
                 <span>Auto-saved ({lastSavedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })})</span>
               </span>
@@ -481,7 +603,7 @@ export function SmartForm({ user }: SmartFormProps) {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Client Contact Details */}
           <Card className="border-gray-100 dark:border-navy-800 shadow-xl shadow-gray-200/40 dark:shadow-none rounded-2xl bg-white/50 dark:bg-navy-900/50 backdrop-blur-xl">
@@ -690,7 +812,162 @@ export function SmartForm({ user }: SmartFormProps) {
             </CardContent>
           </Card>
         </div>
+
+        {/* KYC DOCUMENT SCANNER SECTION */}
+        <Card className="border-gray-100 dark:border-navy-800 shadow-xl shadow-gray-200/40 dark:shadow-none rounded-2xl bg-white/50 dark:bg-navy-900/50 backdrop-blur-xl">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3">
+            <div>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Camera className="text-brand-orange" size={20} />
+                KYC Document Verification
+                {formData.documents.length > 0 && (
+                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
+                    {formData.documents.length} ATTACHED
+                  </span>
+                )}
+              </CardTitle>
+              <CardDescription>
+                Scan Aadhaar, PAN Card, or Bank Statements directly using the device camera with automatic grayscale clarity enhancement.
+              </CardDescription>
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => handleOpenScanner('PAN Card')}
+              className="bg-brand-orange hover:bg-brand-orange/90 text-white font-semibold text-xs h-9 px-4 rounded-xl flex items-center gap-2 shadow-sm"
+            >
+              <Camera size={15} />
+              Open KYC Scanner
+            </Button>
+          </CardHeader>
+
+          <CardContent className="space-y-4 pt-1">
+            {/* Quick scan document shortcuts */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mr-1">Quick Scan:</span>
+              <button
+                type="button"
+                onClick={() => handleOpenScanner('PAN Card')}
+                className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-navy-800 bg-white/80 dark:bg-navy-950 hover:border-brand-orange hover:text-brand-orange text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-1.5"
+              >
+                <Plus size={12} /> PAN Card
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenScanner('Aadhaar Card (Front)')}
+                className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-navy-800 bg-white/80 dark:bg-navy-950 hover:border-brand-orange hover:text-brand-orange text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-1.5"
+              >
+                <Plus size={12} /> Aadhaar Front
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenScanner('Aadhaar Card (Back)')}
+                className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-navy-800 bg-white/80 dark:bg-navy-950 hover:border-brand-orange hover:text-brand-orange text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-1.5"
+              >
+                <Plus size={12} /> Aadhaar Back
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenScanner('Bank Statement (3 Months)')}
+                className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-navy-800 bg-white/80 dark:bg-navy-950 hover:border-brand-orange hover:text-brand-orange text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-1.5"
+              >
+                <Plus size={12} /> Bank Statement
+              </button>
+            </div>
+
+            {/* Scanned Documents Grid */}
+            {formData.documents.length === 0 ? (
+              <div 
+                onClick={() => handleOpenScanner('PAN Card')}
+                className="border-2 border-dashed border-gray-200 dark:border-navy-800 rounded-xl p-6 text-center cursor-pointer hover:border-brand-orange/50 transition-colors bg-gray-50/40 dark:bg-navy-950/30 group"
+              >
+                <div className="h-10 w-10 rounded-full bg-brand-orange/10 text-brand-orange mx-auto flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                  <Camera size={20} />
+                </div>
+                <div className="text-xs font-semibold text-gray-800 dark:text-gray-200 mb-1">
+                  No KYC documents scanned yet
+                </div>
+                <p className="text-[11px] text-gray-500 max-w-sm mx-auto">
+                  Click here or choose a quick shortcut above to scan client identification with camera image capture and grayscale enhancement.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {formData.documents.map((doc) => (
+                  <motion.div
+                    key={doc.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="p-3 rounded-xl border border-gray-200 dark:border-navy-800 bg-white dark:bg-navy-950/80 flex flex-col justify-between group shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div>
+                      {/* Document Preview Thumbnail */}
+                      <div 
+                        onClick={() => setPreviewDoc(doc)}
+                        className="relative w-full aspect-[16/10] bg-gray-950 rounded-lg overflow-hidden mb-2.5 cursor-pointer flex items-center justify-center group/thumb"
+                      >
+                        <img 
+                          src={doc.dataUrl} 
+                          alt={doc.name} 
+                          className="w-full h-full object-contain group-hover/thumb:scale-105 transition-transform duration-200" 
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center text-white gap-1.5 text-xs font-medium backdrop-blur-[1px]">
+                          <Eye size={15} /> Preview
+                        </div>
+
+                        {/* Filter Mode Badge */}
+                        <div className="absolute bottom-1.5 left-1.5 bg-black/75 backdrop-blur-sm text-[10px] font-mono text-white px-2 py-0.5 rounded flex items-center gap-1">
+                          <Sparkles size={10} className="text-brand-orange" />
+                          <span className="capitalize">{doc.filterMode}</span>
+                        </div>
+                      </div>
+
+                      {/* Document Details */}
+                      <div className="flex items-start justify-between gap-1 mb-1">
+                        <div className="font-semibold text-xs text-gray-900 dark:text-white truncate" title={doc.name}>
+                          {doc.name}
+                        </div>
+                      </div>
+                      
+                      <div className="text-[10px] text-gray-500 flex items-center justify-between">
+                        <span>{doc.sizeKb} KB · {doc.scannedAt}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">Ready</span>
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex items-center justify-end gap-1.5 pt-2 mt-2 border-t border-gray-100 dark:border-navy-800">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setPreviewDoc(doc)}
+                        className="h-7 px-2 text-[11px] text-gray-600 dark:text-gray-400 hover:text-gray-900"
+                        title="View Full Resolution"
+                      >
+                        <Eye size={12} className="mr-1" /> View
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleRemoveDocument(doc.id, doc.name)}
+                        className="h-7 px-2 text-[11px] text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                        title="Delete Document"
+                      >
+                        <Trash2 size={12} className="mr-1" /> Delete
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
         
+        {/* SUBMISSION FOOTER */}
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-xs text-gray-500 flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
@@ -708,11 +985,89 @@ export function SmartForm({ user }: SmartFormProps) {
                 Processing...
               </>
             ) : (
-              <>Submit Lead securely</>
+              <>
+                Submit Lead & Documents {formData.documents.length > 0 && `(${formData.documents.length})`}
+              </>
             )}
           </Button>
         </div>
       </form>
+
+      {/* KYC CAMERA SCANNER MODAL */}
+      <KYCDocumentScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onDocumentCaptured={handleDocumentCaptured}
+        initialDocType={scannerDocType}
+      />
+
+      {/* FULL-SIZE DOCUMENT PREVIEW LIGHTBOX */}
+      <AnimatePresence>
+        {previewDoc && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+            onClick={() => setPreviewDoc(null)}
+          >
+            <div 
+              className="relative max-w-3xl w-full bg-white dark:bg-navy-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-navy-800 flex flex-col max-h-[92vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-navy-800 bg-gray-50 dark:bg-navy-950">
+                <div className="flex items-center gap-2">
+                  <FileCheck size={18} className="text-brand-orange" />
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">{previewDoc.name}</h3>
+                    <p className="text-[11px] text-gray-500">
+                      {previewDoc.type} • {previewDoc.filterMode.toUpperCase()} Enhanced • {previewDoc.sizeKb} KB
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href={previewDoc.dataUrl}
+                    download={`${previewDoc.name.replace(/\s+/g, '_')}_KYC.jpg`}
+                    className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-navy-800 transition-colors"
+                    title="Download Scanned Document"
+                  >
+                    <Download size={18} />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDoc(null)}
+                    className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-navy-800 transition-colors"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Document Image View */}
+              <div className="p-4 bg-gray-950 flex-1 flex items-center justify-center overflow-auto min-h-[300px]">
+                <img
+                  src={previewDoc.dataUrl}
+                  alt={previewDoc.name}
+                  className="max-h-[70vh] w-auto max-w-full object-contain rounded-lg shadow-lg"
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="px-5 py-3 border-t border-gray-100 dark:border-navy-800 bg-gray-50 dark:bg-navy-950 flex items-center justify-between text-xs text-gray-500">
+                <span>Scanned at {previewDoc.scannedAt}</span>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => setPreviewDoc(null)}
+                  className="h-8 text-xs bg-gray-200 hover:bg-gray-300 dark:bg-navy-800 dark:hover:bg-navy-700 text-gray-800 dark:text-gray-200"
+                >
+                  Close Preview
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

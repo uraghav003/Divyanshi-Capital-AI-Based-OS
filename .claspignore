@@ -1,6 +1,15 @@
-# Ignore everything by default
-**/*
-
-# Do not ignore Code.gs and appsscript.json
+**/**
 !Code.gs
+!BulbhulMind.gs
 !appsscript.json
+!*.html
+public/**
+node_modules/**
+.git/**
+.github/**
+build-firebase.js
+firebase.json
+.firebaserc
+*.bak
+Code_Part1.gs
+Code_Part2.gs

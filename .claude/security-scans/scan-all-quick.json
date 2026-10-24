@@ -1,0 +1,177 @@
+{
+  "timestamp": "2026-10-24T01:34:49.884Z",
+  "target": "C:\\Users\\aecr\\github_audits\\Divyanshi-Capital-AI-Based-OS",
+  "depth": "quick",
+  "type": "all",
+  "summary": {
+    "critical": 2,
+    "high": 18,
+    "medium": 5,
+    "low": 2,
+    "total": 27
+  },
+  "findings": [
+    {
+      "severity": "low",
+      "type": "Dependency CVE",
+      "location": "package.json:@babel/core",
+      "description": "@babel/core: Arbitrary File Read vi"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:@firebase/firestore",
+      "description": "Vulnerability"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:@firebase/firestore-compat",
+      "description": "Vulnerability"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:@grpc/grpc-js",
+      "description": "@grpc/grpc-js: In certain configura"
+    },
+    {
+      "severity": "medium",
+      "type": "Dependency CVE",
+      "location": "package.json:@hono/node-server",
+      "description": "Node.js Adapter for Hono: Path trav"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:@modelcontextprotocol/sdk",
+      "description": "MCP TypeScript SDK: OAuth client co"
+    },
+    {
+      "severity": "medium",
+      "type": "Dependency CVE",
+      "location": "package.json:@protobufjs/utf8",
+      "description": "protobufjs has overlong UTF-8 decod"
+    },
+    {
+      "severity": "medium",
+      "type": "Dependency CVE",
+      "location": "package.json:baseline-browser-mapping",
+      "description": "baseline-browser-mapping process te"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:body-parser",
+      "description": "body-parser vulnerable to denial of"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:brace-expansion",
+      "description": "brace-expansion: Large numeric rang"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:browserslist",
+      "description": "Browserslist: Unbounded memory grow"
+    },
+    {
+      "severity": "low",
+      "type": "Dependency CVE",
+      "location": "package.json:esbuild",
+      "description": "esbuild allows arbitrary file read "
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:fast-uri",
+      "description": "fast-uri vulnerable to host confusi"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:firebase",
+      "description": "Vulnerability"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:hono",
+      "description": "Hono has CSS Declaration Injection "
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:ip-address",
+      "description": "ip-address: Address4 decodes leadin"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:js-yaml",
+      "description": "JS-YAML: Quadratic-complexity DoS i"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:nanoid",
+      "description": "nanoid: non-secure generators can l"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:postcss",
+      "description": "PostCSS has XSS via Unescaped </sty"
+    },
+    {
+      "severity": "medium",
+      "type": "Dependency CVE",
+      "location": "package.json:postcss-selector-parser",
+      "description": "postcss-selector-parser allows deni"
+    },
+    {
+      "severity": "critical",
+      "type": "Dependency CVE",
+      "location": "package.json:protobufjs",
+      "description": "Arbitrary code execution in protobu"
+    },
+    {
+      "severity": "critical",
+      "type": "Dependency CVE",
+      "location": "package.json:proxy-addr",
+      "description": "proxy-addr vulnerable to IP spoofin"
+    },
+    {
+      "severity": "medium",
+      "type": "Dependency CVE",
+      "location": "package.json:qs",
+      "description": "qs has a remotely triggerable DoS: "
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:shadcn",
+      "description": "Vulnerability"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:source-map-js",
+      "description": "source-map-js allows event-loop den"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:vite",
+      "description": "launch-editor: NTLMv2 hash disclosu"
+    },
+    {
+      "severity": "high",
+      "type": "Dependency CVE",
+      "location": "package.json:zod",
+      "description": "Zod can exhaust memory while valida"
+    }
+  ]
+}

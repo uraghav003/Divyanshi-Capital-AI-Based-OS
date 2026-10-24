@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="referrer" content="no-referrer">
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Divyanshi Capital — AI Digital Profile Card</title>
+
+  <!-- High Performance Web Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <script>
+    try {
+      var _gasBootRaw = '<?= typeof P1_STAFF_PUBLIC_ !== "undefined" ? encodeURIComponent(JSON.stringify(P1_STAFF_PUBLIC_(empCode))) : "" ?>';
+      if (_gasBootRaw) {
+        window.__CARD_BOOT_DATA__ = JSON.parse(decodeURIComponent(_gasBootRaw));
+        window.__P1_BOOT_DATA_JSON__ = window.__CARD_BOOT_DATA__;
+      }
+    } catch (_) {}
+  </script>
+
+  <style>
+    :root {
+      --bg: #030712;
+      --navy: #0B1F3A;
+      --navy-light: #15325B;
+      --navy-surface: rgba(15, 23, 42, 0.88);
+      --gold: #C9A84C;
+      --gold-light: #E5C875;
+      --gold-glow: rgba(201, 168, 76, 0.35);
+      --text: #ffffff;
+      --text-muted: #94A3B8;
+      --border: rgba(255, 255, 255, 0.12);
+      --border-gold: rgba(201, 168, 76, 0.3);
+      --emerald: #10B981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .ambient-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: 
+        radial-gradient(circle at 80% 10%, rgba(201, 168, 76, 0.14) 0%, transparent 50%),
+        radial-gradient(circle at 20% 90%, rgba(15, 50, 91, 0.55) 0%, transparent 60%);
+      z-index: 0;
+    }
+
+    .card-container {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      z-index: 1;
+      animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .profile-card {
+      width: 100%;
+      background: var(--navy-surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      overflow: hidden;
+      text-align: center;
+      -webkit-backdrop-filter: blur(24px);
+      backdrop-filter: blur(24px);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(201, 168, 76, 0.12);
+    }
+
+    .card-banner {
+      padding: 32px 20px 64px;
+      background: linear-gradient(135deg, #0B1F3A 0%, #15325B 100%);
+      border-bottom: 2px solid var(--gold);
+      position: relative;
+    }
+
+    .brand-logo-pill {
+      width: 50px;
+      height: 50px;
+      background: #ffffff;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 14px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+      border: 1.5px solid rgba(255, 255, 255, 0.3);
+      color: var(--navy);
+      font-weight: 900;
+      font-size: 18px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .company-title {
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1;
+    }
+
+    .company-tagline {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 5px;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+
+    .avatar-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-top: -52px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .avatar-circle {
+      width: 104px;
+      height: 104px;
+      border-radius: 50%;
+      border: 4px solid var(--gold);
+      background: var(--navy);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px var(--gold-glow);
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-initials {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 34px;
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+
+    .officer-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      padding: 0 16px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.25;
+    }
+
+    .officer-role {
+      font-size: 13px;
+      color: var(--gold-light);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-top: 4px;
+    }
+
+    .emp-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      background: rgba(201, 168, 76, 0.12);
+      border: 1px solid var(--border-gold);
+      color: var(--gold-light);
+      font-size: 12px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .contact-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 22px 20px 10px;
+    }
+
+    .contact-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: #ffffff;
+      text-decoration: none;
+      padding: 12px 6px;
+      border-radius: 16px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .contact-btn:hover {
+      background: var(--gold);
+      color: var(--navy);
+      border-color: var(--gold);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(201, 168, 76, 0.4);
+    }
+    .contact-btn:hover .icon-circle {
+      background: rgba(11, 31, 58, 0.15);
+      color: var(--navy);
+    }
+
+    .icon-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .feedback-toast {
+      margin: 12px 20px 0;
+      padding: 10px 14px;
+      background: rgba(201, 168, 76, 0.14);
+      border: 1px solid var(--border-gold);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--gold-light);
+      text-align: left;
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .btn-apply-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: calc(100% - 40px);
+      margin: 16px 20px 24px;
+      padding: 16px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--gold) 0%, #b89139 50%, #8e6c22 100%);
+      color: #0b1f3a;
+      font-weight: 900;
+      font-size: 15px;
+      text-decoration: none;
+      box-shadow: 0 10px 25px rgba(201, 168, 76, 0.35);
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-apply-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px rgba(201, 168, 76, 0.55);
+      filter: brightness(1.08);
+    }
+
+    .products-section {
+      padding: 0 20px 24px;
+      text-align: left;
+    }
+
+    .products-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .products-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .product-chip {
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      padding: 7px 12px;
+      border-radius: 10px;
+      color: #e2e8f0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .verified-footer {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .verified-icon {
+      color: var(--emerald);
+      font-size: 15px;
+    }
+
+    .card-subtext {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 11.5px;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.5px;
+    }
+
+    /* Modal for QR Code */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.88);
+      z-index: 9999;
+      place-items: center;
+      padding: 20px;
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+    }
+    .modal-card {
+      background: #0B1F3A;
+      border: 1px solid var(--border-gold);
+      border-radius: 24px;
+      padding: 26px;
+      text-align: center;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+    }
+    .qr-img {
+      width: 200px;
+      height: 200px;
+      margin: 16px auto;
+      background: #fff;
+      padding: 10px;
+      border-radius: 14px;
+      display: block;
+    }
+    .hide { display: none !important; }
+    .btn-qr-scan {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: var(--gold-light);
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .modal-heading {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .modal-subheading {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .btn-modal-close {
+      margin-top: 12px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
+      color: #fff;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient-glow"></div>
+
+  <div class="card-container">
+    <div class="profile-card">
+      
+      <!-- TOP BANNER -->
+      <div class="card-banner">
+        <div class="brand-logo-pill">DC</div>
+        <div class="company-title">DIVYANSHI CAPITAL</div>
+        <div class="company-tagline">India's Premier Loan & Finance Facilitator</div>
+      </div>
+
+      <!-- AVATAR PHOTO -->
+      <div class="avatar-wrapper">
+        <div class="avatar-circle">
+          <img id="avatarImg" class="avatar-img hide" alt="Advisor Avatar" />
+          <div id="avatarInitials" class="avatar-initials">DC</div>
+        </div>
+      </div>
+
+      <!-- OFFICER DETAILS -->
+      <h1 class="officer-name" id="officerName">Divyanshi Capital Officer</h1>
+      <div class="officer-role" id="officerRole">Senior Loan Consultant</div>
+      <div class="emp-badge"><i class="fa-solid fa-id-badge"></i> <span id="officerEmp">DC002</span></div>
+
+      <!-- 4 QUICK CONTACT ACTIONS -->
+      <div class="contact-actions-grid">
+        <a id="btnCall" class="contact-btn" href="#" onclick="handleCall(event)">
+          <span class="icon-circle"><i class="fa-solid fa-phone"></i></span>
+          Call
+        </a>
+        <a id="btnWA" class="contact-btn" href="#" target="_blank" onclick="handleWA(event)">
+          <span class="icon-circle"><i class="fa-brands fa-whatsapp"></i></span>
+          WhatsApp
+        </a>
+        <a id="btnEmail" class="contact-btn" href="#" onclick="handleEmail(event)">
+          <span class="icon-circle"><i class="fa-solid fa-envelope"></i></span>
+          Email
+        </a>
+        <button type="button" class="contact-btn" onclick="downloadVCard()">
+          <span class="icon-circle"><i class="fa-solid fa-address-card"></i></span>
+          Save
+        </button>
+      </div>
+
+      <div id="feedbackToast" class="feedback-toast"></div>
+
+      <!-- APPLY FOR LOAN PRIMARY BUTTON -->
+      <a id="btnApply" class="btn-apply-main" href="?emp=DC002">
+        <i class="fa-solid fa-file-signature"></i> Apply For Loan Now
+      </a>
+
+      <!-- LOAN PRODUCTS HANDLED -->
+      <div class="products-section">
+        <div class="products-title">Loan Products Facilitated</div>
+        <div class="products-grid">
+          <div class="product-chip">💳 Personal Loan</div>
+          <div class="product-chip">🏢 Business Loan</div>
+          <div class="product-chip">🏠 Home Loan</div>
+          <div class="product-chip">🏦 Loan Against Property</div>
+          <div class="product-chip">🚗 Auto Loan</div>
+          <div class="product-chip">🎓 Education Loan</div>
+          <div class="product-chip">🪙 Gold Loan</div>
+          <div class="product-chip">🏭 MSME Project Loan</div>
+        </div>
+
+        <div class="verified-footer">
+          <i class="fa-solid fa-circle-check verified-icon"></i>
+          <span>Verified Divyanshi Capital Staff • 100% Confidential</span>
+          <button type="button" onclick="showQR()" class="btn-qr-scan" title="Scan QR">
+            <i class="fa-solid fa-qrcode"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:16px;">
+      <a id="btnBackToDashboard" href="?page=dashboard&emp=DC002" target="_top" style="color:var(--gold-light);font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);padding:8px 18px;border-radius:12px;border:1px solid var(--border-gold);">
+        <i class="fa-solid fa-arrow-left"></i> Return to Staff Dashboard
+      </a>
+    </div>
+
+    <div class="card-subtext">Powered by Bulbhul AI • Divyanshi Capital OS</div>
+  </div>
+
+  <!-- QR CODE MODAL -->
+  <div class="modal-overlay" id="qrModal" onclick="hideQR()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <h3 class="modal-heading">Scan to Open Card</h3>
+      <p class="modal-subheading">Share this digital profile directly</p>
+      <img id="qrCodeImg" class="qr-img" src="" alt="QR Code" />
+      <button type="button" class="btn-modal-close" onclick="hideQR()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // ══════════════════════════════════════════════════════════════
+    // GLOBAL ZERO-SILENT-FAILURE WATCHDOG
+    // ══════════════════════════════════════════════════════════════
+    window.__DIVYANSHI_ERROR_BUFFER__ = window.__DIVYANSHI_ERROR_BUFFER__ || [];
+    window.addEventListener('error', function(e) {
+      const errInfo = { type: 'UNCLEAN_ERROR', message: e.message, filename: e.filename, lineno: e.lineno, time: new Date().toISOString() };
+      window.__DIVYANSHI_ERROR_BUFFER__.push(errInfo);
+      console.error('[DIVYANSHI_CARD_WATCHDOG]', errInfo);
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      const reason = e.reason ? (e.reason.message || String(e.reason)) : 'Unhandled rejection';
+      const errInfo = { type: 'UNHANDLED_PROMISE', reason: reason, time: new Date().toISOString() };
+      window.__DIVYANSHI_ERROR_BUFFER__.push(errInfo);
+      console.error('[DIVYANSHI_PROMISE_WATCHDOG]', errInfo);
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const EMP_CODE = String(params.get('emp') || params.get('emp_code') || 'DC002').trim().toUpperCase();
+    let CURRENT_STAFF = null;
+
+    function getInitials(name) {
+      if (!name) return 'DC';
+      const parts = name.trim().split(/\s+/).filter(Boolean);
+      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('feedbackToast');
+      if (!toast) return;
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }
+
+    function handleCall(e) {
+      if (!CURRENT_STAFF || !CURRENT_STAFF.mobile) {
+        e.preventDefault();
+        showToast('📞 Direct call will connect once phone number loads for ' + EMP_CODE);
+      }
+    }
+
+    function handleWA(e) {
+      if (!CURRENT_STAFF || !CURRENT_STAFF.mobile) {
+        e.preventDefault();
+        showToast('💬 WhatsApp will connect once phone number loads for ' + EMP_CODE);
+      }
+    }
+
+    function handleEmail(e) {
+      if (!CURRENT_STAFF || !CURRENT_STAFF.email) {
+        e.preventDefault();
+        showToast('✉️ Email will open once officer email loads for ' + EMP_CODE);
+      }
+    }
+
+    function downloadVCard() {
+      if (!CURRENT_STAFF) return;
+      const name = CURRENT_STAFF.name || 'Divyanshi Capital Officer';
+      const phone = CURRENT_STAFF.mobile || '7838074351';
+      const email = CURRENT_STAFF.email || 'support@divyanshicapital.com';
+      const role = CURRENT_STAFF.role || 'Loan Consultant';
+
+      const vcard = `BEGIN:VCARD
+VERSION:3.0
+N:${name};;;;
+FN:${name}
+ORG:Divyanshi Capital Pvt Ltd
+TITLE:${role}
+TEL;TYPE=CELL,VOICE:+91${phone.replace(/\\D/g, '').slice(-10)}
+EMAIL;TYPE=WORK,INTERNET:${email}
+URL:${window.location.href}
+END:VCARD`;
+
+      const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${name.replace(/\\s+/g, '_')}_DivyanshiCapital.vcf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('📥 Contact card (.vcf) downloaded to your phonebook!');
+    }
+
+    function showQR() {
+      const qrModal = document.getElementById('qrModal');
+      const qrImg = document.getElementById('qrCodeImg');
+      if (!qrModal || !qrImg) return;
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.href)}`;
+      qrModal.style.display = 'grid';
+    }
+
+    function hideQR() {
+      const qrModal = document.getElementById('qrModal');
+      if (qrModal) qrModal.style.display = 'none';
+    }
+
+    function renderCard(data) {
+      if (!data) return;
+      const staff = data.data || data.staff || data.result || data;
+      CURRENT_STAFF = staff;
+
+      const nameEl = document.getElementById('officerName');
+      if (nameEl) nameEl.innerText = staff.name || 'Divyanshi Capital Officer';
+
+      const roleEl = document.getElementById('officerRole');
+      if (roleEl) roleEl.innerText = staff.role || staff.dept || 'Loan Consultant';
+
+      const empEl = document.getElementById('officerEmp');
+      if (empEl) empEl.innerText = EMP_CODE;
+
+      const rawMob = String(staff.mobile || staff.phone || '').replace(/\D/g, '');
+      const mobClean = rawMob.slice(-10);
+
+      const btnCall = document.getElementById('btnCall');
+      const btnWA = document.getElementById('btnWA');
+      const btnEmail = document.getElementById('btnEmail');
+
+      if (mobClean) {
+        if (btnCall) btnCall.href = `tel:+91${mobClean}`;
+        if (btnWA) btnWA.href = `https://wa.me/91${mobClean}?text=${encodeURIComponent("Hi, I want to apply for a loan via Divyanshi Capital.")}`;
+      }
+      if (staff.email && btnEmail) {
+        btnEmail.href = `mailto:${staff.email}`;
+      }
+
+      const baseUrl = (window.__DC_BOOT__ && window.__DC_BOOT__.execUrl) || window.location.href.split('?')[0];
+      const btnApply = document.getElementById('btnApply');
+      if (btnApply) {
+        btnApply.href = `${baseUrl}?page=form&emp=${encodeURIComponent(EMP_CODE)}`;
+      }
+      const btnBack = document.getElementById('btnBackToDashboard');
+      if (btnBack) {
+        btnBack.href = `${baseUrl}?page=dashboard&emp=${encodeURIComponent(EMP_CODE)}`;
+      }
+
+      const avImg = document.getElementById('avatarImg');
+      const avInit = document.getElementById('avatarInitials');
+      if (avImg && avInit) {
+        if (staff.avatar || staff.photo || staff.image) {
+          avImg.src = staff.avatar || staff.photo || staff.image;
+          avImg.style.display = 'block';
+          avInit.style.display = 'none';
+          avImg.onerror = function() {
+            avImg.style.display = 'none';
+            avInit.style.display = 'block';
+            avInit.innerText = getInitials(staff.name);
+          };
+        } else {
+          avImg.style.display = 'none';
+          avInit.style.display = 'block';
+          avInit.innerText = getInitials(staff.name);
+        }
+      }
+    }
+
+    function initCard() {
+      if (window.__CARD_BOOT_DATA__) {
+        renderCard(window.__CARD_BOOT_DATA__);
+        return;
+      }
+
+      if (window.google && google.script && google.script.run && typeof google.script.run.P1_STAFF_PUBLIC_ === 'function') {
+        google.script.run.withSuccessHandler(renderCard).P1_STAFF_PUBLIC_(EMP_CODE);
+      } else {
+        const baseUrl = window.location.href.split('?')[0];
+        fetch(baseUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'icard', emp_code: EMP_CODE })
+        })
+        .then(r => r.json())
+        .then(renderCard)
+        .catch(() => {
+          renderCard({
+            name: EMP_CODE === 'DC001' ? 'Narendra Singh Raghav' : (EMP_CODE === 'DC005' ? 'Khushboo Sharma' : 'Upendra Singh Raghav'),
+            role: EMP_CODE === 'DC001' ? 'Founder & CEO' : (EMP_CODE === 'DC005' ? 'Operations Head' : 'Managing Director'),
+            dept: 'Executive Management',
+            mobile: '7838074351',
+            email: 'upendra@divyanshicapital.com'
+          });
+        });
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initCard);
+  </script>
+</body>
+</html>

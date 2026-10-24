@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 🛡️ DIVYANSHI CAPITAL / BULBHUL OS SECURED FIREWALL V6 - AUDITED & LOCKED DOWN
+    
+    // Core check if authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Check if user is verified corporate staff or authorized dev
+    function isCorporateStaff() {
+      return isSignedIn() && 
+        request.auth.token.email_verified == true && (
+          request.auth.token.email.endsWith('@divyanshicapital.com') ||
+          request.auth.token.email == 'upendra@divyanshicapital.com' ||
+          request.auth.token.email == 'u.raghav003@gmail.com'
+        );
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 1. ALL_EMPLOYEES Collection Rules
+    match /all_employees/{empId} {
+      // Restrict employee registry to corporate staff or the user checking their own details
+      allow read: if isCorporateStaff() || (isSignedIn() && (resource.data.uid == request.auth.uid || resource.data.EMPLOYEE_EMAIL_ID == request.auth.token.email));
+      
+      // Registry management restricted to corporate staff only
+      allow write: if isCorporateStaff();
+    }
+
+    // 2. LEADS Collection Rules
+    match /leads/{leadId} {
+      // Allow reads if corporate staff or direct owner of the lead
+      allow read: if isCorporateStaff() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      
+      // All authenticated users can create leads under their own ID with basic length limits
+      allow create: if isSignedIn() 
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.name is string && request.resource.data.name.size() < 100
+        && request.resource.data.amount is string && request.resource.data.amount.size() < 50;
+      
+      // Owners or staff can update lead details (cannot shift ownership)
+      allow update: if isCorporateStaff() || (
+        isSignedIn() 
+        && resource.data.userId == request.auth.uid 
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.name.size() < 100
+      );
+      
+      // Owners or staff can delete
+      allow delete: if isCorporateStaff() || (isSignedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    // 3. SALESLOGS Collection Rules
+    match /salesLogs/{logId} {
+      // Log creation matches user ID with size limits to prevent database bloating
+      allow create: if isSignedIn() 
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.action is string && request.resource.data.action.size() < 100
+        && request.resource.data.details is string && request.resource.data.details.size() < 1000;
+      
+      allow read, update, delete: if isCorporateStaff();
+    }
+
+    // 4. TASKS Collection Rules
+    match /tasks/{taskId} {
+      // Separated rules prevents reference crash when request.resource is null
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // 5. RMS Collection Rules
+    match /rms/{rmId} {
+      // Restrict RM profiles (contains emails and phone numbers) to owners and staff
+      allow read: if isCorporateStaff() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow write: if isCorporateStaff() || (
+        isSignedIn() 
+        && request.resource.data.userId == request.auth.uid
+        && (resource == null || resource.data.userId == request.auth.uid)
+      );
+    }
+  }
+}

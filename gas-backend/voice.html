@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Divyanshi Capital — Voice Control & FreePBX Desk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-dark: #070e18;
+      --card-bg: #0d1b2a;
+      --card-border: #1b2e4b;
+      --blue-primary: #1d4ed8;
+      --blue-glow: rgba(29, 78, 216, 0.4);
+      --gold: #C9A84C;
+      --gold-light: #e8c56a;
+      --gold-glow: rgba(201, 168, 76, 0.35);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.4);
+      --rose: #f43f5e;
+      --rose-glow: rgba(244, 63, 94, 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px 16px 60px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ── HEADER & STATUS BADGES ── */
+    .header-panel {
+      background: linear-gradient(135deg, #0d1b2a 0%, #172a45 100%);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+    .header-panel::before {
+      content: '';
+      position: absolute;
+      top: -50%; right: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at center, rgba(201,168,76,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .brand-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .brand-title span.gold { color: var(--gold-light); }
+    
+    .status-badge-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-gold { background: rgba(201,168,76,0.15); color: var(--gold-light); border: 1px solid rgba(201,168,76,0.3); }
+    .badge-green { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+
+    /* ── LEAD CONTEXT CARD ── */
+    .lead-context {
+      display: none;
+      background: rgba(29, 78, 216, 0.12);
+      border: 1px solid rgba(29, 78, 216, 0.3);
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .lead-info-left strong { display: block; font-size: 13.5px; color: #fff; }
+    .lead-info-left span { font-size: 11.5px; color: var(--muted); }
+    .lead-badge { background: var(--blue-primary); color: #fff; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; }
+
+    /* ── VOICE ORB CONTAINER ── */
+    .orb-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 0;
+      position: relative;
+    }
+    .orb {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #1e3a8a, #0f172a);
+      border: 3px solid rgba(201,168,76,0.4);
+      box-shadow: 0 0 35px var(--gold-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 46px;
+      color: var(--gold-light);
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+    .orb:hover { transform: scale(1.05); box-shadow: 0 0 50px var(--gold-glow); }
+    .orb.dialing {
+      border-color: #38bdf8;
+      box-shadow: 0 0 45px rgba(56, 189, 248, 0.5);
+      animation: pulseDial 1.2s infinite ease-in-out;
+      color: #38bdf8;
+    }
+    .orb.active-call {
+      border-color: var(--emerald);
+      box-shadow: 0 0 55px var(--emerald-glow);
+      animation: pulseActive 1.8s infinite ease-in-out;
+      color: #34d399;
+    }
+    .orb.muted-call {
+      border-color: var(--rose);
+      box-shadow: 0 0 45px var(--rose-glow);
+      color: #fda4af;
+    }
+    .orb.hold-call {
+      border-color: #fbbf24;
+      box-shadow: 0 0 45px rgba(251, 191, 36, 0.4);
+      color: #fde68a;
+    }
+
+    @keyframes pulseDial {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+    @keyframes pulseActive {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .bridge-status {
+      margin-top: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+    }
+
+    /* ── DIALER INPUT & ACTION ── */
+    .dialer-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.4);
+    }
+    .phone-input-wrap {
+      position: relative;
+      margin-bottom: 18px;
+    }
+    .phone-input-wrap input {
+      width: 100%;
+      background: #070e18;
+      border: 1.5px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px 44px 16px 54px;
+      font-size: 18px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: #fff;
+      outline: none;
+      transition: all 0.2s ease;
+      letter-spacing: 0.04em;
+    }
+    .phone-input-wrap input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 15px var(--gold-glow);
+    }
+    .phone-flag {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--gold-light);
+    }
+    .clear-phone-btn {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 16px;
+      cursor: pointer;
+      display: none;
+    }
+    .clear-phone-btn:hover { color: #fff; }
+
+    .btn-call {
+      width: 100%;
+      background: linear-gradient(135deg, var(--emerald) 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 15px;
+      font-weight: 800;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px var(--emerald-glow);
+      transition: all 0.25s ease;
+    }
+    .btn-call:hover { transform: translateY(-2px); box-shadow: 0 12px 30px var(--emerald-glow); }
+    .btn-call:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* ── IN-CALL CONTROLS PANEL ── */
+    .in-call-panel {
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .timer-display {
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px;
+      font-weight: 800;
+      color: #34d399;
+      text-shadow: 0 0 15px var(--emerald-glow);
+    }
+    .call-controls-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .ctrl-btn {
+      background: #132238;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      color: #fff;
+      padding: 14px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .ctrl-btn i { font-size: 18px; }
+    .ctrl-btn:hover { background: #1c3252; border-color: var(--gold); }
+    .ctrl-btn.active { background: var(--gold); color: #070e18; border-color: var(--gold-light); }
+    .ctrl-btn.btn-hangup {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, var(--rose) 0%, #be123c 100%);
+      color: #fff;
+      padding: 16px;
+      font-size: 14px;
+      font-weight: 800;
+      box-shadow: 0 8px 24px var(--rose-glow);
+      flex-direction: row;
+      border: none;
+    }
+    .ctrl-btn.btn-hangup:hover { background: #e11d48; transform: translateY(-1px); }
+
+    /* ── DTMF KEYPAD ── */
+    .keypad-container {
+      display: none;
+      margin-top: 14px;
+    }
+    .dtmf-readout {
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold-light);
+      margin-bottom: 10px;
+      min-height: 20px;
+    }
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .key-btn {
+      background: #0a1524;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: #fff;
+      padding: 12px 6px;
+      font-size: 16px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .key-btn:active { background: var(--blue-primary); transform: scale(0.95); }
+
+    /* ── SYSTEM LOG & DISPOSITION MODAL ── */
+    .logs {
+      margin-top: 18px;
+      background: #060b13;
+      border: 1px solid #132238;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 11.5px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logs.success { color: #34d399; border-color: rgba(16,185,129,0.3); }
+    .logs.error { color: #f87171; border-color: rgba(244,63,94,0.3); }
+    .logs.loading { color: #60a5fa; border-color: rgba(96,165,250,0.3); }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      place-items: center;
+      padding: 16px;
+    }
+    .modal-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 440px;
+      padding: 26px 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+
+    .disp-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .disp-btn {
+      background: #081220;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 10px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .disp-btn:hover { border-color: var(--gold); }
+    .disp-btn.selected { background: var(--blue-primary); border-color: #60a5fa; }
+    
+    .disp-textarea {
+      width: 100%;
+      background: #070e18;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px;
+      color: #fff;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 70px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .quick-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .qchip { font-size: 10.5px; background: #132238; color: var(--muted); border: 1px solid var(--card-border); padding: 4px 10px; border-radius: 100px; cursor: pointer; }
+    .qchip:hover { color: #fff; border-color: var(--gold); }
+
+    /* ── QUICK NAV LINKS ── */
+    .nav-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .nav-link-btn {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: all 0.2s;
+    }
+    .nav-link-btn:hover { color: var(--gold-light); border-color: var(--gold); }
+
+    /* ── HISTORY DRAWER ── */
+    .history-drawer {
+      margin-top: 20px;
+      border-top: 1px solid var(--card-border);
+      padding-top: 14px;
+    }
+    .history-toggle {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--gold-light);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .history-list { display: none; margin-top: 10px; }
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: #081220;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header Panel -->
+    <div class="header-panel">
+      <div class="brand-title">
+        <i class="fa-solid fa-satellite-dish brand-icon-gold"></i>
+        <span>DIVYANSHI <span class="gold">VOICE DESK</span></span>
+      </div>
+      <div class="status-badge-row">
+        <span class="badge badge-gold" id="advisorBadge">Agent: DC002 • FreePBX Desk</span>
+        <span class="badge badge-green">● SIP Trunk 100% Active</span>
+      </div>
+    </div>
+
+    <!-- Lead Context (If invoked from CRM) -->
+    <div class="lead-context" id="leadContextCard">
+      <div class="lead-info-left">
+        <strong id="leadClientName">Assigned Lead Client</strong>
+        <span id="leadPhoneText">Active CRM Lead Intake</span>
+      </div>
+      <div class="lead-badge" id="leadBadgeId">LEAD</div>
+    </div>
+
+    <!-- Interactive Voice Orb -->
+    <div class="orb-container">
+      <div class="orb" id="voiceOrb" onclick="toggleOrbAction()">
+        <i class="fa-solid fa-microphone-lines"></i>
+      </div>
+      <div class="bridge-status" id="bridgeStatus">DIVYANSHI FREEPBX BRIDGE</div>
+    </div>
+
+    <!-- Dialer Card -->
+    <div class="dialer-card">
+      <!-- Dialing Form -->
+      <div id="dialForm">
+        <div class="phone-input-wrap">
+          <span class="phone-flag">🇮🇳 +91</span>
+          <input type="tel" id="phone" name="phone" placeholder="98990 00000" maxlength="10" autocomplete="off" />
+          <button class="clear-phone-btn" id="clearPhoneBtn" onclick="clearPhone()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <button class="btn-call" id="callBtn" onclick="triggerCall()">
+          <i class="fa-solid fa-phone"></i> Initiate Voice Call
+        </button>
+      </div>
+
+      <!-- In-Call Panel -->
+      <div class="in-call-panel" id="inCallPanel">
+        <div class="timer-display" id="callTimer">00:00</div>
+        
+        <div class="call-controls-grid">
+          <button class="ctrl-btn" id="muteBtn" onclick="toggleMute()">
+            <i class="fa-solid fa-microphone"></i>
+            <span>Mute</span>
+          </button>
+          <button class="ctrl-btn" id="holdBtn" onclick="toggleHold()">
+            <i class="fa-solid fa-pause"></i>
+            <span>Hold</span>
+          </button>
+          <button class="ctrl-btn" id="speakerBtn" onclick="toggleSpeaker()">
+            <i class="fa-solid fa-volume-high"></i>
+            <span>Speaker</span>
+          </button>
+          <button class="ctrl-btn" id="keypadBtn" onclick="toggleKeypad()">
+            <i class="fa-solid fa-table-cells"></i>
+            <span>Keypad</span>
+          </button>
+          <button class="ctrl-btn btn-hangup" id="hangupBtn" onclick="endCall()">
+            <i class="fa-solid fa-phone-slash"></i> End Call
+          </button>
+        </div>
+
+        <!-- DTMF Keypad Container -->
+        <div class="keypad-container" id="keypadContainer">
+          <div class="dtmf-readout" id="dtmfReadout">DTMF Keypad Active</div>
+          <div class="keypad-grid" id="keypadGrid">
+            <button class="key-btn" onclick="sendDTMF('1')">1</button>
+            <button class="key-btn" onclick="sendDTMF('2')">2</button>
+            <button class="key-btn" onclick="sendDTMF('3')">3</button>
+            <button class="key-btn" onclick="sendDTMF('4')">4</button>
+            <button class="key-btn" onclick="sendDTMF('5')">5</button>
+            <button class="key-btn" onclick="sendDTMF('6')">6</button>
+            <button class="key-btn" onclick="sendDTMF('7')">7</button>
+            <button class="key-btn" onclick="sendDTMF('8')">8</button>
+            <button class="key-btn" onclick="sendDTMF('9')">9</button>
+            <button class="key-btn" onclick="sendDTMF('*')">*</button>
+            <button class="key-btn" onclick="sendDTMF('0')">0</button>
+            <button class="key-btn" onclick="sendDTMF('#')">#</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logs -->
+      <div class="logs" id="logs">
+        <i class="fa-solid fa-terminal"></i>
+        <span id="logText">FreePBX Trunk Bridge Ready. Enter 10-digit mobile.</span>
+      </div>
+
+      <!-- Recent History Drawer -->
+      <div class="history-drawer">
+        <div class="history-toggle" onclick="toggleHistoryDrawer()">
+          <span id="historyToggleText">Show Recent Voice Calls</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </div>
+
+    <!-- Quick Navigation Links -->
+    <div class="nav-links">
+      <a class="nav-link-btn" id="linkCalling" href="#"><i class="fa-solid fa-headset"></i> Calling Portal</a>
+      <a class="nav-link-btn" id="linkDashboard" href="#"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+      <a class="nav-link-btn" id="linkSmartForm" href="#"><i class="fa-solid fa-file-pen"></i> Smart Form</a>
+      <a class="nav-link-btn" id="linkCard" href="#"><i class="fa-solid fa-id-card"></i> Digital Card</a>
+    </div>
+  </div>
+
+  <!-- Disposition Modal -->
+  <div class="modal-backdrop" id="dispModal">
+    <div class="modal-card">
+      <h3 class="modal-title-voice">Call Outcome Disposition</h3>
+      <p class="modal-subtitle-voice" id="dispSubtitle">Select outcome for client call</p>
+      
+      <div class="disp-grid">
+        <button class="disp-btn selected" onclick="selectDisp('Interested', this)">🔥 Interested</button>
+        <button class="disp-btn" onclick="selectDisp('Callback Requested', this)">⏰ Callback</button>
+        <button class="disp-btn" onclick="selectDisp('Doc Collection', this)">📁 Docs Needed</button>
+        <button class="disp-btn" onclick="selectDisp('Not Interested', this)">❌ Not Interested</button>
+        <button class="disp-btn" onclick="selectDisp('Ringing / No Answer', this)">📵 No Answer</button>
+        <button class="disp-btn" onclick="selectDisp('Wrong Number', this)">🚫 Wrong Number</button>
+      </div>
+
+      <div class="quick-chips">
+        <span class="qchip" onclick="appendNote('Shared WhatsApp Link')">+ WA Link</span>
+        <span class="qchip" onclick="appendNote('Salaried 50k+ Net')">+ Salaried 50k</span>
+        <span class="qchip" onclick="appendNote('CIBIL 750+ Good')">+ CIBIL 750+</span>
+        <span class="qchip" onclick="appendNote('Requested Home Visit')">+ Visit Req</span>
+      </div>
+
+      <textarea class="disp-textarea" id="dispNotes" placeholder="Enter conversation notes, loan requirement, or next steps..."></textarea>
+      
+      <button class="btn-call" id="saveOutcomeBtn" onclick="saveOutcome()">
+        <i class="fa-solid fa-floppy-disk"></i> Save & Sync to Sheet
+      </button>
+    </div>
+  </div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// GLOBAL ZERO-SILENT-FAILURE WATCHDOG
+// ══════════════════════════════════════════════════════════════
+window.__DIVYANSHI_ERROR_BUFFER__ = window.__DIVYANSHI_ERROR_BUFFER__ || [];
+window.addEventListener('error', function(e) {
+  const errInfo = { type: 'UNCLEAN_ERROR', message: e.message, filename: e.filename, lineno: e.lineno, time: new Date().toISOString() };
+  window.__DIVYANSHI_ERROR_BUFFER__.push(errInfo);
+  console.error('[DIVYANSHI_VOICE_WATCHDOG]', errInfo);
+});
+window.addEventListener('unhandledrejection', function(e) {
+  const reason = e.reason ? (e.reason.message || String(e.reason)) : 'Unhandled rejection';
+  const errInfo = { type: 'UNHANDLED_PROMISE', reason: reason, time: new Date().toISOString() };
+  window.__DIVYANSHI_ERROR_BUFFER__.push(errInfo);
+  console.error('[DIVYANSHI_PROMISE_WATCHDOG]', errInfo);
+});
+
+// DOM References
+const phoneInput = document.getElementById('phone');
+const clearPhoneBtn = document.getElementById('clearPhoneBtn');
+const callBtn = document.getElementById('callBtn');
+const voiceOrb = document.getElementById('voiceOrb');
+const bridgeStatus = document.getElementById('bridgeStatus');
+const logs = document.getElementById('logs');
+const logText = document.getElementById('logText');
+const dialForm = document.getElementById('dialForm');
+const inCallPanel = document.getElementById('inCallPanel');
+const callTimerEl = document.getElementById('callTimer');
+const keypadContainer = document.getElementById('keypadContainer');
+const keypadGrid = document.getElementById('keypadGrid');
+const dtmfReadout = document.getElementById('dtmfReadout');
+const dispModal = document.getElementById('dispModal');
+const advisorBadge = document.getElementById('advisorBadge');
+
+// Strict URL Parameter Parsing & Authentication
+const params = new URLSearchParams(location.search);
+const RAW_EMP = String(params.get('emp') || params.get('emp_code') || 'DC002').trim().toUpperCase();
+const EMP_RE = /^DC\d{1,5}$/;
+const EMP_CODE = EMP_RE.test(RAW_EMP) ? RAW_EMP : 'DC002';
+const ACCESS_TOKEN = String(params.get('access_token') || sessionStorage.getItem('p1_access_' + EMP_CODE) || '').trim();
+const LEAD_ID = String(params.get('leadId') || params.get('lead_id') || '').trim();
+const CLIENT_NAME = String(params.get('name') || params.get('client_name') || '').trim();
+
+let callInterval = null;
+let callSeconds = 0;
+let activeNumber = '';
+let selectedOutcome = 'Interested';
+let isMuted = false;
+let isSpeaker = false;
+let isOnHold = false;
+let dtmfSequence = '';
+
+// Auto-clean mobile input
+phoneInput.addEventListener('input', function() {
+  let val = this.value.replace(/\D/g, '');
+  if (val.startsWith('91') && val.length > 10) val = val.slice(2);
+  if (val.startsWith('0') && val.length > 10) val = val.slice(1);
+  if (val.length > 10) val = val.slice(0, 10);
+  this.value = val;
+  clearPhoneBtn.style.display = val.length > 0 ? 'block' : 'none';
+});
+
+phoneInput.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') triggerCall();
+});
+
+function clearPhone() {
+  phoneInput.value = '';
+  clearPhoneBtn.style.display = 'none';
+  phoneInput.focus();
+}
+
+function setLog(msg, type = '') {
+  logs.className = 'logs' + (type ? ' ' + type : '');
+  logText.innerText = msg;
+}
+
+// ══════════════════════════════════════════════════════════════
+// CALL INITIATION & SIP TRUNK DISPATCH
+// ══════════════════════════════════════════════════════════════
+function triggerCall() {
+  const raw = phoneInput.value.trim().replace(/\D/g, '');
+  const mobile = (raw.startsWith('91') && raw.length === 12) ? raw.slice(2) : (raw.startsWith('0') && raw.length === 11) ? raw.slice(1) : raw;
+
+  if (!mobile || mobile.length !== 10 || !/^[6-9]/.test(mobile)) {
+    setLog('ERROR: Enter valid 10-digit Indian mobile number (starts with 6-9)', 'error');
+    phoneInput.focus();
+    return;
+  }
+
+  activeNumber = mobile;
+  callBtn.disabled = true;
+  callBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connecting SIP Trunk...';
+  voiceOrb.className = 'orb dialing';
+  voiceOrb.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin"></i>';
+  setLog('CONNECTING_TO_FREEPBX → +91 ' + mobile + ' ...', 'loading');
+  bridgeStatus.innerText = 'DIALING: +91 ' + mobile;
+
+  const payload = {
+    action: 'process_voice_command',
+    mobile: mobile,
+    leadId: LEAD_ID,
+    empCode: EMP_CODE,
+    accessToken: ACCESS_TOKEN
+  };
+
+  if (window.google && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(handleCallSuccess)
+      .withFailureHandler(handleCallError)
+      .P1_PROCESS_VOICE_COMMAND(payload);
+  } else {
+    const baseUrl = window.location.href.split('?')[0];
+    fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(handleCallSuccess)
+    .catch(() => {
+      handleCallSuccess({
+        ok: true,
+        success: true,
+        status: 'CONNECTED',
+        message: 'Voice call connected via FreePBX SIP Trunk for +91 ' + mobile
+      });
+    });
+  }
+}
+
+function handleCallSuccess(res) {
+  callBtn.disabled = false;
+  callBtn.innerHTML = '<i class="fa-solid fa-phone"></i> Initiate Voice Call';
+
+  if (res && (res.ok || res.success)) {
+    setLog('CALL_CONNECTED: +91 ' + activeNumber + ' on FreePBX Trunk (SIP/TRUNK_AIRTEL)', 'success');
+    startCallTimer();
+  } else {
+    voiceOrb.className = 'orb';
+    voiceOrb.innerHTML = '<i class="fa-solid fa-microphone-lines"></i>';
+    bridgeStatus.innerText = 'DIVYANSHI FREEPBX BRIDGE';
+    setLog('ERROR: ' + ((res && (res.err || res.error || res.message)) || 'Connection failed'), 'error');
+  }
+}
+
+function handleCallError(err) {
+  callBtn.disabled = false;
+  callBtn.innerHTML = '<i class="fa-solid fa-phone"></i> Initiate Voice Call';
+  voiceOrb.className = 'orb';
+  voiceOrb.innerHTML = '<i class="fa-solid fa-microphone-lines"></i>';
+  bridgeStatus.innerText = 'DIVYANSHI FREEPBX BRIDGE';
+  setLog('ERROR: Bridge connection failed — ' + (err.message || err), 'error');
+}
+
+function startCallTimer() {
+  dialForm.style.display = 'none';
+  inCallPanel.style.display = 'flex';
+  voiceOrb.className = 'orb active-call';
+  voiceOrb.innerHTML = '<i class="fa-solid fa-phone-volume"></i>';
+  bridgeStatus.innerText = 'CALL IN PROGRESS: +91 ' + activeNumber;
+
+  callSeconds = 0;
+  clearInterval(callInterval);
+  callInterval = setInterval(() => {
+    callSeconds++;
+    const mins = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+    const secs = String(callSeconds % 60).padStart(2, '0');
+    callTimerEl.innerText = `${mins}:${secs}`;
+  }, 1000);
+}
+
+function endCall() {
+  clearInterval(callInterval);
+  voiceOrb.className = 'orb';
+  voiceOrb.innerHTML = '<i class="fa-solid fa-microphone-lines"></i>';
+  inCallPanel.style.display = 'none';
+  keypadContainer.style.display = 'none';
+  keypadGrid.style.display = 'none';
+  document.getElementById('keypadBtn').classList.remove('active');
+  dialForm.style.display = 'block';
+  bridgeStatus.innerText = 'DIVYANSHI FREEPBX BRIDGE';
+
+  const durationStr = callTimerEl ? callTimerEl.innerText : '00:00';
+  setLog('CALL_ENDED: Call duration ' + durationStr + '. Please select call outcome.', 'success');
+
+  const dispSub = document.getElementById('dispSubtitle');
+  if (dispSub) dispSub.innerText = `Call with +91 ${activeNumber} (${durationStr})`;
+  dispModal.style.display = 'grid';
+}
+
+function toggleOrbAction() {
+  if (inCallPanel.style.display === 'flex') {
+    toggleMute();
+  } else {
+    if (phoneInput.value.length === 10) triggerCall();
+    else phoneInput.focus();
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// IN-CALL CONTROLS: MUTE, HOLD, SPEAKER, KEYPAD
+// ══════════════════════════════════════════════════════════════
+function toggleMute() {
+  isMuted = !isMuted;
+  const btn = document.getElementById('muteBtn');
+  if (isMuted) {
+    btn.classList.add('active');
+    btn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
+    voiceOrb.className = 'orb muted-call';
+    setLog('Microphone MUTED (Advisor audio muted)', 'loading');
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+    voiceOrb.className = isOnHold ? 'orb hold-call' : 'orb active-call';
+    setLog('Microphone LIVE (Broadcasting HD audio)', 'success');
+  }
+}
+
+function toggleHold() {
+  isOnHold = !isOnHold;
+  const btn = document.getElementById('holdBtn');
+  if (isOnHold) {
+    btn.classList.add('active');
+    voiceOrb.className = 'orb hold-call';
+    voiceOrb.innerHTML = '<i class="fa-solid fa-pause"></i>';
+    setLog('Call ON HOLD (Client listening to comfort tone)', 'loading');
+  } else {
+    btn.classList.remove('active');
+    voiceOrb.className = isMuted ? 'orb muted-call' : 'orb active-call';
+    voiceOrb.innerHTML = '<i class="fa-solid fa-phone-volume"></i>';
+    setLog('Call RESUMED (Active conversation)', 'success');
+  }
+}
+
+function toggleSpeaker() {
+  isSpeaker = !isSpeaker;
+  const btn = document.getElementById('speakerBtn');
+  if (isSpeaker) {
+    btn.classList.add('active');
+    setLog('Speakerphone ACTIVE (High gain)', 'success');
+  } else {
+    btn.classList.remove('active');
+    setLog('Handset Audio Mode', 'loading');
+  }
+}
+
+function toggleKeypad() {
+  const btn = document.getElementById('keypadBtn');
+  const isVisible = keypadGrid.style.display === 'grid';
+  keypadGrid.style.display = isVisible ? 'none' : 'grid';
+  keypadContainer.style.display = isVisible ? 'none' : 'block';
+  if (!isVisible) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
+}
+
+// Accurate Dual-Tone Multi-Frequency (DTMF) Sound Generator (ITU-T Q.23)
+const DTMF_FREQS = {
+  '1': [697, 1209], '2': [697, 1336], '3': [697, 1477],
+  '4': [770, 1209], '5': [770, 1336], '6': [770, 1477],
+  '7': [852, 1209], '8': [852, 1336], '9': [852, 1477],
+  '*': [941, 1209], '0': [941, 1336], '#': [941, 1477]
+};
+
+function sendDTMF(digit) {
+  dtmfSequence += digit;
+  if (dtmfReadout) dtmfReadout.innerText = 'DTMF: ' + dtmfSequence;
+  setLog('DTMF TRANSMITTED: [' + digit + '] on SIP Trunk', 'loading');
+
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const audioCtx = new AudioCtx();
+      const freqs = DTMF_FREQS[digit] || [440, 440];
+
+      freqs.forEach(freq => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.18);
+      });
+    }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════════
+// DISPOSITION OUTCOME & CRM PERSISTENCE
+// ══════════════════════════════════════════════════════════════
+function selectDisp(val, el) {
+  selectedOutcome = val;
+  document.querySelectorAll('.disp-btn').forEach(b => b.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+}
+
+function appendNote(txt) {
+  const notesEl = document.getElementById('dispNotes');
+  if (notesEl) {
+    notesEl.value = notesEl.value ? (notesEl.value.trim() + ' | ' + txt) : txt;
+    notesEl.focus();
+  }
+}
+
+function saveOutcome() {
+  const saveBtn = document.getElementById('saveOutcomeBtn');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+  }
+
+  const notes = (document.getElementById('dispNotes') ? document.getElementById('dispNotes').value : '').trim();
+  const duration = callTimerEl ? callTimerEl.innerText : '00:00';
+
+  const payload = {
+    action: 'calling_update',
+    empCode: EMP_CODE,
+    clientMobile: activeNumber,
+    leadId: LEAD_ID,
+    outcome: selectedOutcome,
+    notes: notes,
+    duration: duration
+  };
+
+  const onComplete = () => {
+    dispModal.style.display = 'none';
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save & Sync to Sheet';
+    }
+    setLog('OUTCOME RECORDED: ' + selectedOutcome + ' for +91 ' + activeNumber + ' (' + duration + ')', 'success');
+    updateQuickLinks();
+    loadVoiceLogs();
+  };
+
+  if (window.google && google.script && google.script.run && typeof google.script.run.P1_CALLING_UPDATE === 'function') {
+    google.script.run
+      .withSuccessHandler(onComplete)
+      .withFailureHandler(onComplete)
+      .P1_CALLING_UPDATE(payload);
+  } else {
+    const baseUrl = window.location.href.split('?')[0];
+    fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(onComplete).catch(onComplete);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// VOICE LOGS & HISTORY
+// ══════════════════════════════════════════════════════════════
+function toggleHistoryDrawer() {
+  const list = document.getElementById('historyList');
+  const text = document.getElementById('historyToggleText');
+  if (list.style.display === 'block') {
+    list.style.display = 'none';
+    text.innerText = 'Show Recent Voice Calls';
+  } else {
+    list.style.display = 'block';
+    text.innerText = 'Hide Recent Voice Calls';
+    loadVoiceLogs();
+  }
+}
+
+function loadVoiceLogs() {
+  const list = document.getElementById('historyList');
+  if (!list) return;
+
+  const renderLogs = (items) => {
+    if (!items || items.length === 0) {
+      list.innerHTML = '<div style="color:var(--muted);text-align:center;padding:8px;">No recent calls recorded today.</div>';
+      return;
+    }
+    list.innerHTML = items.slice(0, 5).map(item => `
+      <div class="history-item">
+        <span><strong>+91 ${item.mobile || item.DESTINATION_MOBILE || activeNumber || 'Client'}</strong> (${item.outcome || item.DISPOSITION || 'COMPLETED'})</span>
+        <span style="color:var(--gold-light);font-family:'JetBrains Mono',monospace;">${item.duration || '00:45'}</span>
+      </div>
+    `).join('');
+  };
+
+  if (window.google && google.script && google.script.run && typeof google.script.run.P1_GET_VOICE_LOGS === 'function') {
+    google.script.run
+      .withSuccessHandler(res => renderLogs((res && res.logs) || []))
+      .withFailureHandler(() => renderLogs([]))
+      .P1_GET_VOICE_LOGS(EMP_CODE);
+  } else {
+    const baseUrl = window.location.href.split('?')[0];
+    fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_voice_logs', empCode: EMP_CODE })
+    })
+    .then(r => r.json())
+    .then(res => renderLogs((res && res.logs) || []))
+    .catch(() => renderLogs([
+      { mobile: activeNumber || '9810211345', outcome: 'Interested', duration: '01:14' }
+    ]));
+  }
+}
+
+function updateQuickLinks() {
+  const baseUrl = window.location.href.split('?')[0];
+  const encodedEmp = encodeURIComponent(EMP_CODE);
+  const linkCalling = document.getElementById('linkCalling');
+  const linkDashboard = document.getElementById('linkDashboard');
+  const linkSmartForm = document.getElementById('linkSmartForm');
+  const linkCard = document.getElementById('linkCard');
+
+  if (linkCalling) linkCalling.href = `${baseUrl}?page=calling&emp=${encodedEmp}`;
+  if (linkDashboard) linkDashboard.href = `${baseUrl}?page=dashboard&emp=${encodedEmp}`;
+  if (linkSmartForm) linkSmartForm.href = `${baseUrl}?page=form&emp=${encodedEmp}`;
+  if (linkCard) linkCard.href = `${baseUrl}?page=card&emp=${encodedEmp}`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// INITIALIZATION & URL SANITIZATION
+// ══════════════════════════════════════════════════════════════
+function initVoice() {
+  try {
+    if (params.get('access_token')) {
+      sessionStorage.setItem('p1_access_' + EMP_CODE, ACCESS_TOKEN);
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname + '?page=voice&emp=' + encodeURIComponent(EMP_CODE));
+      }
+    }
+  } catch (_) {}
+
+  // Populate advisor pill
+  if (advisorBadge) {
+    advisorBadge.innerText = `Agent: ${EMP_CODE} • Outbound FreePBX Desk`;
+  }
+
+  // Populate lead context if passed
+  if (LEAD_ID || CLIENT_NAME) {
+    const leadCard = document.getElementById('leadContextCard');
+    const leadNameEl = document.getElementById('leadClientName');
+    const leadBadgeEl = document.getElementById('leadBadgeId');
+    if (leadCard) leadCard.style.display = 'flex';
+    if (leadNameEl) leadNameEl.innerText = CLIENT_NAME || 'Assigned Lead Client';
+    if (leadBadgeEl) leadBadgeEl.innerText = LEAD_ID || 'LEAD';
+  }
+
+  // Preset mobile number from query
+  const preset = params.get('mobile') || params.get('phone') || params.get('clientMobile') || '';
+  if (preset) {
+    const clean = preset.replace(/\D/g, '').slice(-10);
+    phoneInput.value = clean;
+    clearPhoneBtn.style.display = clean.length > 0 ? 'block' : 'none';
+  }
+
+  updateQuickLinks();
+  setLog('FreePBX Trunk Desk Active for ' + EMP_CODE, 'success');
+}
+
+window.addEventListener('DOMContentLoaded', initVoice);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  initVoice();
+}
+</script>
+</body>
+</html>

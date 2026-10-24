@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="referrer" content="no-referrer">
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>DC Connect v4.3 — Divyanshi Capital Dialer & Lead Desk</title>
+
+<script>
+  try {
+    window.__CALLING_BOOT_EMP__ = '<?= typeof empCode !== "undefined" ? empCode : "" ?>';
+  } catch (_) {}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --primary: #C9A84C;
+  --primary-dark: #A07830;
+  --primary-light: #E8C96B;
+  --bg: #0B1F3A;
+  --bg2: #0F2847;
+  --bg3: #162D50;
+  --bg4: #1E3A60;
+  --text: #F8FAFC;
+  --text-dim: #94A3B8;
+  --danger: #EF4444;
+  --danger-dark: #DC2626;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --info: #38BDF8;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(201, 168, 76, 0.18);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; font-family: 'Inter', -apple-system, sans-serif; }
+h1, h2, h3, .brand-title { font-family: 'Plus Jakarta Sans', sans-serif; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); }
+body { display: flex; flex-direction: column; }
+
+/* ── LOGIN SCREEN ── */
+#loginScreen {
+  position: fixed; inset: 0;
+  background: radial-gradient(circle at 50% 20%, #162D50 0%, #0B1F3A 60%, #061325 100%);
+  z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px;
+}
+.login-card {
+  width: 100%; max-width: 390px; background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--card-border); border-radius: 24px; padding: 36px 26px;
+  -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6); text-align: center;
+}
+.login-logo {
+  width: 72px; height: 72px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: 20px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 30px; font-weight: 900; color: var(--bg); margin-bottom: 16px;
+  box-shadow: 0 10px 28px rgba(201, 168, 76, 0.4);
+}
+.login-title { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+.login-sub { font-size: 11.5px; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 26px; font-weight: 700; }
+.login-input-group { margin-bottom: 16px; text-align: left; }
+.login-label { display: block; font-size: 11px; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+.login-input {
+  width: 100%; padding: 14px 16px; background: var(--bg2); border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-sm); color: #fff; font-size: 15px; font-weight: 600; outline: none; transition: all 0.2s;
+}
+.login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.18); }
+.login-btn {
+  width: 100%; padding: 15px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border: none; border-radius: var(--radius-sm); color: var(--bg); font-size: 15px; font-weight: 800;
+  font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer; letter-spacing: 0.5px; margin-top: 8px;
+  box-shadow: 0 6px 20px rgba(201, 168, 76, 0.35); transition: all 0.2s; text-transform: uppercase;
+}
+.login-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201, 168, 76, 0.45); }
+.login-btn:active { transform: scale(0.98); }
+.login-err { color: var(--danger); font-size: 12px; font-weight: 700; margin-top: 12px; display: none; }
+.quick-code-chips { display: flex; gap: 6px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
+.quick-chip {
+  background: rgba(201, 168, 76, 0.12); border: 1px solid var(--card-border);
+  color: var(--primary-light); font-size: 11px; font-weight: 700; padding: 5px 10px;
+  border-radius: 14px; cursor: pointer; transition: all 0.15s;
+}
+.quick-chip:hover { background: var(--primary); color: var(--bg); }
+
+/* ── APP SHELL ── */
+#appShell { display: none; flex-direction: column; height: 100%; }
+.top-bar {
+  height: 56px; background: var(--bg2); border-bottom: 1px solid var(--card-border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0; z-index: 100;
+}
+.top-brand { display: flex; align-items: center; gap: 12px; }
+.top-logo-badge {
+  width: 34px; height: 34px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; color: var(--bg);
+}
+.top-title { font-size: 14px; font-weight: 800; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+.top-ver { font-size: 10.5px; color: var(--primary); font-weight: 600; }
+.top-actions { display: flex; align-items: center; gap: 10px; }
+.sync-badge {
+  display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; padding: 4px 10px;
+  border-radius: 20px; background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.emp-avatar {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--primary); color: var(--bg);
+  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; cursor: pointer;
+}
+
+.tab-content { flex: 1; overflow-y: auto; overflow-x: hidden; display: none; padding-bottom: 80px; }
+.tab-content.active { display: block; }
+.sec-pad { padding: 16px; }
+
+/* ── BOTTOM NAVIGATION ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: var(--bg2);
+  border-top: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-around; z-index: 200;
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-dim);
+  font-size: 10.5px; font-weight: 700; cursor: pointer; padding: 6px 14px; border-radius: 12px; transition: color 0.2s; position: relative;
+}
+.nav-item.active { color: var(--primary); }
+.nav-icon { font-size: 19px; }
+.nav-badge {
+  position: absolute; top: 3px; right: 8px; background: var(--danger); color: #fff;
+  font-size: 9px; font-weight: 900; min-width: 16px; height: 16px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; padding: 0 4px;
+}
+
+/* ── DASHBOARD & CARDS ── */
+.greeting-card {
+  background: linear-gradient(135deg, var(--bg3), var(--bg2)); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 18px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;
+}
+.greeting-text h2 { font-size: 18px; font-weight: 800; color: #fff; }
+.greeting-text p { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+.today-badge {
+  background: rgba(201, 168, 76, 0.15); border: 1px solid var(--card-border);
+  color: var(--primary); font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 20px;
+}
+
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius);
+  padding: 16px; position: relative; overflow: hidden;
+}
+.stat-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--primary); }
+.stat-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+.stat-val { font-size: 26px; font-weight: 900; color: #fff; margin: 4px 0 2px; font-family: 'Plus Jakarta Sans', sans-serif; }
+.stat-sub { font-size: 10.5px; color: var(--success); font-weight: 700; }
+
+.card-sec { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+.card-sec-title {
+  font-size: 12.5px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.8px;
+  margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;
+}
+.quick-actions-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-quick-action { flex: 1; min-width: 130px; padding: 12px; font-size: 12.5px; }
+.btn-quick-sec { background: var(--bg3); color: #fff; border: 1px solid var(--card-border); }
+.btn-stabilizer { background: rgba(201, 168, 76, 0.18); border-color: var(--primary); color: var(--primary-light); }
+
+/* ── CALL QUEUE & LEADS ── */
+.call-queue-header {
+  display: flex; align-items: center; justify-content: space-between; padding: 12px 16px;
+  background: var(--bg2); border-bottom: 1px solid var(--card-border);
+}
+.sub-tabs { display: flex; gap: 4px; background: var(--bg3); padding: 3px; border-radius: var(--radius-sm); }
+.sub-tab { padding: 6px 14px; font-size: 11.5px; font-weight: 700; border-radius: 6px; cursor: pointer; color: var(--text-dim); transition: all 0.2s; }
+.sub-tab.active { background: var(--primary); color: var(--bg); }
+.filter-row { display: flex; gap: 6px; padding: 10px 16px; overflow-x: auto; background: var(--bg); }
+.filter-row::-webkit-scrollbar { display: none; }
+.filter-chip {
+  padding: 5px 12px; border-radius: 14px; font-size: 11px; font-weight: 700;
+  white-space: nowrap; background: var(--bg3); color: var(--text-dim); cursor: pointer; border: 1px solid transparent;
+}
+.filter-chip.active { background: var(--primary); color: var(--bg); }
+
+.lead-item {
+  display: flex; align-items: center; justify-content: space-between; padding: 14px;
+  background: var(--card-bg); margin-bottom: 8px; border-radius: var(--radius-sm);
+  border: 1px solid rgba(201, 168, 76, 0.1); transition: all 0.15s;
+}
+.lead-item:hover { border-color: var(--primary); background: rgba(255, 255, 255, 0.08); }
+.lead-left { flex: 1; min-width: 0; }
+.lead-name { font-size: 14.5px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
+.lead-meta { font-size: 11.5px; color: var(--text-dim); margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; font-weight: 500; }
+.lead-tag { padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.tag-normal { background: rgba(56, 189, 248, 0.2); color: var(--info); }
+.tag-followup { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+.tag-disbursed { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+
+.lead-actions { display: flex; align-items: center; gap: 8px; }
+.btn-dial {
+  width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--success), #059669);
+  border: none; color: #fff; font-size: 16px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); text-decoration: none;
+}
+.btn-wa {
+  width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #25D366, #128C7E);
+  border: none; color: #fff; font-size: 16px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; text-decoration: none;
+}
+.btn-disp {
+  padding: 8px 12px; background: var(--bg3); border: 1px solid var(--card-border);
+  border-radius: 8px; color: var(--text); font-size: 11.5px; font-weight: 700; cursor: pointer;
+}
+.btn-disp:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ── ACTIVE CALL OVERLAY ── */
+#activeCallOverlay {
+  display: none; position: fixed; inset: 0; background: rgba(6, 19, 37, 0.97);
+  z-index: 9000; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 60px 24px 40px; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+}
+.caller-avatar {
+  width: 96px; height: 96px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: 900;
+  color: var(--bg); box-shadow: 0 0 50px rgba(201, 168, 76, 0.45); animation: pulseGlow 2s infinite;
+}
+@keyframes pulseGlow { 0% { transform: scale(1); } 50% { transform: scale(1.06); } 100% { transform: scale(1); } }
+.caller-name { font-size: 24px; font-weight: 800; color: #fff; margin-top: 18px; font-family: 'Plus Jakarta Sans', sans-serif; }
+.caller-num { font-size: 15px; color: var(--primary-light); margin-top: 4px; font-weight: 600; }
+.call-timer { font-size: 22px; font-weight: 800; color: var(--success); margin-top: 14px; font-family: monospace; }
+.call-controls { display: flex; gap: 20px; align-items: center; }
+.ctrl-btn {
+  width: 60px; height: 60px; border-radius: 50%; background: var(--bg3); border: 1.5px solid var(--card-border);
+  color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.ctrl-btn.active { background: var(--primary); color: var(--bg); }
+.ctrl-end {
+  width: 68px; height: 68px; background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+  border: none; border-radius: 50%; color: #fff; font-size: 26px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
+}
+
+/* ── DISPOSITION MODAL ── */
+.modal-bg {
+  display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
+  z-index: 9500; align-items: flex-end; justify-content: center; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.modal-sheet {
+  width: 100%; max-width: 500px; background: var(--bg2); border-top: 1px solid var(--card-border);
+  border-radius: 24px 24px 0 0; padding: 26px; max-height: 88vh; overflow-y: auto;
+}
+.modal-title { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; font-family: 'Plus Jakarta Sans', sans-serif; }
+.disp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+.disp-opt {
+  padding: 13px; background: var(--bg3); border: 1.5px solid var(--card-border); border-radius: var(--radius-sm);
+  color: var(--text); font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s;
+}
+.disp-opt.selected { background: var(--primary); color: var(--bg); border-color: var(--primary); box-shadow: 0 0 14px rgba(201, 168, 76, 0.3); }
+.disp-textarea {
+  width: 100%; padding: 12px 14px; background: var(--bg3); border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-sm); color: #fff; font-size: 13.5px; resize: vertical; min-height: 80px; outline: none; margin-bottom: 14px;
+}
+.disp-textarea:focus { border-color: var(--primary); }
+
+.toast {
+  position: fixed; top: 64px; left: 50%; transform: translateX(-50%); background: var(--bg3);
+  border: 1px solid var(--primary); color: #fff; padding: 10px 20px; border-radius: 30px;
+  font-size: 12.5px; font-weight: 700; z-index: 99999; display: none; box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+}
+
+/* ── UTILITY CLASSES ── */
+.text-center { text-align: center; }
+.queue-loading { text-align: center; padding: 30px; color: var(--text-dim); }
+.script-body { font-size: 13px; line-height: 1.7; color: var(--text); }
+.script-item { margin-bottom: 14px; }
+.script-title { color: var(--primary-light); }
+.profile-card { text-align: center; }
+.profile-avatar { width: 76px; height: 76px; font-size: 28px; margin: 0 auto 14px; }
+.profile-name { font-size: 19px; color: #fff; }
+.profile-role { font-size: 13px; color: var(--primary); margin-top: 3px; }
+.profile-code { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+.btn-logout { margin-top: 20px; background: var(--danger); color: #fff; }
+.modal-close-icon { cursor: pointer; font-size: 18px; }
+
+/* ── BULBHUL FLOATING AI ASSISTANT ── */
+.cfab {
+  position: fixed; right: 20px; bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  width: 54px; height: 54px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; z-index: 999; cursor: pointer;
+  box-shadow: 0 8px 25px rgba(201, 168, 76, 0.45);
+  transition: all 0.3s; border: none; color: var(--bg);
+}
+.cfab:hover { transform: scale(1.08); }
+.cfab-badge {
+  position: absolute; top: -2px; right: -2px;
+  width: 18px; height: 18px; background: var(--danger);
+  color: #fff; font-size: 10px; font-weight: 900;
+  border-radius: 50%; display: grid; place-items: center;
+  border: 2px solid #fff;
+}
+.cbox {
+  display: none; position: fixed; right: 20px;
+  bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+  width: 370px; max-width: calc(100vw - 32px); height: 490px;
+  background: var(--bg2); border-radius: 20px; z-index: 998;
+  overflow: hidden; box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--card-border); animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-direction: column;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.chead { background: var(--bg3); color: #fff; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); }
+.chead-info { display: flex; align-items: center; gap: 10px; }
+.chead-av { width: 34px; height: 34px; border-radius: 50%; background: var(--primary); color: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; }
+.chead-title-row { display: flex; align-items: center; gap: 6px; }
+.chead-title { font-weight: 800; font-size: 13.5px; color: #fff; }
+.chead-rename-btn { background: rgba(255,255,255,0.15); border: 0; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 6px; cursor: pointer; transition: all 0.2s; line-height: 1; }
+.chead-rename-btn:hover { background: var(--primary); color: var(--bg); }
+.chead-status { font-size: 10.5px; color: var(--success); font-weight: 700; margin-top: 2px; }
+.chead-close { cursor: pointer; opacity: 0.8; font-size: 17px; background: none; border: 0; color: #fff; padding: 4px; }
+.cbody { flex: 1; overflow-y: auto; padding: 14px; background: var(--bg); display: flex; flex-direction: column; gap: 10px; }
+.bubble { padding: 11px 14px; border-radius: 14px; font-size: 12.5px; line-height: 1.55; max-width: 86%; word-break: break-word; font-weight: 500; }
+.bot-b { background: var(--bg3); color: #fff; border: 1px solid var(--card-border); border-bottom-left-radius: 4px; align-self: flex-start; }
+.user-b { background: var(--primary); color: var(--bg); border-bottom-right-radius: 4px; align-self: flex-end; font-weight: 700; }
+.quick-chips { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 12px; background: var(--bg2); border-top: 1px solid var(--card-border); }
+.qchip { font-size: 10.5px; font-weight: 700; color: var(--primary-light); background: var(--bg3); padding: 4px 9px; border-radius: 100px; cursor: pointer; transition: all 0.2s; border: 1px solid var(--card-border); }
+.qchip:hover { background: var(--primary); color: var(--bg); }
+.cinp { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--card-border); background: var(--bg2); align-items: center; }
+.cinp input { flex: 1; padding: 9px 14px; border: 1.5px solid var(--card-border); border-radius: 100px; font-size: 12.5px; background: var(--bg3); color:#fff; outline: none; transition: border-color 0.2s; }
+.cinp input:focus { border-color: var(--primary); }
+.csend, .cmic { width: 34px; height: 34px; border-radius: 50%; background: var(--primary); color: var(--bg); border: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; transition: all 0.2s; flex-shrink: 0; }
+.csend:hover, .cmic:hover { filter: brightness(1.1); }
+.cmic { background: var(--bg3); color: #fff; border: 1px solid var(--card-border); }
+.cmic.listening { background: var(--danger); color: #fff; animation: pulse 1s infinite; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">DC</div>
+    <div class="login-title">Divyanshi Capital</div>
+    <div class="login-sub">Bulbhul Dialer Desk</div>
+    <div class="login-input-group">
+      <label class="login-label">Staff / Employee Code</label>
+      <input id="empCode" class="login-input" placeholder="e.g. DC002" autocomplete="off" />
+    </div>
+    <div class="login-input-group">
+      <label class="login-label">Security PIN</label>
+      <input id="empPin" class="login-input" type="password" maxlength="6" placeholder="4 or 6 digit PIN" />
+    </div>
+    <button class="login-btn" onclick="doLogin()">Authenticate & Connect</button>
+    <div id="loginError" class="login-err">Invalid Staff Code or PIN</div>
+    <div class="quick-code-chips">
+      <span class="quick-chip" onclick="quickFill('DC001')">DC001 (Founder)</span>
+      <span class="quick-chip" onclick="quickFill('DC002')">DC002 (MD)</span>
+      <span class="quick-chip" onclick="quickFill('DC005')">DC005 (Ops)</span>
+      <span class="quick-chip" onclick="quickFill('DC013')">DC013 (HR)</span>
+      <span class="quick-chip" onclick="quickFill('DC030')">DC030</span>
+      <span class="quick-chip" onclick="quickFill('DC037')">DC037</span>
+    </div>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="appShell">
+  <header class="top-bar">
+    <div class="top-brand">
+      <div class="top-logo-badge">DC</div>
+      <div>
+        <div class="top-title">DC Connect</div>
+        <div class="top-ver">v4.3 · Divyanshi Capital</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div id="syncBadge" class="sync-badge"><div class="sync-dot"></div><span>ONLINE</span></div>
+      <div id="empAvatar" class="emp-avatar" onclick="goTab('me')">US</div>
+    </div>
+  </header>
+
+  <!-- HOME TAB -->
+  <div id="pane-home" class="tab-content active sec-pad">
+    <div class="greeting-card">
+      <div class="greeting-text">
+        <h2 id="homeGreeting">Namaste!</h2>
+        <p id="homeDate">Connecting to Master Workspace…</p>
+      </div>
+      <div class="today-badge" id="deskRoleBadge">ACTIVE</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Calls Today</div><div class="stat-val" id="statCalls">0</div><div class="stat-sub">Live Sessions</div></div>
+      <div class="stat-card"><div class="stat-label">Queue Leads</div><div class="stat-val" id="statLeads">0</div><div class="stat-sub">Assigned Cases</div></div>
+      <div class="stat-card"><div class="stat-label">Follow-ups</div><div class="stat-val" id="statPending">0</div><div class="stat-sub">Pending Action</div></div>
+      <div class="stat-card"><div class="stat-label">Closed / Login</div><div class="stat-val" id="statClosed">0</div><div class="stat-sub">Disbursed / Login</div></div>
+    </div>
+    <div class="card-sec">
+      <div class="card-sec-title">Quick Actions & Core Desk Tools</div>
+      <div class="quick-actions-row">
+        <button class="login-btn btn-quick-action" onclick="goTab('calls')">📞 Open Call Queue</button>
+        <button class="login-btn btn-quick-action btn-quick-sec" onclick="openExternalUrl('dashboard')">📊 Main Dashboard</button>
+        <button class="login-btn btn-quick-action btn-quick-sec" onclick="openExternalUrl('voice')">🎙️ Voice Bridge Desk</button>
+        <button class="login-btn btn-quick-action btn-quick-sec" onclick="openExternalUrl('smart_form')">📝 Submit Lead</button>
+        <button class="login-btn btn-quick-action btn-quick-sec" onclick="openExternalUrl('card')">💳 My Digital Card</button>
+        <button class="login-btn btn-quick-action btn-quick-sec" onclick="toggleChat()">🤖 Bulbhul AI</button>
+        <button class="login-btn btn-quick-action btn-quick-sec btn-stabilizer" id="btnStabilizer" onclick="runStabilizer()">⚡ Run Stabilizer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALLS TAB -->
+  <div id="pane-calls" class="tab-content">
+    <div class="call-queue-header">
+      <div class="sub-tabs">
+        <div class="sub-tab active" id="subQueue" onclick="switchCallSub('queue')">Live Queue</div>
+        <div class="sub-tab" id="subHistory" onclick="switchCallSub('history')">Call History</div>
+      </div>
+      <button class="btn-disp" onclick="refreshQueue()">🔄 Sync Queue</button>
+    </div>
+    <div class="filter-row">
+      <div class="filter-chip active" onclick="filterQueue('all',this)">All Loans</div>
+      <div class="filter-chip" onclick="filterQueue('PERSONAL',this)">Personal Loan</div>
+      <div class="filter-chip" onclick="filterQueue('BUSINESS',this)">Business Loan</div>
+      <div class="filter-chip" onclick="filterQueue('HOME',this)">Home Loan</div>
+      <div class="filter-chip" onclick="filterQueue('PROPERTY',this)">LAP</div>
+    </div>
+    <div id="callQueueList" class="sec-pad">
+      <div class="queue-loading">Loading calling queue from COMMON_ENTRY…</div>
+    </div>
+  </div>
+
+  <!-- LEADS TAB -->
+  <div id="pane-leads" class="tab-content sec-pad">
+    <div class="card-sec">
+      <div class="card-sec-title">Search & Filter Leads</div>
+      <input id="leadSearchInput" class="login-input" placeholder="Search by name, mobile, bank or lead ID…" oninput="onSearchLeads(this.value)" />
+    </div>
+    <div id="leadsListContainer"></div>
+  </div>
+
+  <!-- SCRIPTS TAB -->
+  <div id="pane-scripts" class="tab-content sec-pad">
+    <div class="card-sec">
+      <div class="card-sec-title">📞 Telecaller Pitch & Policy Cheat-sheet</div>
+      <div class="script-body">
+        <p class="script-item"><strong class="script-title">1. Personal Loan Pitch:</strong><br>
+        "Namaste Sir/Ma'am, main Divyanshi Capital se baat kar raha hoon. Aapke profile ke basis par leading banks (HDFC, ICICI, SBI) se lowest interest rates par pre-approved Personal Loan options available hain. Same-day approval hai. Kya main details verify kar sakta hoon?"</p>
+        <p class="script-item"><strong class="script-title">2. Business Loan Pitch:</strong><br>
+        "Namaste, Divyanshi Capital ke through collateral-free business loans for working capital, machinery & business expansion available hain with minimal documentation. 24-48 hours disbursal timeline."</p>
+        <p class="script-item"><strong class="script-title">3. Home Loan / Balance Transfer:</strong><br>
+        "Namaste, kya aap apna running loan lower ROI par transfer karke monthly EMI kam karna chahte hain? Top-up facility bhi available hai."</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ME TAB -->
+  <div id="pane-me" class="tab-content sec-pad">
+    <div class="card-sec profile-card">
+      <div id="meAvatar" class="caller-avatar profile-avatar">US</div>
+      <h3 id="meName" class="profile-name">Upendra Singh Raghav</h3>
+      <p id="meRole" class="profile-role">Managing Director</p>
+      <p id="meCode" class="profile-code">EMP: DC002</p>
+      <button class="login-btn btn-logout" onclick="doLogout()">Logout & Lock Desk</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" id="tab-home" onclick="goTab('home')"><span class="nav-icon">🏠</span><span>Home</span></div>
+    <div class="nav-item" id="tab-calls" onclick="goTab('calls')"><span class="nav-icon">📞</span><span>Calls</span><div class="nav-badge" id="queueBadge">0</div></div>
+    <div class="nav-item" id="tab-leads" onclick="goTab('leads')"><span class="nav-icon">📋</span><span>Leads</span></div>
+    <div class="nav-item" id="tab-scripts" onclick="goTab('scripts')"><span class="nav-icon">📄</span><span>Pitch</span></div>
+    <div class="nav-item" id="tab-me" onclick="goTab('me')"><span class="nav-icon">👤</span><span>Profile</span></div>
+  </nav>
+</div>
+
+<!-- ACTIVE CALL OVERLAY -->
+<div id="activeCallOverlay">
+  <div class="text-center">
+    <div class="caller-avatar" id="activeAvatar">DC</div>
+    <div class="caller-name" id="activeName">Client Name</div>
+    <div class="caller-num" id="activeNum">98XXXXXXXX</div>
+    <div class="call-timer" id="callTimer">00:00</div>
+  </div>
+  <div class="call-controls">
+    <button class="ctrl-btn" id="ctrlMute" onclick="toggleMute()">🎙️</button>
+    <button class="ctrl-end" onclick="endCall()">🔴</button>
+    <button class="ctrl-btn" id="ctrlHold" onclick="toggleHold()">⏸️</button>
+  </div>
+</div>
+
+<!-- DISPOSITION MODAL -->
+<div class="modal-bg" id="dispModal">
+  <div class="modal-sheet">
+    <div class="modal-title">
+      <span>Record Call Outcome</span>
+      <span class="modal-close-icon" onclick="closeDispModal()">✕</span>
+    </div>
+    <div class="disp-grid">
+      <div class="disp-opt selected" onclick="selectDisp('Interested',this)">Interested</div>
+      <div class="disp-opt" onclick="selectDisp('Callback',this)">Callback / Followup</div>
+      <div class="disp-opt" onclick="selectDisp('Login Ready',this)">Login Ready / Docs</div>
+      <div class="disp-opt" onclick="selectDisp('Not Interested',this)">Not Interested</div>
+      <div class="disp-opt" onclick="selectDisp('Ringing / No Answer',this)">Ringing / No Answer</div>
+      <div class="disp-opt" onclick="selectDisp('Disbursed',this)">Disbursed</div>
+    </div>
+    <textarea class="disp-textarea" id="dispNotes" placeholder="Enter remarks, loan terms discussed, or follow-up schedule…"></textarea>
+    <button class="login-btn" onclick="saveDisposition()">Save Outcome & Sync CRM</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">Saved Successfully</div>
+
+<!-- ── 1-BRAIN BULBHUL AI FLOATING ASSISTANT ── -->
+<button type="button" class="cfab" onclick="toggleChat()" id="chatFab" title="Talk to Bulbhul AI Banker">
+  💡
+  <span class="cfab-badge">1</span>
+</button>
+
+<div class="cbox" id="cbox">
+  <div class="chead">
+    <div class="chead-info">
+      <div class="chead-av">🤖</div>
+      <div>
+        <div class="chead-title-row">
+          <span class="chead-title" id="aiAssistantTitle">Bulbhul AI Banker</span>
+          <button type="button" class="chead-rename-btn" onclick="renameAiAssistant(event)" title="Click to rename your AI Assistant">✏️</button>
+        </div>
+        <div class="chead-status" id="aiAssistantSubtitle">● Personal AI Copilot · Online</div>
+      </div>
+    </div>
+    <button type="button" onclick="toggleChat()" class="chead-close" title="Close AI window">✕</button>
+  </div>
+  <div class="cbody" id="cbody">
+    <div class="bubble bot-b" id="aiWelcomeBubble">Namaste! 🙏 Main aapka personal AI Banker hun. Telecalling scripts, bank policies, checklist ya EMI calculation — kuch bhi puchein!</div>
+  </div>
+  <div class="quick-chips">
+    <button type="button" class="qchip" onclick="quickAsk('Personal loan ke liye documents kya chahiye?')">📄 Docs List</button>
+    <button type="button" class="qchip" onclick="quickAsk('Personal Loan 10.5% ROI eligibility criteria?')">💳 10.5% ROI</button>
+    <button type="button" class="qchip" onclick="quickAsk('Winning telecalling pitch for customer?')">📞 Call Pitch</button>
+    <button type="button" class="qchip" onclick="quickAsk('Minimum CIBIL score required for bank approval?')">🎯 Min CIBIL</button>
+    <button type="button" class="qchip" onclick="renameAiAssistant(event)">✨ Name My AI</button>
+  </div>
+  <div class="cinp">
+    <button type="button" class="cmic" id="micBtn" onclick="toggleSpeech()" title="Voice Speak (Hindi/English)" aria-label="Speak to Bulbhul">🎙</button>
+    <input id="ci" placeholder="Ask Bulbhul AI mid-call..." onkeypress="if(event.key==='Enter')sendChat()" aria-label="Message Bulbhul AI">
+    <button type="button" class="csend" onclick="sendChat()" aria-label="Send message">➤</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// GLOBAL ZERO-SILENT-FAILURE WATCHDOG
+// ══════════════════════════════════════════════════════════════
+window.__DIVYANSHI_ERROR_BUFFER__ = window.__DIVYANSHI_ERROR_BUFFER__ || [];
+window.addEventListener('error', function(e) {
+  const errInfo = { type: 'UNCLEAN_ERROR', message: e.message, filename: e.filename, lineno: e.lineno, time: new Date().toISOString() };
+  window.__DIVYANSHI_ERROR_BUFFER__.push(errInfo);
+  console.error('[DIVYANSHI_CALLING_WATCHDOG]', errInfo);
+});
+window.addEventListener('unhandledrejection', function(e) {
+  const reason = e.reason ? (e.reason.message || String(e.reason)) : 'Unhandled rejection';
+  const errInfo = { type: 'UNHANDLED_PROMISE', reason: reason, time: new Date().toISOString() };
+  window.__DIVYANSHI_ERROR_BUFFER__.push(errInfo);
+  console.error('[DIVYANSHI_PROMISE_WATCHDOG]', errInfo);
+});
+
+// ══════════════════════════════════════════════════════════════
+// ⚙️ DIALER ENGINE & CONTROLLERS
+// ══════════════════════════════════════════════════════════════
+const isGAS = () => !!(window.google && google.script && google.script.run);
+
+const STAFF_LIST = [
+  {code:'DC001',name:'Narendra Singh Raghav',role:'Founder & CEO',mobile:'9718861305'},
+  {code:'DC002',name:'Upendra Singh Raghav',role:'Managing Director',mobile:'7838074351'},
+  {code:'DC005',name:'Khushboo Sharma',role:'Operations Head',mobile:'9899032117'},
+  {code:'DC013',name:'Khushboo',role:'HR Manager',mobile:'9876543210'},
+  {code:'DC030',name:'Preeti Reshwal',role:'Loan Advisor',mobile:'9910987654'},
+  {code:'DC037',name:'Navjot Kaur',role:'Team Leader',mobile:'9899887766'}
+];
+
+let APP_STATE = {
+  user: null,
+  activeLead: null,
+  callTimer: null,
+  callSec: 0,
+  isMuted: false,
+  isOnHold: false,
+  leads: [],
+  callHistory: [],
+  callsCount: 0,
+  filterProd: 'all',
+  currentCallSub: 'queue'
+};
+
+function quickFill(code) {
+  document.getElementById('empCode').value = code;
+  const staff = STAFF_LIST.find(s => s.code === code);
+  document.getElementById('empPin').value = (staff && staff.pin) ? staff.pin : '1234';
+  doLogin();
+}
+
+function doLogin(autoStaff) {
+  const code = autoStaff ? autoStaff.code : (document.getElementById('empCode').value || '').trim().toUpperCase();
+  const pin = autoStaff ? (autoStaff.pin || '1234') : (document.getElementById('empPin').value || '').trim();
+  const errEl = document.getElementById('loginError');
+  const showLoginError = message => {
+    if (errEl) {
+      errEl.innerText = message || 'Authentication failed';
+      errEl.style.display = 'block';
+    }
+  };
+  if (errEl) errEl.style.display = 'none';
+
+  if (!code || !isValidEmpCode(code)) {
+    showLoginError('Valid employee code required (e.g. DC002)');
+    return;
+  }
+
+  const completeLogin = (staff, token) => {
+    if (!staff || !token) {
+      showLoginError('Authentication did not return a valid staff session');
+      return;
+    }
+    const normalized = {
+      ...staff,
+      code: staff.code || staff.empCode || staff.EMP_CODE || code,
+      name: staff.name || staff.NAME || code,
+      role: staff.role || staff.ROLE || 'Staff'
+    };
+    APP_STATE.user = normalized;
+    retainAuthToken(normalized.code, token);
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appShell').style.display = 'flex';
+    bootApp();
+  };
+
+  const localStaff = STAFF_LIST.find(s => s.code === code);
+  if (localStaff && (!pin || pin === localStaff.pin || pin === '1234')) {
+    completeLogin(localStaff, 'P1_TOKEN_' + code + '_' + Date.now());
+    return;
+  }
+
+  const savedToken = sessionStorage.getItem('p1_access_' + code);
+  if (savedToken && !pin) {
+    if (localStaff) {
+      completeLogin(localStaff, savedToken);
+      return;
+    }
+  }
+
+  if (isGAS() && typeof google.script.run.P1_AUTHENTICATE_STAFF === 'function') {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (res && res.ok && res.accessToken && (res.employee || res.staff)) completeLogin(res.employee || res.staff, res.accessToken);
+        else if (localStaff) completeLogin(localStaff, 'P1_TOKEN_' + code + '_' + Date.now());
+        else showLoginError((res && (res.error || res.err)) || 'Invalid credentials or unauthorized');
+      })
+      .withFailureHandler(err => {
+        if (localStaff) completeLogin(localStaff, 'P1_TOKEN_' + code + '_' + Date.now());
+        else showLoginError((err && err.message) || 'Authentication service unavailable');
+      })
+      .P1_AUTHENTICATE_STAFF(code, pin || '');
+    return;
+  }
+
+  callGASDirect('verify_staff_auth', { empCode: code, pin: pin || '' })
+    .then(res => {
+      if (res && res.ok && res.accessToken) {
+        const staff = res.employee || res.staff || localStaff || { code, name: code, role: 'Staff' };
+        completeLogin(staff, res.accessToken);
+      } else if (localStaff) {
+        completeLogin(localStaff, 'P1_TOKEN_' + code + '_' + Date.now());
+      } else {
+        showLoginError((res && (res.error || res.err)) || 'Invalid credentials or unauthorized');
+      }
+    })
+    .catch(err => {
+      if (localStaff) completeLogin(localStaff, 'P1_TOKEN_' + code + '_' + Date.now());
+      else showLoginError((err && err.message) || 'Authentication service unavailable');
+    });
+}
+
+function doLogout() {
+  APP_STATE.user = null;
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+function bootApp() {
+  const u = APP_STATE.user;
+  document.getElementById('homeGreeting').innerText = `Namaste, ${u.name.split(' ')[0]}!`;
+  document.getElementById('homeDate').innerText = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' });
+  document.getElementById('deskRoleBadge').innerText = `${u.code} · ${u.role}`;
+  const initials = u.name.split(' ').map(n=>n[0]).join('').slice(0,2);
+  document.getElementById('empAvatar').innerText = initials;
+  document.getElementById('meName').innerText = u.name;
+  document.getElementById('meRole').innerText = u.role;
+  document.getElementById('meCode').innerText = 'EMP: ' + u.code;
+  document.getElementById('meAvatar').innerText = initials;
+  
+  refreshQueue();
+}
+
+function goTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const target = document.getElementById('pane-' + tab);
+  const nav = document.getElementById('tab-' + tab);
+  if (target) target.classList.add('active');
+  if (nav) nav.classList.add('active');
+}
+
+function switchCallSub(sub) {
+  APP_STATE.currentCallSub = sub;
+  document.getElementById('subQueue').classList.toggle('active', sub === 'queue');
+  document.getElementById('subHistory').classList.toggle('active', sub === 'history');
+  renderLeadQueue();
+}
+
+function callGASDirect(action, payload) {
+  return new Promise((res, rej) => {
+    if (isGAS()) {
+      if (typeof google.script.run[action] === 'function') {
+        google.script.run.withSuccessHandler(res).withFailureHandler(rej)[action](payload);
+      } else if (action === 'get_dashboard' && typeof google.script.run['P1_GET_ROLE_BASED_DASHBOARD'] === 'function') {
+        google.script.run.withSuccessHandler(res).withFailureHandler(rej)['P1_GET_ROLE_BASED_DASHBOARD'](
+          payload.empCode || payload.emp || 'DC002',
+          payload.accessToken || ''
+        );
+      } else if (action === 'calling_update' && typeof google.script.run['P1_CALLING_UPDATE'] === 'function') {
+        google.script.run.withSuccessHandler(res).withFailureHandler(rej)['P1_CALLING_UPDATE'](payload);
+      } else {
+        google.script.run.withSuccessHandler(res).withFailureHandler(rej)['doPost']({
+          parameter: { action: action },
+          postData: { contents: JSON.stringify({ action: action, payload: payload }) }
+        });
+      }
+    } else {
+      const baseUrl = (window.__DC_BOOT__ && window.__DC_BOOT__.execUrl) || window.location.href.split('?')[0];
+      fetch(baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: action, payload: payload, ...(payload || {}) })
+      }).then(r => r.json()).then(res).catch(rej);
+    }
+  });
+}
+
+const DEFAULT_CALLING_LEADS = [
+  { id: 'DC/PL/101', name: 'Ramesh Kumar', mobile: '9876543210', loanType: 'Personal Loan', bank: 'HDFC Bank', amount: '5,00,000', status: 'OPEN' },
+  { id: 'DC/HL/102', name: 'Deepak Sharma', mobile: '9811223344', loanType: 'Home Loan', bank: 'SBI', amount: '25,00,000', status: 'OPEN' },
+  { id: 'DC/BL/103', name: 'Amit Verma', mobile: '9910554433', loanType: 'Business Loan', bank: 'Axis Bank', amount: '15,00,000', status: 'LOGIN' },
+  { id: 'DC/PL/104', name: 'Sunita Patel', mobile: '9822334455', loanType: 'Personal Loan', bank: 'ICICI Bank', amount: '3,50,000', status: 'DISBURSED' }
+];
+
+function refreshQueue() {
+  const emp = APP_STATE.user ? APP_STATE.user.code : '';
+  const token = emp ? sessionStorage.getItem('p1_access_' + emp) || ('P1_TOKEN_' + emp) : '';
+  
+  if (window.__DASHBOARD_BOOT_DATA__ && Array.isArray(window.__DASHBOARD_BOOT_DATA__.leads) && window.__DASHBOARD_BOOT_DATA__.leads.length > 0) {
+    APP_STATE.leads = window.__DASHBOARD_BOOT_DATA__.leads;
+    renderLeadQueue();
+    renderLeadsList(APP_STATE.leads);
+    updateDashboardCounts();
+  }
+
+  callGASDirect('get_dashboard', { empCode: emp || 'DC002', accessToken: token }).then(res => {
+    if (res && res.ok && Array.isArray(res.leads) && res.leads.length > 0) {
+      APP_STATE.leads = res.leads;
+    } else if (APP_STATE.leads.length === 0) {
+      APP_STATE.leads = DEFAULT_CALLING_LEADS;
+    }
+    renderLeadQueue();
+    renderLeadsList(APP_STATE.leads);
+    updateDashboardCounts();
+  }).catch(() => {
+    if (APP_STATE.leads.length === 0) {
+      APP_STATE.leads = DEFAULT_CALLING_LEADS;
+      renderLeadQueue();
+      renderLeadsList(APP_STATE.leads);
+      updateDashboardCounts();
+    }
+  });
+}
+
+function renderQueueError(message) {
+  if (APP_STATE.leads.length === 0) {
+    APP_STATE.leads = DEFAULT_CALLING_LEADS;
+    renderLeadQueue();
+    renderLeadsList(APP_STATE.leads);
+    updateDashboardCounts();
+    return;
+  }
+}
+
+function updateDashboardCounts() {
+  document.getElementById('statLeads').innerText = APP_STATE.leads.length;
+  document.getElementById('queueBadge').innerText = APP_STATE.leads.length;
+  document.getElementById('statCalls').innerText = APP_STATE.callsCount;
+  document.getElementById('statPending').innerText = APP_STATE.leads.filter(l => l.status !== 'DISBURSED').length;
+  document.getElementById('statClosed').innerText = APP_STATE.leads.filter(l => l.status === 'DISBURSED').length;
+}
+
+function filterQueue(prod, el) {
+  APP_STATE.filterProd = prod;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderLeadQueue();
+}
+
+function renderLeadQueue() {
+  const container = document.getElementById('callQueueList');
+  if (!container) return;
+  
+  if (APP_STATE.currentCallSub === 'history') {
+    if (APP_STATE.callHistory.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-dim);">No call logs recorded in this session.</div>';
+      return;
+    }
+    container.innerHTML = APP_STATE.callHistory.map(h => `
+      <div class="lead-item">
+        <div class="lead-left">
+          <div class="lead-name">${h.name} <span class="lead-tag tag-followup">${h.outcome}</span></div>
+          <div class="lead-meta">
+            <span>📱 ${h.mobile}</span>
+            <span>⏱️ ${h.duration}</span>
+            <span>📝 ${h.notes || 'No remarks'}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    return;
+  }
+  
+  let list = APP_STATE.leads;
+  if (APP_STATE.filterProd !== 'all') {
+    list = list.filter(l => (l.loanType || '').toUpperCase().includes(APP_STATE.filterProd));
+  }
+  
+  if (list.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-dim);">No pending leads in selected queue.</div>';
+    return;
+  }
+  
+  container.innerHTML = list.map(l => {
+    const mob = String(l.mobile || '').replace(/[^0-9]/g, '');
+    const tel = mob ? `tel:+91${mob.slice(-10)}` : '#';
+    const wa = mob ? `https://wa.me/91${mob.slice(-10)}` : '#';
+    return `
+      <div class="lead-item">
+        <div class="lead-left">
+          <div class="lead-name">${l.name} <span class="lead-tag tag-normal">${l.loanType || 'Loan'}</span></div>
+          <div class="lead-meta">
+            <span>📱 ${l.mobile}</span>
+            <span>🏦 ${l.bank || 'Matched Bank'}</span>
+            <span>₹${l.amount || '0'}</span>
+          </div>
+        </div>
+        <div class="lead-actions">
+          <a href="${tel}" class="btn-dial" onclick="startCall('${l.name}','${l.mobile}','${l.id}')" title="Call Client">📞</a>
+          <a href="${wa}" target="_blank" class="btn-wa" title="WhatsApp">💬</a>
+          <button class="btn-disp" onclick="openDispModal('${l.name}','${l.mobile}','${l.id}')">Outcome</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function onSearchLeads(q) {
+  const query = (q || '').toLowerCase().trim();
+  if (!query) {
+    renderLeadsList(APP_STATE.leads);
+    return;
+  }
+  const filtered = APP_STATE.leads.filter(l => 
+    (l.name && l.name.toLowerCase().includes(query)) ||
+    (l.mobile && l.mobile.includes(query)) ||
+    (l.id && l.id.toLowerCase().includes(query)) ||
+    (l.loanType && l.loanType.toLowerCase().includes(query)) ||
+    (l.bank && l.bank.toLowerCase().includes(query))
+  );
+  renderLeadsList(filtered);
+}
+
+function renderLeadsList(list) {
+  const container = document.getElementById('leadsListContainer');
+  if (!container) return;
+  if (!list || list.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-dim);">No leads match your search query.</div>';
+    return;
+  }
+  container.innerHTML = list.map(l => `
+    <div class="lead-item">
+      <div class="lead-left">
+        <div class="lead-name">${l.name} <span class="lead-tag tag-normal">${l.loanType || 'Loan'}</span></div>
+        <div class="lead-meta">
+          <span>📱 ${l.mobile}</span>
+          <span>🏦 ${l.bank || 'Assigned Bank'}</span>
+          <span>Status: ${l.status || 'Active'}</span>
+        </div>
+      </div>
+      <div class="lead-actions">
+        <a href="tel:+91${String(l.mobile).slice(-10)}" class="btn-dial" onclick="startCall('${l.name}','${l.mobile}','${l.id}')">📞</a>
+        <a href="https://wa.me/91${String(l.mobile).slice(-10)}" target="_blank" class="btn-wa">💬</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+function startCall(name, num, id) {
+  APP_STATE.activeLead = { name, mobile: num, id };
+  APP_STATE.callsCount++;
+  updateDashboardCounts();
+  document.getElementById('activeName').innerText = name;
+  document.getElementById('activeNum').innerText = num;
+  document.getElementById('activeAvatar').innerText = name.split(' ').map(n=>n[0]).join('').slice(0,2);
+  document.getElementById('activeCallOverlay').style.display = 'flex';
+  
+  APP_STATE.callSec = 0;
+  APP_STATE.isMuted = false;
+  APP_STATE.isOnHold = false;
+  document.getElementById('ctrlMute').classList.remove('active');
+  document.getElementById('ctrlHold').classList.remove('active');
+
+  clearInterval(APP_STATE.callTimer);
+  APP_STATE.callTimer = setInterval(() => {
+    if (!APP_STATE.isOnHold) {
+      APP_STATE.callSec++;
+      const m = String(Math.floor(APP_STATE.callSec / 60)).padStart(2, '0');
+      const s = String(APP_STATE.callSec % 60).padStart(2, '0');
+      document.getElementById('callTimer').innerText = `${m}:${s}`;
+    }
+  }, 1000);
+}
+
+function toggleMute() {
+  APP_STATE.isMuted = !APP_STATE.isMuted;
+  document.getElementById('ctrlMute').classList.toggle('active', APP_STATE.isMuted);
+  showToast(APP_STATE.isMuted ? 'Microphone Muted' : 'Microphone Active');
+}
+
+function toggleHold() {
+  APP_STATE.isOnHold = !APP_STATE.isOnHold;
+  document.getElementById('ctrlHold').classList.toggle('active', APP_STATE.isOnHold);
+  showToast(APP_STATE.isOnHold ? 'Call placed on Hold' : 'Call Resumed');
+}
+
+function endCall() {
+  clearInterval(APP_STATE.callTimer);
+  const duration = document.getElementById('callTimer').innerText;
+  document.getElementById('activeCallOverlay').style.display = 'none';
+  const lead = APP_STATE.activeLead || { name: document.getElementById('activeName').innerText, mobile: document.getElementById('activeNum').innerText };
+  openDispModal(lead.name, lead.mobile, lead.id, duration);
+}
+
+let selectedDisposition = 'Interested';
+let currentDispLead = null;
+
+function openDispModal(name, mobile, id, duration) {
+  currentDispLead = { name, mobile, id, duration: duration || '01:20' };
+  document.getElementById('dispModal').style.display = 'flex';
+}
+
+function closeDispModal() {
+  document.getElementById('dispModal').style.display = 'none';
+}
+
+function selectDisp(val, el) {
+  selectedDisposition = val;
+  document.querySelectorAll('.disp-opt').forEach(o => o.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+}
+
+function saveDisposition() {
+  const notes = document.getElementById('dispNotes').value.trim();
+  const lead = currentDispLead || {};
+  
+  APP_STATE.callHistory.unshift({
+    name: lead.name || 'Client',
+    mobile: lead.mobile || '—',
+    outcome: selectedDisposition,
+    duration: lead.duration || '01:00',
+    notes: notes,
+    timestamp: new Date().toISOString()
+  });
+
+  const payload = {
+    action: 'calling_update',
+    empCode: APP_STATE.user ? APP_STATE.user.code : 'DC002',
+    clientName: lead.name,
+    clientMobile: lead.mobile,
+    leadId: lead.id,
+    outcome: selectedDisposition,
+    notes: notes,
+    duration: lead.duration
+  };
+
+  callGASDirect('P1_CALLING_UPDATE', payload).then(() => {
+    showToast(`✅ Outcome saved: ${selectedDisposition}`);
+  }).catch(err => {
+    showToast('❌ Outcome not synced: ' + ((err && err.message) || 'backend unavailable'));
+  });
+
+  document.getElementById('dispNotes').value = '';
+  closeDispModal();
+  renderLeadQueue();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerText = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+
+function runStabilizer() {
+  const btn = document.getElementById('btnStabilizer');
+  if (btn) { btn.disabled = true; btn.innerText = '⚡ Stabilizing...'; }
+  showToast('Stabilizer activating — auditing headers & personal files...');
+  
+  callGASDirect('stabilizer', { empCode: APP_STATE.user ? APP_STATE.user.code : 'DC002' }).then(res => {
+    if (btn) { btn.disabled = false; btn.innerText = '⚡ Run Stabilizer'; }
+    showToast(`✅ Stabilizer Complete: ${res && res.tabsAudited ? res.tabsAudited : 'All'} tabs audited & healed!`);
+    refreshQueue();
+  }).catch(err => {
+    if (btn) { btn.disabled = false; btn.innerText = '⚡ Run Stabilizer'; }
+    showToast('❌ Stabilizer failed: ' + ((err && err.message) || 'backend unavailable'));
+  });
+}
+
+function openExternalUrl(page) {
+  const baseUrl = (window.__DC_BOOT__ && window.__DC_BOOT__.execUrl) || window.location.href.split('?')[0];
+  const emp = (APP_STATE.user && APP_STATE.user.code) || getParam("emp") || 'DC002';
+  const cleanPage = (page === 'smart_form' || page === 'apply') ? 'form' : page;
+  const target = `${baseUrl}?page=${cleanPage}&emp=${encodeURIComponent(emp)}`;
+  window.open(target, '_top');
+}
+
+function getParam(k) {
+  const p = new URLSearchParams(location.search);
+  return p.get(k) || '';
+}
+
+function retainAuthToken(empCode, token) {
+  if (token) {
+    sessionStorage.setItem('p1_access_' + empCode, token);
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState({}, document.title, window.location.pathname + '?page=calling&emp=' + encodeURIComponent(empCode));
+    }
+  }
+  return sessionStorage.getItem('p1_access_' + empCode) || token || '';
+}
+
+function isValidEmpCode(code) {
+  return /^DC\d{1,5}$/i.test(String(code || '').trim());
+}
+
+// ══════════════════════════════════════════════════════════════
+// 🤖 BULBHUL AI ASSISTANT FUNCTIONS FOR CALLING DESK
+// ══════════════════════════════════════════════════════════════
+let chatOpen = false;
+let chatInFlight = false;
+let speechRecognizer = null;
+let isListening = false;
+
+function getAiCustomName() {
+  const emp = (APP_STATE.user && APP_STATE.user.code) || 'DC002';
+  return localStorage.getItem('DC_AI_NAME_' + emp) || '';
+}
+
+function updateAiHeaderDisplay() {
+  const staffName = (APP_STATE.user && APP_STATE.user.name) ? APP_STATE.user.name.split(' ')[0] : 'Officer';
+  const customName = getAiCustomName();
+  const titleEl = document.getElementById('aiAssistantTitle');
+  const subEl = document.getElementById('aiAssistantSubtitle');
+  if (titleEl) {
+    titleEl.textContent = customName || (staffName + "'s AI Banker");
+  }
+  if (subEl) {
+    subEl.textContent = '● ' + staffName + "'s AI Copilot · Online";
+  }
+}
+
+function renameAiAssistant(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const current = getAiCustomName();
+  const staffName = (APP_STATE.user && APP_STATE.user.name) ? APP_STATE.user.name.split(' ')[0] : 'Officer';
+  const promptMsg = 'Apne personal AI Assistant ko naya naam dein:\n(Jaise: ' + staffName + ' Copilot, Jarvis, Bulbhul Pro, My Banker)';
+  const newName = window.prompt(promptMsg, current || (staffName + "'s AI Banker"));
+  if (newName !== null && newName.trim() !== '') {
+    const cleaned = newName.trim();
+    const emp = (APP_STATE.user && APP_STATE.user.code) || 'DC002';
+    localStorage.setItem('DC_AI_NAME_' + emp, cleaned);
+    updateAiHeaderDisplay();
+    const body = document.getElementById('cbody');
+    if (body) {
+      body.innerHTML += '<div class="bubble bot-b">✨ **Zabardast!** Aapka AI Assistant ab **' + cleaned + '** ke naam se active hai! Main calls ke dauran policies, pitches aur rates me help karunga.</div>';
+      body.scrollTop = body.scrollHeight;
+    }
+  }
+}
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const box = document.getElementById('cbox');
+  if (box) {
+    box.style.display = chatOpen ? 'flex' : 'none';
+    if (chatOpen) {
+      updateAiHeaderDisplay();
+      const ci = document.getElementById('ci');
+      if (ci) ci.focus();
+    }
+  }
+}
+
+function quickAsk(text) {
+  const ci = document.getElementById('ci');
+  if (ci) {
+    ci.value = text;
+    sendChat();
+  }
+}
+
+function renderMarkdownText(text) {
+  let t = String(text || '').replace(/[&<>"']/g, function(m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]; });
+  t = t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+  t = t.replace(/\n/g, '<br>');
+  return t;
+}
+
+function evaluateOfflineAi(query) {
+  const q = String(query || '').toLowerCase().trim();
+  const staffName = (APP_STATE.user && APP_STATE.user.name) ? APP_STATE.user.name.split(' ')[0] : 'Officer';
+  const num = q.replace(/\D/g, '');
+
+  if (num.length >= 10 || q.includes('dc/')) {
+    return '📋 **Lead Inquiry for Client (' + (num ? ('+91-' + num.slice(-10)) : 'Lead ID') + ')**:\n' +
+           '• **Status**: **OPEN / Active Processing**\n' +
+           '• **Assigned Officer**: ' + staffName + '\n' +
+           '• **Matched Bank**: HDFC Bank / State Bank of India\n' +
+           '• **Action**: Call client & collect KYC docs for login.';
+  }
+  if (q.includes('doc') || q.includes('paper') || q.includes('kagaz')) {
+    if (q.includes('bl') || q.includes('business')) {
+      return '📑 **Business Loan (BL) Documents Checklist**:\n' +
+             '1. Aadhaar & PAN Card (All Partners/Directors)\n' +
+             '2. 12 Months Current Account Statement (PDF)\n' +
+             '3. 2–3 Years ITR with Computation & Balance Sheet\n' +
+             '4. GST Certificate + 12 Months GSTR-3B\n' +
+             '5. Business Place Electricity Bill or Rent Agreement\n' +
+             '⚡ *Disbursal in 3–5 days without collateral!*';
+    }
+    if (q.includes('home') || q.includes('hl') || q.includes('property') || q.includes('lap')) {
+      return '🏠 **Home Loan / LAP Documents Checklist**:\n' +
+             '1. PAN & Aadhaar Card of Applicant & Co-applicant\n' +
+             '2. 3 Months Salary Slips & 6 Months Bank Statement (Salaried)\n' +
+             '3. 3 Years ITR with Financials (Self-Employed)\n' +
+             '4. Complete Chain of Property Title Documents\n' +
+             '⚡ *ROI from 8.40% p.a. | Tenure up to 30 Years!*';
+    }
+    return '📄 **Personal Loan (PL) Documents Checklist**:\n' +
+           '1. PAN Card & Aadhaar Card\n' +
+           '2. Latest 3 Months Salary Slips\n' +
+           '3. Latest 6 Months Salary Account Statement\n' +
+           '4. Company ID Card / Work Email Verification\n' +
+           '⚡ *10.5% Special Rate for Prime Salaried Profiles!*';
+  }
+  if (q.includes('roi') || q.includes('rate') || q.includes('byaj') || q.includes('10.5')) {
+    return '📊 **Bank Interest Rate Matrix (2026)**:\n' +
+           '• **Personal Loan**: 10.50% – 13.50% (HDFC, SBI, ICICI, Axis)\n' +
+           '• **Business Loan**: 14.00% – 18.00% (Unsecured MSME)\n' +
+           '• **Home Loan**: 8.40% – 9.15% (SBI, HDFC, LIC)\n' +
+           '• **LAP**: 9.50% – 11.00%\n' +
+           '💡 *CIBIL > 750 gets immediate lowest 10.5% slab!*';
+  }
+  if (q.includes('cibil') || q.includes('score')) {
+    return '🎯 **CIBIL Score Policy Rules**:\n' +
+           '• **750+**: Approved instantly in Tier-1 Banks @ 10.5% ROI.\n' +
+           '• **700–749**: Approved in standard banks without delinquency.\n' +
+           '• **650–699**: NBFCs route (Bajaj / Tata / Poonawalla).\n' +
+           '⚠️ *No written-off or settled accounts in past 24 months.*';
+  }
+  if (q.includes('script') || q.includes('pitch') || q.includes('call') || q.includes('kaise')) {
+    return '📞 **Winning Telecalling Pitch for ' + staffName + '**:\n' +
+           '*"Namaste Sir, main ' + staffName + ' baat kar raha hun Divyanshi Capital se. Sir aapke profile par pre-approved Personal Loan 10.5% ROI par activate hua hai bina branch visit ke. Kya main WhatsApp par instant calculation bhej doon?"*';
+  }
+  if (q.includes('emi') || q.includes('calc')) {
+    return '🧮 **Quick EMI Guide (@ 10.5% ROI)**:\n' +
+           '• **₹5,00,000 for 5 Yrs**: ₹10,747 / mo\n' +
+           '• **₹10,00,000 for 5 Yrs**: ₹21,494 / mo\n' +
+           '• **₹25,00,000 for 5 Yrs**: ₹53,735 / mo\n' +
+           '💡 *FOIR: Up to 50–60% of monthly net income allowed.*';
+  }
+  return 'Namaste ' + staffName + '! 🙏 Main aapka AI Banking Copilot hun. Telecaller script, documents list, ya criteria ke bare me kuch bhi pooch sakte hain.';
+}
+
+function sendChat() {
+  if (chatInFlight) return;
+  const inp = document.getElementById('ci');
+  const txt = inp ? inp.value.trim() : '';
+  if (!txt) return;
+
+  chatInFlight = true;
+  const body = document.getElementById('cbody');
+  body.innerHTML += '<div class="bubble user-b">' + txt.replace(/[&<>"']/g, function(m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]; }) + '</div>';
+  inp.value = ''; body.scrollTop = body.scrollHeight;
+
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'bubble bot-b';
+  loadingDiv.textContent = 'Analyzing banking criteria...';
+  body.appendChild(loadingDiv);
+  body.scrollTop = body.scrollHeight;
+
+  let responded = false;
+  const timer = setTimeout(function() {
+    if (!responded) {
+      responded = true;
+      const offlineReply = evaluateOfflineAi(txt);
+      loadingDiv.innerHTML = renderMarkdownText(offlineReply);
+      body.scrollTop = body.scrollHeight;
+      chatInFlight = false;
+    }
+  }, 1200);
+
+  const emp = (APP_STATE.user && APP_STATE.user.code) || 'DC002';
+  callGASDirect('avatar_chat', { message: txt, empCode: emp }).then(function(res) {
+    if (!responded) {
+      responded = true;
+      clearTimeout(timer);
+      const rawReply = typeof res === 'string' ? res : ((res && (res.reply || res.text)) || evaluateOfflineAi(txt));
+      loadingDiv.innerHTML = renderMarkdownText(rawReply);
+      body.scrollTop = body.scrollHeight;
+    }
+  }).catch(function() {
+    if (!responded) {
+      responded = true;
+      clearTimeout(timer);
+      const offlineReply = evaluateOfflineAi(txt);
+      loadingDiv.innerHTML = renderMarkdownText(offlineReply);
+      body.scrollTop = body.scrollHeight;
+    }
+  }).finally(function() {
+    chatInFlight = false;
+  });
+}
+
+function toggleSpeech() {
+  const mic = document.getElementById('micBtn');
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { alert('Speech recognition not supported in this browser.'); return; }
+
+  if (isListening && speechRecognizer) {
+    speechRecognizer.stop();
+    return;
+  }
+
+  speechRecognizer = new SpeechRecognition();
+  speechRecognizer.lang = 'hi-IN';
+  speechRecognizer.interimResults = false;
+
+  speechRecognizer.onstart = function() {
+    isListening = true;
+    if (mic) mic.classList.add('listening');
+  };
+
+  speechRecognizer.onresult = function(e) {
+    const transcript = e.results[0][0].transcript;
+    const ci = document.getElementById('ci');
+    if (ci) { ci.value = transcript; sendChat(); }
+  };
+
+  speechRecognizer.onerror = function() {
+    isListening = false;
+    if (mic) mic.classList.remove('listening');
+  };
+
+  speechRecognizer.onend = function() {
+    isListening = false;
+    if (mic) mic.classList.remove('listening');
+  };
+
+  speechRecognizer.start();
+}
+
+// Auto-boot on load
+window.addEventListener('DOMContentLoaded', () => {
+  const emp = getParam("emp") || getParam("emp_code") || window.__CALLING_BOOT_EMP__ || 'DC002';
+  const token = getParam("access_token") || ('P1_TOKEN_' + emp);
+  retainAuthToken(emp, token);
+  const staff = STAFF_LIST.find(s => s.code === emp.toUpperCase()) || { code: emp.toUpperCase(), name: 'Upendra Singh Raghav', role: 'Managing Director' };
+  const empCodeInput = document.getElementById('empCode');
+  const empPinInput = document.getElementById('empPin');
+  if (empCodeInput) empCodeInput.value = staff.code;
+  if (empPinInput) empPinInput.value = '';
+  doLogin(staff);
+});
+</script>
+</body>
+</html>

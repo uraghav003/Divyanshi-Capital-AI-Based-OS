@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer">
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Divyanshi Capital — Smart Loan Intake OS</title>
+
+  <!-- High Performance Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- High Performance JSON Bootstrap Configuration -->
+  <script id="BOOT_DATA" type="application/json">
+    {
+      "scriptId": "<?= typeof scriptId !== 'undefined' ? scriptId : '1PP7wUFkDAkmgOjgPKeWbZeg3Ajs9N4ZNRPnfih_LMv89KEdSTVPvtipp' ?>",
+      "execUrl": "<?= typeof execUrl !== 'undefined' ? execUrl : 'https://script.google.com/macros/s/AKfycbwzdhZF3cVTT01atwZOSnXq7kBvx6k9NgFCbSvfAIXldCjBnMUqxKIBlLUPTiA7V8tc/exec' ?>",
+      "promptVersion": "<?= typeof promptVersion !== 'undefined' ? promptVersion : 'V22-COMPLETE-FINAL' ?>"
+    }
+  </script>
+
+  <style>
+    :root {
+      --navy-950: #050d1a;
+      --navy-900: #0B1F3A;
+      --navy-800: #142d54;
+      --navy-700: #1e3a8a;
+      --gold-500: #C9A84C;
+      --gold-400: #e5c875;
+      --gold-300: #fae7a5;
+      --indigo-600: #4f46e5;
+      --indigo-700: #4338ca;
+      --emerald-500: #10b981;
+      --emerald-600: #059669;
+      --amber-500: #f59e0b;
+      --rose-500: #f43f5e;
+      --ink: #0f172a;
+      --mid: #334155;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 24px;
+      --shadow-sm: 0 2px 8px rgba(11, 31, 58, 0.04);
+      --shadow-md: 0 10px 30px rgba(11, 31, 58, 0.08);
+      --shadow-lg: 0 20px 50px rgba(11, 31, 58, 0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(201, 168, 76, 0.07) 0px, transparent 50%);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 20px 16px 80px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    h1, h2, h3, .brand-font { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .wrap { max-width: 760px; margin: 0 auto; }
+
+    /* ── HEADER HERO ── */
+    .hero-banner {
+      background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-800) 55%, var(--navy-700) 100%);
+      border-radius: var(--radius-lg);
+      padding: 30px 28px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 95% 5%, rgba(201, 168, 76, 0.3) 0%, transparent 50%),
+                  radial-gradient(circle at 5% 95%, rgba(79, 70, 229, 0.3) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .brand-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .brand-logo-img {
+      height: 38px; width: auto; background: #fff; padding: 4px 10px; border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: block;
+    }
+    .hero-title { font-size: clamp(24px, 4.5vw, 34px); font-weight: 900; color: #fff; letter-spacing: -0.02em; line-height: 1.15; }
+    .hero-sub { color: rgba(255, 255, 255, 0.8); font-size: 13.5px; margin-top: 8px; line-height: 1.5; font-weight: 400; max-width: 580px; }
+    .badge-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .badge {
+      font-size: 10.5px; font-weight: 800; letter-spacing: 0.05em; padding: 5px 12px;
+      border-radius: 100px; text-transform: uppercase;
+      background: rgba(255, 255, 255, 0.12); color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .badge.green { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.35); }
+    .badge.gold { background: rgba(201, 168, 76, 0.2); color: var(--gold-300); border-color: rgba(201, 168, 76, 0.35); }
+    .badge-semi { background: rgba(255, 255, 255, 0.15); }
+
+    /* ── STEPPER WIZARD ── */
+    .stepper-nav { display: flex; gap: 10px; margin-bottom: 20px; }
+    .step-indicator {
+      flex: 1; background: #fff; border: 1.5px solid var(--line); border-radius: var(--radius-md);
+      padding: 12px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer;
+      transition: all 0.25s ease; box-shadow: var(--shadow-sm);
+    }
+    .step-indicator.active {
+      border-color: var(--indigo-600); background: #ffffff;
+      box-shadow: 0 4px 16px rgba(79, 70, 229, 0.12);
+    }
+    .step-indicator.done { border-color: var(--emerald-500); }
+    .step-num {
+      width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+      font-size: 11.5px; font-weight: 800; background: var(--line); color: var(--muted);
+      transition: all 0.25s ease; flex-shrink: 0;
+    }
+    .step-indicator.active .step-num { background: var(--indigo-600); color: #fff; }
+    .step-indicator.done .step-num { background: var(--emerald-500); color: #fff; }
+    .step-info { overflow: hidden; }
+    .step-info .step-title { font-size: 12px; font-weight: 800; color: var(--ink); white-space: nowrap; }
+    .step-info .step-desc { font-size: 10.5px; color: var(--muted); }
+
+    /* ── FORM CONTAINER ── */
+    .form-panel {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      border: 1.5px solid var(--line);
+      box-shadow: var(--shadow-md);
+      position: relative;
+    }
+    .step-content { display: none; }
+    .step-content.active { display: block; animation: stepFade 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes stepFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .sec-header {
+      font-size: 12px; font-weight: 800; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--indigo-600);
+      margin: 20px 0 14px; display: flex; align-items: center; gap: 8px;
+    }
+    .sec-header:first-of-type { margin-top: 0; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 12px; font-weight: 700; color: var(--mid);
+      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .req { color: var(--rose-500); }
+
+    .input-wrap { position: relative; }
+    input[type="text"], input[type="number"], input[type="email"], select, textarea {
+      width: 100%; padding: 12px 14px; font-size: 14px; font-family: inherit;
+      color: var(--ink); background: #f8fafc; border: 1.5px solid var(--line);
+      border-radius: var(--radius-md); outline: none; transition: all 0.2s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      background: #ffffff; border-color: var(--indigo-600);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    }
+    .readonly { background: #f1f5f9; color: var(--muted); cursor: not-allowed; }
+    .hint { font-size: 11.5px; margin-top: 5px; color: var(--muted); line-height: 1.4; min-height: 16px; }
+    .hint-success { color: var(--emerald-600); font-weight: 700; }
+    .hint-info { color: var(--indigo-600); font-weight: 600; }
+    .uppercase-input { text-transform: uppercase; }
+    .mt-20 { margin-top: 20px; }
+    .consent-label { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; text-transform: none; cursor: pointer; }
+    .consent-checkbox { width: auto; margin-top: 2px; }
+
+    /* ── CALCULATOR CARD ── */
+    .calc-card {
+      background: linear-gradient(135deg, #0B1F3A 0%, #1e3a8a 100%);
+      border-radius: var(--radius-md); padding: 18px 20px; color: #fff;
+      margin-bottom: 20px; box-shadow: var(--shadow-md);
+    }
+    .calc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .calc-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold-300); }
+    .calc-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
+    @media (max-width: 500px) { .calc-stat-grid { grid-template-columns: 1fr; gap: 8px; text-align: left; } }
+    .calc-box { background: rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 10px 12px; border: 1px solid rgba(255, 255, 255, 0.12); }
+    .calc-box .label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); }
+    .calc-box .val { font-size: 16px; font-weight: 900; color: #ffffff; margin-top: 2px; }
+    .calc-box.highlight .val { color: #4ade80; }
+
+    /* ── BANK CHIPS ── */
+    .bank-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px; margin-bottom: 16px; max-height: 220px; overflow-y: auto; padding-right: 4px;
+    }
+    .bank-chip {
+      background: #f8fafc; border: 1.5px solid var(--line); border-radius: 10px;
+      padding: 10px 12px; font-size: 12px; font-weight: 700; color: var(--mid);
+      cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;
+    }
+    .bank-chip:hover { border-color: var(--indigo-600); background: #f5f3ff; }
+    .bank-chip.selected {
+      border-color: var(--indigo-600); background: var(--indigo-600); color: #ffffff;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+    .chk {
+      width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid currentColor;
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .bank-chip.selected .chk::after {
+      content: '✓'; font-size: 10px; font-weight: 900;
+    }
+
+    /* ── BUTTON ROW ── */
+    .btn-row { display: flex; gap: 12px; margin-top: 24px; align-items: center; }
+    .btn-row-center { justify-content: center; }
+    .btn-nav {
+      padding: 14px 22px; border-radius: var(--radius-md); font-size: 14px; font-weight: 700;
+      border: 1.5px solid var(--line); background: #fff; color: var(--mid); cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-nav:hover { background: #f8fafc; border-color: var(--muted); }
+    .btn-primary {
+      flex: 1; padding: 14px 26px; border-radius: var(--radius-md); font-size: 14px; font-weight: 800;
+      border: none; background: linear-gradient(135deg, var(--indigo-600) 0%, var(--indigo-700) 100%);
+      color: #fff; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 18px rgba(79, 70, 229, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px); box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
+    }
+    .btn-submit {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35);
+    }
+    .btn-submit:hover {
+      transform: translateY(-1px); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
+    }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ── REVIEW GRID & BULLET DISPATCH BUTTON ── */
+    .review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; }
+    @media (max-width: 600px) { .review-grid { grid-template-columns: 1fr; } }
+    .review-card {
+      background: #f8fafc; border: 1.5px solid var(--line); border-radius: var(--radius-md);
+      padding: 16px; position: relative;
+    }
+    .review-card.highlight-card {
+      border-color: rgba(79, 70, 229, 0.3);
+      background: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
+    }
+    .review-badge {
+      font-size: 11px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--indigo-600); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .review-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      font-size: 12.5px; padding: 6px 0; border-bottom: 1px dashed var(--line);
+    }
+    .review-row:last-child { border-bottom: none; }
+    .review-row span { color: var(--mid); }
+    .review-row strong { color: var(--ink); font-weight: 700; text-align: right; max-width: 60%; word-break: break-word; }
+    .btn-bullet {
+      background: linear-gradient(135deg, #10b981 0%, #059669 60%, #047857 100%) !important;
+      box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35) !important;
+      font-weight: 900 !important; font-size: 14.5px !important;
+      animation: pulseGlow 2.5s infinite ease-in-out;
+    }
+    .btn-bullet-quick { flex: 0.85; }
+    .score-compliant { color: var(--emerald-600); }
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35); }
+      50% { transform: scale(1.015); box-shadow: 0 6px 24px rgba(16, 185, 129, 0.55); }
+    }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      margin-top: 16px; padding: 12px 16px; border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 600; display: none; align-items: center; gap: 10px;
+    }
+    .status-bar.show { display: flex; animation: stepFade 0.25s ease; }
+    .status-bar.loading { background: #eef2ff; color: var(--indigo-700); border: 1px solid #c7d2fe; }
+    .status-bar.error { background: #fef2f2; color: var(--rose-500); border: 1px solid #fecdd3; }
+    .status-bar.success { background: #ecfdf5; color: var(--emerald-600); border: 1px solid #a7f3d0; }
+    .spin {
+      width: 16px; height: 16px; border: 2px solid currentColor; border-top-color: transparent;
+      border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── SUCCESS VIEW ── */
+    .success-view { text-align: center; padding: 20px 0; }
+    .success-badge {
+      width: 64px; height: 64px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff; border-radius: 50%; font-size: 28px; display: grid; place-items: center;
+      margin: 0 auto 16px; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+    }
+    .success-title { font-size: 24px; font-weight: 900; color: var(--navy-900); }
+    .lead-tag {
+      display: inline-block; background: #eef2ff; border: 1.5px solid #c7d2fe;
+      color: var(--indigo-700); padding: 6px 16px; border-radius: 100px; font-size: 14px;
+      font-weight: 800; font-family: 'JetBrains Mono', monospace; margin: 10px 0 20px;
+    }
+    .summary-card {
+      background: #f8fafc; border: 1.5px solid var(--line); border-radius: var(--radius-md);
+      padding: 16px; text-align: left; margin-bottom: 20px;
+    }
+    .summary-row {
+      display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row span:first-child { color: var(--muted); }
+    .summary-row span:last-child { font-weight: 700; color: var(--ink); }
+
+    .wa-card {
+      background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: var(--radius-md);
+      padding: 16px; text-align: left; margin-bottom: 20px;
+    }
+    .wa-title { font-size: 11.5px; font-weight: 800; text-transform: uppercase; color: #166534; margin-bottom: 8px; }
+    .wa-body { font-size: 13px; color: #14532d; line-height: 1.6; white-space: pre-line; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #dcfce7; }
+    .wa-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    .btn-wa {
+      padding: 10px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 700;
+      border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+    }
+    .btn-wa.green { background: #25d366; color: #fff; }
+    .btn-wa.gray { background: #e2e8f0; color: var(--mid); }
+
+    .checklist { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 10px; }
+    .check-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    
+    <!-- ── HEADER HERO BANNER ── -->
+    <header class="hero-banner">
+      <div class="hero-content">
+        <div class="brand-top">
+          <img src="https://divyanshicapital.com/logo.png" alt="Divyanshi Capital" class="brand-logo-img" onerror="this.style.display='none'">
+          <span class="badge gold">🕊️ BULBHUL OS V22</span>
+        </div>
+        <h1 class="hero-title">Smart Loan Intake OS</h1>
+        <p class="hero-sub">Direct Underwriting • 500+ Institutional Lenders • Real-Time CRM Allocation • Paperless Submissions</p>
+        <div class="badge-bar">
+          <span class="badge green">● Bulbhul AI Matrix Active</span>
+          <span class="badge">⚡ Instant SLA Routing</span>
+          <span class="badge">🔒 Bank-Grade 256-Bit</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── PROGRESS STEPPER ── -->
+    <nav class="stepper-nav">
+      <div class="step-indicator active" id="tab1" onclick="goStep(1)">
+        <div class="step-num">1</div>
+        <div class="step-info">
+          <div class="step-title">Origin & Staff</div>
+          <div class="step-desc">Attribution</div>
+        </div>
+      </div>
+      <div class="step-indicator" id="tab2" onclick="goStep(2)">
+        <div class="step-num">2</div>
+        <div class="step-info">
+          <div class="step-title">Applicant KYC</div>
+          <div class="step-desc">Income & EMI</div>
+        </div>
+      </div>
+      <div class="step-indicator" id="tab3" onclick="goStep(3)">
+        <div class="step-num">3</div>
+        <div class="step-info">
+          <div class="step-title">Policy & Lenders</div>
+          <div class="step-desc">Select Banks</div>
+        </div>
+      </div>
+      <div class="step-indicator" id="tab4" onclick="goStep(4)">
+        <div class="step-num">4</div>
+        <div class="step-info">
+          <div class="step-title">Review & Submit</div>
+          <div class="step-desc">⚡ Bullet Dispatch</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── MAIN FORM CONTAINER ── -->
+    <main class="form-panel">
+      
+      <!-- ══════════════════════════════════════════════════════════
+           STEP 1: ORIGIN & STAFF ATTRIBUTION
+           ══════════════════════════════════════════════════════════ -->
+      <section id="step1" class="step-content active">
+        <div class="sec-header">⚡ Intake Origin & Attribution</div>
+        
+        <div class="grid-2">
+          <div class="field">
+            <label for="entry_type">Entry Classification</label>
+            <select id="entry_type" title="Select Entry Classification" aria-label="Select Entry Classification" onchange="toggleFields()">
+              <option value="SALES_LEAD">Sales Lead Intake</option>
+              <option value="CUSTOMER_DIRECT">Direct Customer Apply</option>
+              <option value="DSA_LOGIN">DSA / Partner Login</option>
+              <option value="NEW_STAFF_ENTRY">HR Staff Onboarding</option>
+              <option value="VISITOR_ENTRY">Office Visitor Registration</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="source_name">Sourcing Channel</label>
+            <select id="source_name" title="Select Sourcing Channel" aria-label="Select Sourcing Channel">
+              <option value="PORTAL_SMART_FORM">Sales Advisor Desk</option>
+              <option value="BRANCH_WALKIN">Branch Walk-In</option>
+              <option value="DIGITAL_CAMPAIGN">Online Campaign</option>
+              <option value="DSA_CHANNEL">DSA Partner Network</option>
+              <option value="DIRECT_REFERRAL">Client Referral</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="emp_code">Advisor Code (EMP_CODE) <span class="req">*</span></label>
+            <div class="input-wrap">
+              <input type="text" id="emp_code" value="DC002" placeholder="e.g. DC002" title="Advisor Code" oninput="onEmpCodeTyped(this.value)">
+            </div>
+            <div class="hint" id="empHint"><span class="hint-success">✓ Upendra Singh Raghav (MANAGING DIRECTOR)</span></div>
+          </div>
+          <div class="field">
+            <label for="manager_display">Reporting Manager (Auto-Assigned)</label>
+            <input type="text" id="manager_display" class="readonly" readonly value="upendra.raghav@divyanshicapital.com (MD Desk)" placeholder="Reporting Manager" title="Reporting Manager">
+            <input type="hidden" id="manager_email_id" value="upendra.raghav@divyanshicapital.com">
+            <input type="hidden" id="sales_name" value="Upendra Singh Raghav">
+            <input type="hidden" id="employee_email" value="upendra.raghav@divyanshicapital.com">
+            <div class="hint">Direct escalation to MD & Founder Desk</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" type="button" onclick="goStep(2)">Proceed to Applicant Details →</button>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════
+           STEP 2: APPLICANT KYC & LIVE CALCULATOR
+           ══════════════════════════════════════════════════════════ -->
+      <section id="step2" class="step-content">
+        
+        <!-- Live Financial Preview Card -->
+        <div class="calc-card" id="calcWidget">
+          <div class="calc-top">
+            <span class="calc-title">✨ Bulbhul Underwriting Estimator</span>
+            <span class="badge badge-semi">55% FOIR Safe Norm</span>
+          </div>
+          <div class="calc-stat-grid">
+            <div class="calc-box">
+              <div class="label">Estimated EMI</div>
+              <div class="val" id="calcEMI">₹10,747 / mo</div>
+            </div>
+            <div class="calc-box highlight">
+              <div class="label">Max Eligibility</div>
+              <div class="val" id="calcMaxLoan">₹22.5 Lakhs</div>
+            </div>
+            <div class="calc-box">
+              <div class="label">SLA Benchmark</div>
+              <div class="val" id="calcTAT">4 Business Days</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-header" id="kycSecTitle">👤 Applicant KYC & Contact Information</div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label id="clientNameLabel" for="client_name">Full Name (As per Aadhaar/PAN) <span class="req">*</span></label>
+            <input type="text" id="client_name" placeholder="Enter applicant full name" title="Applicant Full Name">
+          </div>
+          <div class="field">
+            <label for="mobile">10-Digit Mobile <span class="req">*</span></label>
+            <input type="text" id="mobile" maxlength="10" placeholder="e.g. 9876543210" title="10-Digit Mobile" oninput="onMobileInput(this.value)">
+            <div class="hint" id="mobHint">Instant client lookup on 10 digits</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="applicant@email.com" title="Email Address">
+          </div>
+          <div class="field">
+            <label for="pincode">PIN Code (6 Digits)</label>
+            <input type="text" id="pincode" maxlength="6" placeholder="e.g. 110058" title="6-Digit PIN Code" oninput="onPincodeInput(this.value)">
+            <input type="hidden" id="city">
+            <div class="hint" id="pinHint">Google Maps location auto-resolve</div>
+          </div>
+        </div>
+
+        <div class="grid-2" id="incomeFields">
+          <div class="field">
+            <label for="employment_type">Employment Type</label>
+            <select id="employment_type" title="Select Employment Type" aria-label="Select Employment Type" onchange="renderDocChecklist(); recalculateEstimator();">
+              <option value="Salaried Employee (Corporate / MNC / Pvt Ltd)">Salaried Employee (Corporate / MNC / Pvt Ltd)</option>
+              <option value="Salaried Employee (Government / PSU / Defense)">Salaried Employee (Government / PSU / Defense)</option>
+              <option value="Self-Employed Professional (Doctor / CA / CS / Architect / Lawyer)">Self-Employed Professional (Doctor / CA / CS / Architect / Lawyer)</option>
+              <option value="Business Owner (Proprietorship Firm)">Business Owner (Proprietorship Firm)</option>
+              <option value="Director / Partner (Pvt Ltd / LLP / Partnership)">Director / Partner (Pvt Ltd / LLP / Partnership)</option>
+              <option value="MSME Manufacturer / Trader / Retailer">MSME Manufacturer / Trader / Retailer</option>
+              <option value="Agriculturist / Farmer">Agriculturist / Farmer</option>
+              <option value="Freelancer / Consultant / Other">Freelancer / Consultant / Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="monthly_income">Monthly Net Income (₹)</label>
+            <input type="number" id="monthly_income" value="50000" placeholder="e.g. 50000" title="Monthly Net Income" oninput="recalculateEstimator()">
+          </div>
+        </div>
+
+        <div class="grid-2" id="financeFields">
+          <div class="field">
+            <label for="existing_emi">Existing Total EMI (₹/mo)</label>
+            <input type="number" id="existing_emi" value="0" placeholder="0 if none" title="Existing EMI" oninput="recalculateEstimator()">
+          </div>
+          <div class="field">
+            <label for="pan_no">PAN Card Number</label>
+            <input type="text" id="pan_no" maxlength="10" placeholder="ABCDE1234F" title="PAN Card Number" class="uppercase-input">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-nav" type="button" onclick="goStep(1)">← Back</button>
+          <button class="btn-primary" type="button" onclick="goStep(3)">Select Matching Lenders →</button>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════
+           STEP 3: LOAN POLICY & MATCHING LENDERS
+           ══════════════════════════════════════════════════════════ -->
+      <section id="step3" class="step-content">
+        <div class="sec-header">🏦 Product, Facility & Institutional Lenders</div>
+
+        <div class="grid-2" id="loanProductFields">
+          <div class="field">
+            <label for="loan_type">Loan Product <span class="req">*</span></label>
+            <select id="loan_type" title="Select Loan Product" aria-label="Select Loan Product" onchange="renderBankChips()">
+              <option value="Personal Loan">Personal Loan</option>
+              <option value="Business Loan">Business Loan</option>
+              <option value="Professional Loan">Professional Loan (Doctor / CA / CS / Architect)</option>
+              <option value="Machinery Loan">Machinery Loan / Equipment Financing</option>
+              <option value="Home Loan">Home Loan</option>
+              <option value="Loan Against Property">Loan Against Property</option>
+              <option value="Working Capital">Working Capital (OD / CC Limit)</option>
+              <option value="Auto Loan">Auto Loan</option>
+              <option value="Education Loan">Education Loan</option>
+              <option value="Gold Loan">Gold Loan</option>
+              <option value="Project Loan">Project Loan</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="loan_variant">Facility / Loan Variant <span class="req">*</span></label>
+            <select id="loan_variant" title="Select Loan Variant" aria-label="Select Loan Variant" onchange="renderDocChecklist()">
+              <option value="Fresh Personal Loan">Fresh Personal Loan</option>
+              <option value="Balance Transfer (BT)">Balance Transfer (BT)</option>
+              <option value="Balance Transfer + Top-Up (BT + Top-Up)">Balance Transfer + Top-Up (BT + Top-Up)</option>
+              <option value="Instant Top-Up Loan">Instant Top-Up Loan</option>
+              <option value="Personal Overdraft (OD Limit)">Personal Overdraft (OD Limit)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="amount">Required Amount (₹) <span class="req">*</span></label>
+          <input type="number" id="amount" value="500000" placeholder="e.g. 500000" title="Required Loan Amount" oninput="recalculateEstimator()">
+        </div>
+
+        <div class="field">
+          <label>Matched Institutional Lenders (Multi-Select)</label>
+          <div class="bank-grid" id="bankChips"></div>
+          <input type="hidden" id="preferred_bank" value="HDFC Bank, Axis Bank">
+        </div>
+
+        <div class="field">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="margin-bottom:0;">Required Documents Checklist</label>
+            <span class="badge badge-semi" style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; font-size:11px; padding:2px 8px; border-radius:12px; font-weight:700;">🟢 Min. 1 Doc to Submit</span>
+          </div>
+          <div class="checklist" id="docList"></div>
+          <div class="hint hint-info" style="margin-top:6px; font-size:11.5px; color:#4338ca;">
+            ⚡ You can submit with whatever documents are currently available. Uploading complete files enables same-day sanction.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="docFiles">Attach KYC / Income Documents (Optional)</label>
+          <input type="file" id="docFiles" multiple accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" title="Attach KYC Documents">
+          <div class="hint" id="fileHint">Files are encrypted and stored in client Google Drive folder</div>
+        </div>
+
+        <div class="field">
+          <label for="remarks">Underwriting Remarks & Special Notes</label>
+          <textarea id="remarks" rows="2" placeholder="e.g. Immediate sanction requested, fast-track case" title="Underwriting Remarks"></textarea>
+        </div>
+
+        <div class="field mt-20">
+          <label class="consent-label" for="consent">
+            <input type="checkbox" id="consent" checked class="consent-checkbox" title="Data Consent Agreement">
+            <span>I confirm that all details are accurate and authorize Divyanshi Capital to route this application to partner institutional lenders under RBI fair practice guidelines.</span>
+          </label>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-nav" type="button" onclick="goStep(2)">← Back</button>
+          <button class="btn-primary" type="button" onclick="goStep(4)">🔍 Review Entire Application →</button>
+          <button class="btn-primary btn-submit btn-bullet btn-bullet-quick" type="button" id="submitBtn3" onclick="submitForm()">⚡ 1-Click Submit</button>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════
+           STEP 4: APPLICATION REVIEW & BULLET DISPATCH
+           ══════════════════════════════════════════════════════════ -->
+      <section id="step4" class="step-content">
+        <div class="sec-header">🔍 Application Review & Instant Verification</div>
+        
+        <!-- Live Bullet Summary Grid -->
+        <div class="review-grid">
+          <div class="review-card highlight-card">
+            <div class="review-badge">👤 Applicant Information</div>
+            <div class="review-row"><span>Full Name</span><strong id="revName">—</strong></div>
+            <div class="review-row"><span>Mobile Number</span><strong id="revMobile">—</strong></div>
+            <div class="review-row"><span>Email Address</span><strong id="revEmail">—</strong></div>
+            <div class="review-row"><span>Location / City</span><strong id="revCity">—</strong></div>
+          </div>
+
+          <div class="review-card highlight-card">
+            <div class="review-badge">💼 Loan Request & Financials</div>
+            <div class="review-row"><span>Loan Product</span><strong id="revProduct">—</strong></div>
+            <div class="review-row"><span>Requested Amount</span><strong id="revAmount">—</strong></div>
+            <div class="review-row"><span>Employment & Income</span><strong id="revIncome">—</strong></div>
+            <div class="review-row"><span>Existing EMI / PAN</span><strong id="revFinance">—</strong></div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-badge">🏦 Institutional Routing</div>
+            <div class="review-row"><span>Selected Lenders</span><strong id="revBanks">—</strong></div>
+            <div class="review-row"><span>Assigned Advisor</span><strong id="revAdvisor">—</strong></div>
+            <div class="review-row"><span>SLA Benchmark TAT</span><strong id="revTAT">—</strong></div>
+            <div class="review-row"><span>Sourcing Origin</span><strong id="revSource">—</strong></div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-badge">📝 Notes & Checklist</div>
+            <div class="review-row"><span>Attached Documents</span><strong id="revDocs">—</strong></div>
+            <div class="review-row"><span>Underwriting Remarks</span><strong id="revRemarks">—</strong></div>
+            <div class="review-row"><span>Compliance Pre-Score</span><strong id="revScore" class="score-compliant">✓ 100% RBI Compliant</strong></div>
+          </div>
+        </div>
+
+        <div class="field mt-20">
+          <label class="consent-label" for="consentReview">
+            <input type="checkbox" id="consentReview" checked class="consent-checkbox" title="Data Consent Agreement">
+            <span>I confirm that all details are accurate and authorize Divyanshi Capital to route this application to partner institutional lenders under RBI fair practice guidelines.</span>
+          </label>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-nav" type="button" onclick="goStep(3)">← Edit Details</button>
+          <button class="btn-primary btn-submit btn-bullet" type="button" id="submitBtn" onclick="submitForm()">
+            ⚡ 🚀 Bullet Submit Application ✦
+          </button>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════
+           SUCCESS CELEBRATION VIEW
+           ══════════════════════════════════════════════════════════ -->
+      <section id="stepSuccess" class="step-content success-view">
+        <div class="success-badge">✓</div>
+        <h2 class="success-title">Application Successfully Routed!</h2>
+        <div class="lead-tag" id="succLeadId">26/08/308/UPENDR</div>
+
+        <div class="summary-card" id="succSummary">
+          <div class="summary-row"><span>Applicant Name</span><strong id="succName">—</strong></div>
+          <div class="summary-row"><span>Loan Product</span><strong id="succProduct">—</strong></div>
+          <div class="summary-row"><span>Assigned Banker</span><strong id="succBanker">—</strong></div>
+          <div class="summary-row"><span>SLA Resolution TAT</span><strong id="succTAT">—</strong></div>
+        </div>
+
+        <div class="wa-card">
+          <div class="wa-title">📱 Client WhatsApp Confirmation</div>
+          <div class="wa-body" id="succWaBody">—</div>
+          <div class="wa-actions">
+            <button class="btn-wa gray" onclick="copyWhatsAppMessage()">📋 Copy Message</button>
+            <a class="btn-wa green" id="succWaLink" href="#" target="_blank">💬 Open WhatsApp</a>
+          </div>
+        </div>
+
+        <div class="btn-row btn-row-center">
+          <button class="btn-primary" onclick="resetForm()">+ New Intake Submission</button>
+        </div>
+      </section>
+
+      <!-- ── STATUS BAR ── -->
+      <div class="status-bar" id="statusBar">
+        <div class="spin"></div>
+        <span id="statusMsg">Processing application...</span>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       HIGH PERFORMANCE REACTIVE JAVASCRIPT ENGINE
+       ══════════════════════════════════════════════════════════════ -->
+  <script>
+    window.__DIVYANSHI_ERROR_BUFFER__ = window.__DIVYANSHI_ERROR_BUFFER__ || [];
+    window.addEventListener('error', function(e) {
+      var errInfo = { type: 'ERROR', message: e.message, filename: e.filename, lineno: e.lineno, colno: e.colno, error: e.error ? String(e.error.stack || e.error) : null, timestamp: new Date().toISOString() };
+      window.__DIVYANSHI_ERROR_BUFFER__.push(errInfo);
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      var reason = e.reason ? (e.reason.stack || String(e.reason)) : 'Unknown rejection';
+      var errInfo = { type: 'UNHANDLED_REJECTION', reason: reason, timestamp: new Date().toISOString() };
+      window.__DIVYANSHI_ERROR_BUFFER__.push(errInfo);
+    });
+
+    try {
+      var _bEl = document.getElementById('BOOT_DATA');
+      var _boot = _bEl ? JSON.parse(_bEl.textContent || '{}') : {};
+      window.APPS_SCRIPT_ID = _boot.scriptId || '1PP7wUFkDAkmgOjgPKeWbZeg3Ajs9N4ZNRPnfih_LMv89KEdSTVPvtipp';
+      window.GAS_EXEC_URL = _boot.execUrl || 'https://script.google.com/macros/s/AKfycbwzdhZF3cVTT01atwZOSnXq7kBvx6k9NgFCbSvfAIXldCjBnMUqxKIBlLUPTiA7V8tc/exec';
+      window.PROMPT_VERSION = _boot.promptVersion || 'V22-COMPLETE-FINAL';
+    } catch (_) {}
+
+    const $ = id => document.getElementById(id);
+    const safe = s => String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+    const isGAS = () => !!(window.google && google.script && google.script.run);
+    const MOBILE_RE = /^[6-9]\d{9}$/;
+
+    const CANONICAL_LOAN_TYPES = [
+      "Personal Loan", "Business Loan", "Professional Loan", "Machinery Loan",
+      "Home Loan", "Loan Against Property", "Working Capital", "Auto Loan",
+      "Education Loan", "Gold Loan", "Project Loan", "Mortgage Loan", "Credit Card"
+    ];
+
+    const LOAN_PRODUCT_VARIANTS = {
+      "PERSONAL LOAN": [
+        "Fresh Personal Loan",
+        "Balance Transfer (BT)",
+        "Balance Transfer + Top-Up (BT + Top-Up)",
+        "Instant Top-Up Loan",
+        "Personal Overdraft (OD Limit)"
+      ],
+      "BUSINESS LOAN": [
+        "Fresh Business Term Loan",
+        "Business Overdraft (OD Limit)",
+        "Dropline Overdraft (DLOD)",
+        "Cash Credit (CC) Facility",
+        "Machinery / Equipment Loan",
+        "Merchant Line of Credit"
+      ],
+      "PROFESSIONAL LOAN": [
+        "Doctor Professional Loan",
+        "Chartered Accountant (CA) Loan",
+        "Architect / Company Secretary Loan",
+        "Medical Equipment Loan",
+        "Practice Expansion OD"
+      ],
+      "MACHINERY LOAN": [
+        "New Industrial Machinery Purchase",
+        "Used / Refurbished Equipment Financing",
+        "Sale & Lease Back Facility",
+        "Plant & Machinery Modernization"
+      ],
+      "HOME LOAN": [
+        "Fresh Home Purchase Loan",
+        "Home Loan Balance Transfer (BT)",
+        "Home Loan BT + Top-Up",
+        "Plot + Construction Loan",
+        "Home Renovation / Extension Loan"
+      ],
+      "LOAN AGAINST PROPERTY": [
+        "Commercial LAP",
+        "Residential LAP",
+        "Industrial LAP",
+        "LAP Overdraft (OD / DLOD)",
+        "Lease Rental Discounting (LRD)"
+      ],
+      "WORKING CAPITAL": [
+        "Cash Credit (CC) Limit",
+        "Overdraft (OD) Facility",
+        "Dropline Overdraft (DLOD)",
+        "Letter of Credit (LC) / Bank Guarantee (BG)",
+        "Invoice Discounting / Trade Finance"
+      ],
+      "AUTO LOAN": [
+        "New Car / Vehicle Loan",
+        "Used Car Purchase Loan",
+        "Auto Refinance / Car Top-Up",
+        "Commercial Vehicle (CV) Financing"
+      ],
+      "EDUCATION LOAN": [
+        "Domestic Higher Education",
+        "Overseas Studies Loan (Secured / Unsecured)",
+        "Executive Education / Up-skilling"
+      ],
+      "GOLD LOAN": [
+        "Bullet Repayment Gold Loan",
+        "Monthly Interest Gold Loan",
+        "Gold Overdraft (OD Limit)"
+      ],
+      "PROJECT LOAN": [
+        "Greenfield Project Finance",
+        "Brownfield Expansion Loan",
+        "Commercial Real Estate (CRE) Loan"
+      ]
+    };
+
+    let ACTIVE_EMPLOYEES = [
+      { code: "DC001", name: "Narendra Singh Raghav", email: "narendraraghav@divyanshicapital.com", managerEmail: "upendra.raghav@divyanshicapital.com", role: "FOUNDER" },
+      { code: "DC002", name: "Upendra Singh Raghav", email: "upendra.raghav@divyanshicapital.com", managerEmail: "upendra.raghav@divyanshicapital.com", role: "MANAGING DIRECTOR" },
+      { code: "DC005", name: "Khushboo Sharma", email: "khushboo.divyanshicapital@gmail.com", managerEmail: "upendra.raghav@divyanshicapital.com", role: "OPERATIONS HEAD" },
+      { code: "DC010", name: "Rajat Sharma", email: "rajat.sharma@divyanshicapital.com", managerEmail: "upendra.raghav@divyanshicapital.com", role: "SALES MANAGER" },
+      { code: "DC030", name: "Preeti Reshwal", email: "preetireshwal@divyanshicapital.com", managerEmail: "upendra.raghav@divyanshicapital.com", role: "LOAN ADVISOR" }
+    ];
+
+    let BANK_MAP = {
+      "PERSONAL LOAN": ["Axis Bank", "HDFC Bank", "ICICI Bank", "IDFC First Bank", "Kotak Bank", "Bajaj Finserv", "Tata Capital", "Piramal Finance", "State Bank of India"],
+      "BUSINESS LOAN": ["HDFC Bank", "Axis Bank", "ICICI Bank", "Kotak Bank", "Bajaj Finserv", "Tata Capital", "Lendingkart", "IDFC First Bank"],
+      "PROFESSIONAL LOAN": ["HDFC Bank", "ICICI Bank", "Axis Bank", "State Bank of India", "Kotak Bank", "Bajaj Finserv", "Poonawalla", "IDFC First Bank"],
+      "MACHINERY LOAN": ["State Bank of India", "HDFC Bank", "Axis Bank", "Tata Capital", "Bajaj Finserv", "L&T Finance", "SIDBI", "ICICI Bank", "Piramal"],
+      "HOME LOAN": ["State Bank of India", "HDFC Bank", "ICICI Bank", "Axis Bank", "LIC Housing", "Bank of Baroda", "Kotak Bank"],
+      "LOAN AGAINST PROPERTY": ["HDFC Bank", "ICICI Bank", "State Bank of India", "Axis Bank", "Bajaj Finserv", "Kotak Bank"],
+      "WORKING CAPITAL": ["State Bank of India", "HDFC Bank", "ICICI Bank", "Axis Bank", "Bank of Baroda", "Kotak Bank"],
+      "AUTO LOAN": ["HDFC Bank", "ICICI Bank", "State Bank of India", "Axis Bank", "Kotak Bank", "Mahindra Finance"],
+      "EDUCATION LOAN": ["State Bank of India", "HDFC Credila", "Avanse", "Axis Bank", "ICICI Bank"],
+      "GOLD LOAN": ["Muthoot Finance", "Manappuram", "HDFC Bank", "State Bank of India"],
+      "PROJECT LOAN": ["State Bank of India", "HDFC Bank", "ICICI Bank", "Axis Bank", "Bank of Baroda", "Piramal"]
+    };
+
+    let TAT_MAP = {
+      "PERSONAL LOAN": 4, "BUSINESS LOAN": 6, "PROFESSIONAL LOAN": 3, "MACHINERY LOAN": 6,
+      "HOME LOAN": 15, "LOAN AGAINST PROPERTY": 10, "WORKING CAPITAL": 7, "AUTO LOAN": 5,
+      "EDUCATION LOAN": 7, "GOLD LOAN": 1, "PROJECT LOAN": 15
+    };
+
+    let selectedBanks = ["HDFC Bank", "Axis Bank"];
+    let currentStep = 1;
+
+    // ── INITIALIZATION ──
+    function init() {
+      const p = new URLSearchParams(location.search);
+      const emp = (p.get('emp') || p.get('emp_code') || 'DC002').toUpperCase();
+      if ($('emp_code')) $('emp_code').value = emp;
+
+      onEmpCodeTyped(emp);
+      onLoanTypeChanged();
+      recalculateEstimator();
+      fetchRemoteConfig();
+    }
+
+    function fetchRemoteConfig() {
+      if (isGAS()) {
+        google.script.run.withSuccessHandler(res => {
+          if (res && res.ok && Array.isArray(res.employees)) {
+            ACTIVE_EMPLOYEES = res.employees;
+            onEmpCodeTyped($('emp_code').value);
+          }
+        }).P1_GET_ACTIVE_EMPLOYEES_PUBLIC();
+
+        google.script.run.withSuccessHandler(res => {
+          if (res && res.ok && res.banks) {
+            BANK_MAP = Object.assign({}, BANK_MAP, res.banks);
+            if (res.tatMap) TAT_MAP = Object.assign({}, TAT_MAP, res.tatMap);
+            renderBankChips();
+            recalculateEstimator();
+          }
+        }).P1_GET_LOAN_CATALOG();
+      }
+    }
+
+    // ── STEPPER NAVIGATION ──
+    function goStep(n) {
+      if (n < 1 || n > 4) return;
+
+      if (n >= 2) {
+        const code = $('emp_code') ? $('emp_code').value.trim() : '';
+        if (!code) { showStatus('Employee / Advisor code required', 'error'); return; }
+      }
+      if (n >= 3) {
+        const name = $('client_name') ? $('client_name').value.trim() : '';
+        const mob = $('mobile') ? $('mobile').value.trim() : '';
+        if (!name || name.length < 2) { showStatus('Full applicant name required', 'error'); return; }
+        if (!MOBILE_RE.test(mob)) { showStatus('Valid 10-digit mobile required', 'error'); return; }
+      }
+      if (n === 4) {
+        populateReviewSummary();
+      }
+
+      hideStatus();
+      document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+      const targetStep = $('step' + n);
+      if (targetStep) targetStep.classList.add('active');
+
+      for (let i = 1; i <= 4; i++) {
+        const tab = $('tab' + i);
+        if (!tab) continue;
+        tab.classList.remove('active', 'done');
+        if (i < n) tab.classList.add('done');
+        else if (i === n) tab.classList.add('active');
+      }
+
+      currentStep = n;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── POPULATE REVIEW SUMMARY ──
+    function populateReviewSummary() {
+      const name = $('client_name') ? $('client_name').value.trim() : '';
+      const mob = $('mobile') ? $('mobile').value.trim() : '';
+      const em = $('email') ? $('email').value.trim() : '';
+      const city = $('city') && $('city').value.trim() ? $('city').value.trim() : ($('pincode') ? $('pincode').value.trim() : '');
+      const product = $('loan_type') ? $('loan_type').value : 'Personal Loan';
+      const variant = $('loan_variant') ? $('loan_variant').value : 'Standard Facility';
+      const rawAmt = Number($('amount') ? $('amount').value : 0) || 0;
+      const fmtAmt = rawAmt > 0 ? '₹' + rawAmt.toLocaleString('en-US') : '₹0';
+      const empType = $('employment_type') ? $('employment_type').value : 'Salaried';
+      const income = Number($('monthly_income') ? $('monthly_income').value : 0) || 0;
+      const emi = Number($('existing_emi') ? $('existing_emi').value : 0) || 0;
+      const pan = $('pan_no') ? $('pan_no').value.trim().toUpperCase() : '';
+      const banks = $('preferred_bank') ? $('preferred_bank').value : 'HDFC Bank';
+      const advisor = $('sales_name') ? `${$('sales_name').value} (${$('emp_code').value})` : ($('emp_code') ? $('emp_code').value : 'DC002');
+      const tat = $('calcTAT') ? $('calcTAT').textContent : '4 Business Days';
+      const source = $('source_name') ? $('source_name').value : 'Portal';
+      const rawFiles = Array.from($('docFiles') ? $('docFiles').files || [] : []);
+      const remarks = $('remarks') ? $('remarks').value.trim() : '';
+
+      if ($('revName')) $('revName').textContent = name || '—';
+      if ($('revMobile')) $('revMobile').textContent = mob ? `+91 ${mob}` : '—';
+      if ($('revEmail')) $('revEmail').textContent = em || 'Not Provided';
+      if ($('revCity')) $('revCity').textContent = city || 'PAN India';
+      if ($('revProduct')) $('revProduct').textContent = `${product} (${variant})`;
+      if ($('revAmount')) $('revAmount').textContent = fmtAmt;
+      if ($('revIncome')) $('revIncome').textContent = `${empType} (₹${income.toLocaleString('en-US')}/mo)`;
+      if ($('revFinance')) $('revFinance').textContent = `EMI: ₹${emi.toLocaleString('en-US')}/mo | PAN: ${pan || 'N/A'}`;
+      if ($('revBanks')) $('revBanks').textContent = banks;
+      if ($('revAdvisor')) $('revAdvisor').textContent = advisor;
+      if ($('revTAT')) $('revTAT').textContent = tat;
+      if ($('revSource')) $('revSource').textContent = source;
+      if ($('revDocs')) $('revDocs').textContent = rawFiles.length > 0 ? `${rawFiles.length} file(s) attached` : 'Checklist verified (Min. 1 doc accepted)';
+      if ($('revRemarks')) $('revRemarks').textContent = remarks || 'Immediate fast-track requested';
+    }
+
+    // ── STAFF CODE LOOKUP ──
+    function onEmpCodeTyped(val) {
+      let code = String(val || '').trim().toUpperCase();
+      if (/^\d+$/.test(code)) code = 'DC' + code.padStart(3, '0');
+
+      const emp = ACTIVE_EMPLOYEES.find(e => e.code === code || e.EMP_CODE === code);
+      if (emp) {
+        $('sales_name').value = emp.name || emp.EMPLOYEES_NAME || '';
+        $('employee_email').value = emp.email || emp.EMPLOYEE_EMAIL_ID || '';
+        const mgr = emp.managerEmail || emp.MANAGER_EMAIL_ID || 'upendra.raghav@divyanshicapital.com';
+        $('manager_email_id').value = mgr;
+        $('manager_display').value = `${mgr} (${emp.name || 'Staff'})`;
+        $('empHint').innerHTML = `<span class="hint-success">✓ ${safe(emp.name)} (${safe(emp.role || 'Advisor')})</span>`;
+      } else {
+        $('empHint').innerHTML = `<span class="hint-info">ℹ Code ${safe(code)} · Central Management Desk</span>`;
+      }
+    }
+
+    // ── ENTRY TYPE SWITCH ──
+    function toggleFields() {
+      const et = $('entry_type').value;
+      const isHR = et === 'NEW_STAFF_ENTRY';
+      const isVisitor = et === 'VISITOR_ENTRY';
+
+      $('calcWidget').style.display = (isHR || isVisitor) ? 'none' : 'block';
+      $('incomeFields').style.display = (isHR || isVisitor) ? 'none' : 'grid';
+      $('financeFields').style.display = (isHR || isVisitor) ? 'none' : 'grid';
+      $('loanProductFields').style.display = (isHR || isVisitor) ? 'none' : 'grid';
+
+      if (isHR) {
+        $('kycSecTitle').textContent = '💼 Candidate / Staff Information';
+        $('clientNameLabel').innerHTML = 'Candidate Full Name <span class="req">*</span>';
+      } else if (isVisitor) {
+        $('kycSecTitle').textContent = '🏢 Office Visitor Information';
+        $('clientNameLabel').innerHTML = 'Visitor Full Name <span class="req">*</span>';
+      } else {
+        $('kycSecTitle').textContent = '👤 Applicant KYC & Contact Information';
+        $('clientNameLabel').innerHTML = 'Full Name (As per Aadhaar/PAN) <span class="req">*</span>';
+      }
+
+      renderDocChecklist();
+      runAIMonitor();
+    }
+
+    // ── MOBILE LOOKUP ──
+    function onMobileInput(val) {
+      const clean = String(val || '').replace(/\D/g, '').slice(0, 10);
+      $('mobile').value = clean;
+      if (clean.length === 10) {
+        $('mobHint').innerHTML = `<span class="hint-info">🔍 Checking records for +91-${clean}…</span>`;
+        if (isGAS()) {
+          google.script.run.withSuccessHandler(res => {
+            if (res && res.ok && res.found && res.client) {
+              const c = res.client;
+              if (c.name && !$('client_name').value) $('client_name').value = c.name;
+              if (c.email && !$('email').value) $('email').value = c.email;
+              if (c.pan && !$('pan_no').value) $('pan_no').value = c.pan;
+              $('mobHint').innerHTML = `<span class="hint-success">⚡ Client Found: ${safe(c.name)}</span>`;
+            } else {
+              $('mobHint').innerHTML = `<span class="hint-success">✓ Valid 10-digit mobile number</span>`;
+            }
+          }).P1_SEARCH_CLIENT_BY_MOBILE(clean);
+        } else {
+          $('mobHint').innerHTML = `<span class="hint-success">✓ Valid 10-digit mobile number</span>`;
+        }
+      }
+      runAIMonitor();
+    }
+
+    function searchExistingClient(val) {
+      return onMobileInput(val);
+    }
+
+    // ── PINCODE LOOKUP ──
+    function onPincodeInput(val) {
+      const clean = String(val || '').replace(/\D/g, '').slice(0, 6);
+      $('pincode').value = clean;
+      if (clean.length === 6 && isGAS()) {
+        $('pinHint').innerHTML = `<span class="hint-info">🗺️ Resolving location…</span>`;
+        google.script.run.withSuccessHandler(res => {
+          if (res && res.ok) {
+            const loc = (res.city ? res.city + ', ' : '') + res.state;
+            $('city').value = loc;
+            $('pinHint').innerHTML = `<span class="hint-success">📍 ${safe(res.formattedAddress || loc)}</span>`;
+          }
+        }).P1_GEOCODE_ADDRESS_(clean);
+      }
+    }
+
+    // ── FINANCIAL ESTIMATOR ──
+    function recalculateEstimator() {
+      const amt = Number($('amount') ? $('amount').value : 500000) || 500000;
+      const income = Number($('monthly_income') ? $('monthly_income').value : 50000) || 50000;
+      const emiExisting = Number($('existing_emi') ? $('existing_emi').value : 0) || 0;
+      const product = $('loan_type') ? $('loan_type').value.toUpperCase() : 'PERSONAL LOAN';
+
+      // Standard EMI: 10.5% for 5 years (60 months)
+      const r = (10.5 / 12) / 100;
+      const n = 60;
+      const estEmi = Math.round(amt * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1));
+      if ($('calcEMI')) $('calcEMI').textContent = `₹${estEmi.toLocaleString('en-US')} / mo`;
+
+      // 55% FOIR Max Loan
+      const maxMonthlyBudget = Math.max(0, (income * 0.55) - emiExisting);
+      const maxEligibleAmt = Math.round(maxMonthlyBudget * (Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n)));
+      if ($('calcMaxLoan')) {
+        $('calcMaxLoan').textContent = maxEligibleAmt >= 10000000 
+          ? `₹${(maxEligibleAmt/10000000).toFixed(2)} Cr` 
+          : `₹${(maxEligibleAmt/100000).toFixed(1)} Lakhs`;
+      }
+
+      // SLA TAT
+      const tat = TAT_MAP[product] || 7;
+      if ($('calcTAT')) $('calcTAT').textContent = `${tat} Business Days`;
+    }
+
+    function onLoanTypeChanged() {
+      const p = ($('loan_type') ? $('loan_type').value : 'Personal Loan').toUpperCase();
+      const matchKey = Object.keys(LOAN_PRODUCT_VARIANTS).find(k => p.includes(k) || k.includes(p)) || "PERSONAL LOAN";
+      const variants = LOAN_PRODUCT_VARIANTS[matchKey] || ["Fresh Standard Loan", "Balance Transfer (BT)", "Top-Up Loan"];
+      
+      const vSelect = $('loan_variant');
+      if (vSelect) {
+        vSelect.innerHTML = variants.map(v => `<option value="${safe(v)}">${safe(v)}</option>`).join('');
+      }
+      renderBankChips();
+      renderDocChecklist();
+      recalculateEstimator();
+      runAIMonitor();
+    }
+
+    function renderBankChips() {
+      const p = ($('loan_type') ? $('loan_type').value : 'Personal Loan').toUpperCase();
+      const varKey = Object.keys(LOAN_PRODUCT_VARIANTS).find(k => p.includes(k) || k.includes(p)) || "PERSONAL LOAN";
+      const variants = LOAN_PRODUCT_VARIANTS[varKey] || ["Fresh Standard Loan", "Balance Transfer (BT)", "Top-Up Loan"];
+      
+      const vSelect = $('loan_variant');
+      if (vSelect && (!vSelect.dataset.lastLoan || vSelect.dataset.lastLoan !== p)) {
+        vSelect.dataset.lastLoan = p;
+        vSelect.innerHTML = variants.map(v => `<option value="${safe(v)}">${safe(v)}</option>`).join('');
+      }
+
+      const matchKey = Object.keys(BANK_MAP).find(k => p.includes(k) || k.includes(p)) || "PERSONAL LOAN";
+      const banks = BANK_MAP[matchKey] || ["HDFC Bank", "Axis Bank", "ICICI Bank", "Kotak Bank"];
+
+      selectedBanks = [banks[0], banks[1] || banks[0]];
+      $('preferred_bank').value = selectedBanks.join(', ');
+
+      const container = $('bankChips');
+      if (!container) return;
+
+      container.innerHTML = banks.map(b => {
+        const isSel = selectedBanks.includes(b);
+        return `
+          <div class="bank-chip ${isSel ? 'selected' : ''}" onclick="toggleChip(this)" data-bank="${safe(b)}">
+            <div class="chk"></div>
+            <span>${safe(b)}</span>
+          </div>`;
+      }).join('');
+
+      renderDocChecklist();
+      recalculateEstimator();
+      runAIMonitor();
+    }
+
+    function toggleChip(el) {
+      const bName = el.dataset.bank || el.innerText.trim();
+      if (selectedBanks.includes(bName)) {
+        if (selectedBanks.length > 1) {
+          selectedBanks = selectedBanks.filter(b => b !== bName);
+          el.classList.remove('selected');
+        }
+      } else {
+        selectedBanks.push(bName);
+        el.classList.add('selected');
+      }
+      $('preferred_bank').value = selectedBanks.join(', ');
+      runAIMonitor();
+    }
+
+    function renderDocChecklist() {
+      const et = $('entry_type') ? $('entry_type').value : 'SALES_LEAD';
+      const box = $('docList');
+      if (!box) return;
+
+      let docs = [
+        { name: 'PAN Card (Primary Identity)', tag: 'Mandatory', required: true },
+        { name: 'Aadhaar Card / Passport (Address Proof)', tag: 'Mandatory', required: true }
+      ];
+
+      if (et === 'NEW_STAFF_ENTRY') {
+        docs = [
+          { name: 'Resume / Curriculum Vitae', tag: 'Mandatory', required: true },
+          { name: 'Aadhaar & PAN Card Proof', tag: 'Mandatory', required: true },
+          { name: 'Highest Degree Certificate', tag: 'Academic', required: true },
+          { name: 'Previous Experience / Relieving Letter', tag: 'Experience', required: false }
+        ];
+      } else if (et === 'VISITOR_ENTRY') {
+        docs = [{ name: 'Visiting Card / Govt Photo ID Proof', tag: 'Entry Proof', required: true }];
+      } else {
+        const empType = String($('employment_type') ? $('employment_type').value : 'SALARIED').toUpperCase();
+        const p = String($('loan_type') ? $('loan_type').value : 'PERSONAL LOAN').toUpperCase();
+        const v = String($('loan_variant') ? $('loan_variant').value : '').toUpperCase();
+
+        if (empType.includes('SALARIED')) {
+          docs.push({ name: 'Last 3 Months Salary Slips', tag: 'Income Proof', required: true });
+          docs.push({ name: '6 Months Salary Bank Account Statement', tag: 'Banking', required: true });
+          docs.push({ name: 'Form 16 / Latest 2 Years ITR', tag: 'Tax Proof', required: false });
+        } else if (empType.includes('PROFESSIONAL') || p.includes('PROFESSIONAL')) {
+          docs.push({ name: 'Degree / Council Registration Certificate', tag: 'Professional Proof', required: true });
+          docs.push({ name: 'Last 2 Years ITR with Computation & Balance Sheet', tag: 'Financials', required: true });
+          docs.push({ name: '12 Months Primary Bank Statement', tag: 'Banking', required: true });
+        } else if (empType.includes('BUSINESS') || empType.includes('DIRECTOR') || empType.includes('MSME') || p.includes('BUSINESS')) {
+          docs.push({ name: 'Business Registration (GST / Udyam / COI / Partnership Deed)', tag: 'Entity Proof', required: true });
+          docs.push({ name: 'Last 2-3 Years CA-Audited Financials (P&L, Balance Sheet)', tag: 'Financials', required: true });
+          docs.push({ name: '12 Months Current Bank Account Statement', tag: 'Banking', required: true });
+          docs.push({ name: 'Latest 12 Months GSTR-3B Returns', tag: 'Tax Proof', required: false });
+        } else {
+          docs.push({ name: 'Last 2 Years ITR / Income Certificate', tag: 'Income', required: true });
+          docs.push({ name: '12 Months Active Bank Statement', tag: 'Banking', required: true });
+        }
+
+        if (p.includes('MACHINERY') || p.includes('EQUIPMENT')) {
+          docs.push({ name: 'Machinery Proforma Invoice / Quotation with Specs', tag: 'Collateral/Asset', required: true });
+          docs.push({ name: 'Existing Plant Layout / Electricity Bill', tag: 'Premises', required: false });
+        }
+
+        if (p.includes('PROPERTY') || p.includes('LAP') || p.includes('HOME') || p.includes('PROJECT')) {
+          docs.push({ name: 'Complete Property Chain Deeds (13-30 Years)', tag: 'Collateral', required: true });
+          docs.push({ name: 'Approved Building / Floor Plan Map & Tax Receipt', tag: 'Property Verification', required: false });
+        }
+
+        if (v.includes('BT') || v.includes('BALANCE TRANSFER') || v.includes('TOP-UP')) {
+          docs.push({ name: 'Existing Loan Sanction Letter & Statement of Account (12M SOA)', tag: 'BT Proof', required: true });
+          docs.push({ name: 'Foreclosure Letter / Outstanding Principal Amount', tag: 'Foreclosure', required: false });
+        }
+
+        if (p.includes('WORKING') || v.includes('OD') || v.includes('CC') || v.includes('LIMIT')) {
+          docs.push({ name: 'Sanction Letters of Existing Banking Limits', tag: 'Limit Proof', required: false });
+          docs.push({ name: 'Stock & Debtors Statement / Projected Financials', tag: 'Working Capital', required: false });
+        }
+      }
+
+      box.innerHTML = docs.map(d => `
+        <label class="check-item" style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" checked value="${safe(d.name)}" onchange="runAIMonitor()">
+            <span style="font-size:13px; color:var(--ink);">${safe(d.name)}</span>
+          </div>
+          <span class="badge ${d.required ? 'badge-semi' : ''}" style="font-size:10px; padding:2px 6px; border-radius:4px; font-weight:700;">${safe(d.tag)}</span>
+        </label>`).join('');
+    }
+
+    function runAIMonitor() {
+      // Background monitor for UI validation state
+    }
+
+    // ── SUBMISSION HANDLER ──
+    const fileToB64 = f => new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = () => rej(r.error);
+      r.readAsDataURL(f);
+    });
+
+    async function submitForm() {
+      const submitButtons = document.querySelectorAll('.btn-submit');
+      if (submitButtons.length > 0 && Array.from(submitButtons).some(b => b.disabled)) return;
+
+      const et = $('entry_type').value;
+      const isHR = et === 'NEW_STAFF_ENTRY';
+      const isVisitor = et === 'VISITOR_ENTRY';
+
+      // Gather checked docs
+      const checkedDocBoxes = document.querySelectorAll('#docList input[type="checkbox"]:checked');
+      const docsListStr = Array.from(checkedDocBoxes).map(cb => cb.value).join(', ');
+
+      const payload = {
+        entry_type: et,
+        emp_code: $('emp_code').value.trim().toUpperCase() || 'DC002',
+        sales_name: $('sales_name').value.trim(),
+        employee_email: $('employee_email').value.trim(),
+        manager_email_id: $('manager_email_id').value.trim(),
+        client_name: $('client_name').value.trim(),
+        client_mobile: $('mobile').value.trim(),
+        client_email: $('email').value.trim(),
+        city_location: $('city').value.trim(),
+        loan_type: isHR ? 'STAFF_ONBOARDING' : (isVisitor ? 'OFFICE_VISITOR' : $('loan_type').value),
+        loan_variant: $('loan_variant') ? $('loan_variant').value : 'Fresh Standard Loan',
+        required_loan_amount: isHR || isVisitor ? '0' : ($('amount').value.trim() || '0'),
+        employment_type: $('employment_type') ? $('employment_type').value : 'Salaried',
+        monthly_income: $('monthly_income') ? $('monthly_income').value : '0',
+        preferred_bank: $('preferred_bank').value.trim() || 'HDFC Bank',
+        pan_no: $('pan_no') ? $('pan_no').value.trim() : '',
+        existing_emi: $('existing_emi') ? $('existing_emi').value : '0',
+        docs_list: docsListStr,
+        source_name: $('source_name').value,
+        remarks: $('remarks').value.trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      if (!payload.client_name || payload.client_name.length < 2) { showStatus('Full applicant name required', 'error'); return; }
+      if (!MOBILE_RE.test(payload.client_mobile)) { showStatus('Valid 10-digit mobile required', 'error'); return; }
+
+      submitButtons.forEach(b => b.disabled = true);
+      showStatus('⚡ 🚀 Dispatched at Bullet Speed! Routing to Banks...', 'loading');
+
+      const rawFiles = Array.from($('docFiles') ? $('docFiles').files || [] : []);
+      if (rawFiles.length > 0) {
+        try {
+          payload.files = await Promise.all(rawFiles.map(async f => ({
+            name: f.name,
+            mimeType: f.type || 'application/octet-stream',
+            base64: await fileToB64(f)
+          })));
+        } catch (_) {}
+      }
+
+      const onSuccess = (res) => {
+        submitButtons.forEach(b => b.disabled = false);
+        hideStatus();
+        if (res && (res.ok || res.success)) {
+          showSuccess(res.leadId || res.lid || 'Generated', payload, res.tatDays || 4);
+        } else {
+          showStatus('❌ Submission failed: ' + ((res && (res.err || res.errorMessage)) || 'Server error'), 'error');
+        }
+      };
+
+      const onError = (err) => {
+        submitButtons.forEach(b => b.disabled = false);
+        showStatus('❌ Connection error: ' + (err.message || String(err)), 'error');
+      };
+
+      if (isGAS()) {
+        google.script.run
+          .withSuccessHandler(onSuccess)
+          .withFailureHandler(onError)
+          .P1_SMART_FORM_SUBMIT(payload);
+      } else {
+        fetch(window.GAS_EXEC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'submit_lead', payload: payload })
+        }).then(r => r.json()).then(onSuccess).catch(onError);
+      }
+    }
+
+    // ── SUCCESS VIEW ──
+    function showSuccess(leadId, p, tat) {
+      document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+      $('stepSuccess').classList.add('active');
+
+      $('succLeadId').textContent = leadId;
+      $('succName').textContent = `${p.client_name} (+91 ${p.client_mobile})`;
+      $('succProduct').textContent = `${p.loan_type} (₹${Number(p.required_loan_amount).toLocaleString('en-US')})`;
+      $('succBanker').textContent = p.sales_name || p.emp_code;
+      $('succTAT').textContent = `${tat} Business Days`;
+
+      const waMsg = `Hi ${p.client_name.split(' ')[0]}, Welcome to Divyanshi Capital! ✅\n\nYour ${p.loan_type} request (Lead ID: ${leadId}) has been received.\n\nAssigned Advisor: ${p.sales_name || p.emp_code}\nEstimated TAT: ${tat} Business Days\n\nOur team will call you within 2 hours.\n📞 Urgent: +91-9899032117 | Helpline: +91-7838074351\n\n— Team Divyanshi Capital`;
+      $('succWaBody').textContent = waMsg;
+      $('succWaLink').href = `https://wa.me/91${p.client_mobile}?text=${encodeURIComponent(waMsg)}`;
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function copyWhatsAppMessage() {
+      const text = $('succWaBody').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showStatus('✅ WhatsApp message copied!', 'success');
+        setTimeout(hideStatus, 2000);
+      });
+    }
+
+    function resetForm() {
+      $('client_name').value = '';
+      $('mobile').value = '';
+      $('email').value = '';
+      $('remarks').value = '';
+      if ($('docFiles')) $('docFiles').value = '';
+      goStep(1);
+    }
+
+    function showStatus(msg, type) {
+      const bar = $('statusBar');
+      bar.className = 'status-bar show ' + (type || 'loading');
+      $('statusMsg').textContent = msg;
+    }
+    function hideStatus() { $('statusBar').className = 'status-bar'; }
+
+    init();
+  </script>
+</body>
+</html>

@@ -2,19 +2,36 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Divyanshi Capital AI-Based OS (Canonical Master Repository)
 
-This contains everything you need to run your app locally.
+Unified Enterprise Fintech Operating System combining:
+1. **AI Studio Web App & OCR Ingestion**: React 19 + Vite 6 + Gemini 2.5 Flash + Express API (`server.ts`).
+2. **Core Apps Script & Bulbhul Banking Brain**: `gas-backend/` & `Code.gs` connected to Script ID `1PP7wUFkDAkmgOjgPKeWbZeg3Ajs9N4ZNRPnfih_LMv89KEdSTVPvtipp`.
+3. **Unified Loan Automation Core**: Integrated workflow documentation, credit policy models, and Firestore rules.
 
-View your app in AI Studio: https://ai.studio/apps/58a38ce7-05f6-4277-854b-ac083bed23ae
+---
+
+## Production Identifiers
+- **Apps Script ID**: `1PP7wUFkDAkmgOjgPKeWbZeg3Ajs9N4ZNRPnfih_LMv89KEdSTVPvtipp`
+- **Web App Deployment ID**: `AKfycbwzdhZF3cVTT01atwZOSnXq7kBvx6k9NgFCbSvfAIXldCjBnMUqxKIBlLUPTiA7V8tc`
+- **Authoritative Sheets**: `ALL_EMPLOYEES`, `COMMON_ENTRY`, `MASTER_DATA`, `Loan_Bank_Map`.
+
+---
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js 18+
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+   ```bash
+   npm install
+   ```
+2. Configure environment:
+   ```bash
+   cp .env.example .env.local
+   # Configure GEMINI_API_KEY and APPS_SCRIPT_URL
+   ```
+3. Start development server:
+   ```bash
+   npm run dev
+   ```

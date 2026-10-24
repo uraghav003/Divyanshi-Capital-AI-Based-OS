@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "Lead": {
+      "title": "Lead",
+      "description": "Represents a potential loan customer in the sales pipeline.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Auto-generated lead identifier" },
+        "name": { "type": "string", "description": "Customer name" },
+        "amount": { "type": "string", "description": "Loan amount requested" },
+        "loanType": { "type": "string", "description": "Type of loan (Personal, Business, etc.)" },
+        "bank": { "type": "string", "description": "Target bank" },
+        "stage": { "type": "string", "description": "Current pipeline stage (Fresh, Login, etc.)" },
+        "CITY_LOCATION": { "type": "string", "description": "Customer location" },
+        "time": { "type": "string", "description": "Relative time string for display" },
+        "userId": { "type": "string", "description": "Owner of the lead record" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "amount", "loanType", "userId"]
+    },
+    "RelationshipManager": {
+      "title": "Relationship Manager",
+      "description": "Bank contact responsible for loan processing.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "bank": { "type": "string" },
+        "city": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "loanType": { "type": "string" },
+        "userId": { "type": "string", "description": "User who added the RM" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "bank", "userId"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Operational task or reminder.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "notes": { "type": "string" },
+        "due": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["needsAction", "completed"] },
+        "category": { "type": "string", "description": "Derived category (Calling, Verification, etc.)" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "status", "userId"]
+    },
+    "SalesLog": {
+      "title": "Sales Log",
+      "description": "Auditing log for sales activities.",
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string" },
+        "empCode": { "type": "string" },
+        "action": { "type": "string" },
+        "details": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["timestamp", "action", "userId"]
+    },
+    "Employee": {
+      "title": "Employee",
+      "description": "Personnel Registry record of Divyanshi Capital RM",
+      "type": "object",
+      "properties": {
+        "EMPLOYEES_NAME": { "type": "string" },
+        "EMPLOYEE_EMAIL_ID": { "type": "string", "format": "email" },
+        "ROLE": { "type": "string" },
+        "EMP_CODE": { "type": "string" },
+        "SYSTEM_KEY": { "type": "string" },
+        "WHATSAPP_VERIFIED": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["EMPLOYEES_NAME", "EMPLOYEE_EMAIL_ID", "EMP_CODE"]
+    }
+  },
+  "firestore": {
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Loan pipeline records"
+    },
+    "/rms/{rmId}": {
+      "schema": "RelationshipManager",
+      "description": "Bank RM directory"
+    },
+    "/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Operational checklists"
+    },
+    "/salesLogs/{logId}": {
+      "schema": "SalesLog",
+      "description": "Audit trails for user actions"
+    },
+    "/all_employees/{empId}": {
+      "schema": "Employee",
+      "description": "Employee and Personnel Directory"
+    }
+  }
+}

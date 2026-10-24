@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Divyanshi Capital | India's Premier Loan & Finance Facilitator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+  <link rel="dns-prefetch" href="https://ui-avatars.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
+    h1, h2, h3, .display, .serif { font-family: 'Playfair Display', Georgia, serif; }
+
+    /* ── DYNAMIC ROLE-BASED CSS THEME VARIABLES (Default: Midnight Executive Gold) ── */
+    :root {
+      --primary: #0B1F3A;
+      --primary-dark: #071426;
+      --primary-light: #142d54;
+      --accent: #C9A84C;
+      --accent-hover: #e8c56a;
+      --accent-dim: #8a6f2e;
+      --highlight: #F97316;
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text: #0F172A;
+      --text-muted: #64748B;
+      --line: #E2E8F0;
+      --green: #10B981;
+      --red: #EF4444;
+      --card-shadow: 0 12px 36px rgba(11, 31, 58, 0.08);
+      --hero-grad: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 60%, #1e3a8a 100%);
+      --badge-bg: rgba(201, 168, 76, 0.15);
+      --badge-text: var(--accent-hover);
+    }
+
+    body { background: var(--bg); color: var(--text); overflow-x: hidden; -webkit-tap-highlight-color: transparent; min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+    input, select, textarea, button { font-family: 'DM Sans', sans-serif; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+    /* ── TOPBAR & TICKER ── */
+    .topbar { background: var(--primary-dark); color: rgba(255, 255, 255, 0.85); padding: 8px 5%; display: flex; justify-content: space-between; align-items: center; font-size: 12px; gap: 8px; flex-wrap: wrap; }
+    .ticker-wrap { flex: 1; overflow: hidden; white-space: nowrap; background: rgba(255, 255, 255, 0.06); border-radius: 6px; padding: 4px 12px; margin: 0 12px; }
+    .ticker { display: inline-block; animation: ticker 32s linear infinite; font-size: 11px; font-weight: 700; color: var(--accent-hover); letter-spacing: 0.5px; text-transform: uppercase; }
+    @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+    /* ── HEADER ── */
+    .header { background: rgba(255, 255, 255, 0.98); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); padding: 12px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--line); box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04); }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .logo-img { height: 38px; width: auto; }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+    .logo-name { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 900; color: var(--primary); }
+    .logo-tag { font-size: 8.5px; font-weight: 800; color: var(--highlight); letter-spacing: 1.2px; text-transform: uppercase; }
+    
+    .nav { display: flex; gap: 20px; align-items: center; }
+    .nav a { font-size: 13px; font-weight: 700; color: var(--text); transition: color 0.2s; cursor: pointer; }
+    .nav a:hover, .nav a.active { color: var(--accent-dim); }
+    
+    .btn { background: var(--accent); color: #000; border: 0; border-radius: 10px; padding: 11px 22px; font-weight: 800; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.2px; text-decoration: none; }
+    .btn:hover { background: var(--accent-hover); transform: translateY(-1.5px); box-shadow: 0 8px 24px rgba(201, 168, 76, 0.35); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.5; pointer-events: none; }
+    .btn-orange { background: var(--highlight); color: #fff; }
+    .btn-orange:hover { background: #ea580c; box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35); }
+    .btn-outline { background: transparent; border: 1.5px solid rgba(255, 255, 255, 0.3); color: #fff; }
+    .btn-outline:hover { background: rgba(255, 255, 255, 0.1); border-color: #fff; transform: translateY(-1.5px); }
+
+    /* ── STAFF BANNER ── */
+    .staff-bar { background: linear-gradient(90deg, var(--primary), var(--primary-light)); color: #fff; padding: 10px 5%; display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; gap: 8px; }
+    .staff-bar-left { display: flex; align-items: center; gap: 10px; }
+    .dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite; flex-shrink: 0; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.3); } }
+
+    /* ── HERO SECTION ── */
+    .hero { background: var(--hero-grad); color: #fff; padding: 60px 5% 50px; position: relative; overflow: hidden; }
+    .hero-inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 50px; align-items: center; max-width: 1280px; margin: 0 auto; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--badge-bg); border: 1px solid rgba(201, 168, 76, 0.35); border-radius: 100px; padding: 6px 16px; font-size: 12px; font-weight: 800; color: var(--badge-text); letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 20px; }
+    .hero h1 { font-size: 44px; line-height: 1.15; margin-bottom: 16px; font-weight: 900; }
+    .hero h1 span { color: var(--accent); }
+    .hero p { font-size: 16px; line-height: 1.7; color: rgba(255, 255, 255, 0.82); margin-bottom: 28px; font-weight: 400; }
+    .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+    .hero-stats { display: flex; gap: 28px; margin-top: 36px; flex-wrap: wrap; }
+    .stat-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: var(--accent); }
+    .stat-lbl { font-size: 11px; color: rgba(255, 255, 255, 0.65); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+    /* ── EMPLOYEE BANKER PROFILE CARD ── */
+    .emp-card { background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(201, 168, 76, 0.35); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-radius: 24px; padding: 30px; box-shadow: 0 25px 60px rgba(0,0,0,0.3); text-align: center; }
+    .emp-avatar-wrap { position: relative; width: 96px; height: 96px; margin: 0 auto 16px; }
+    .emp-avatar { width: 96px; height: 96px; border-radius: 50%; border: 3.5px solid var(--accent); object-fit: cover; display: block; box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+    .emp-online { position: absolute; bottom: 4px; right: 4px; width: 18px; height: 18px; background: var(--green); border: 3px solid var(--primary-dark); border-radius: 50%; }
+    .emp-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .emp-role { font-size: 12.5px; color: var(--accent-hover); font-weight: 700; margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .emp-dept { font-size: 11px; color: rgba(255,255,255,0.65); margin-bottom: 20px; }
+    .emp-actions { display: flex; flex-direction: column; gap: 10px; }
+    .eab { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; width: 100%; text-decoration: none; }
+    .eab-wa { background: rgba(37, 211, 102, 0.15); color: #25d366; border-color: rgba(37, 211, 102, 0.3); }
+    .eab-wa:hover { background: #25d366; color: #fff; }
+    .eab-call { background: rgba(201, 168, 76, 0.15); color: var(--accent-hover); border-color: rgba(201, 168, 76, 0.3); }
+    .eab-call:hover { background: var(--accent); color: #000; }
+    .eab-apply { background: var(--accent); color: #000; font-weight: 800; }
+    .eab-apply:hover { background: var(--accent-hover); }
+
+    /* ── PARTNERS MARQUEE ── */
+    .partners { background: var(--primary-dark); padding: 18px 5%; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .ptrack { display: flex; gap: 46px; align-items: center; animation: pscroll 30s linear infinite; white-space: nowrap; }
+    .partner-tag { font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.5); letter-spacing: 1px; text-transform: uppercase; transition: color 0.2s; }
+    .partner-tag:hover { color: var(--accent); }
+    @keyframes pscroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    /* ── PRODUCTS GRID ── */
+    .section { padding: 70px 5%; max-width: 1300px; margin: 0 auto; }
+    .slabel { font-size: 11px; font-weight: 800; color: var(--accent-dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+    .stitle { font-size: 34px; font-weight: 900; color: var(--primary); margin-bottom: 8px; line-height: 1.2; }
+    .ssub { font-size: 15px; color: var(--text-muted); margin-bottom: 36px; line-height: 1.6; max-width: 700px; }
+    
+    .loan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+    .loan-card { background: var(--card-bg); border: 1.5px solid var(--line); border-radius: 18px; padding: 26px 20px; cursor: pointer; transition: all 0.3s; text-align: center; position: relative; overflow: hidden; }
+    .loan-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-hover)); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+    .loan-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(11, 31, 58, 0.1); border-color: var(--accent); }
+    .loan-card:hover::before { transform: scaleX(1); }
+    .loan-icon { font-size: 40px; margin-bottom: 12px; display: inline-block; }
+    .loan-card h3 { font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 6px; }
+    .loan-card p { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .loan-tag { display: inline-block; background: rgba(201, 168, 76, 0.12); color: var(--accent-dim); font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 100px; margin-top: 12px; }
+
+    /* ── EMI CALCULATOR SECTION ── */
+    .calc-section { background: var(--hero-grad); padding: 70px 5%; color: #fff; }
+    .calc-wrap { max-width: 1050px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    .calc-box { background: #fff; border-radius: 24px; padding: 36px; box-shadow: var(--card-shadow); color: var(--text); }
+    .flabel { font-size: 12px; font-weight: 800; color: var(--primary); margin: 14px 0 6px; letter-spacing: 0.4px; text-transform: uppercase; }
+    .field { width: 100%; padding: 13px 16px; border: 1.5px solid var(--line); border-radius: 12px; font-size: 14px; font-weight: 600; color: var(--text); background: #fdfdfd; transition: all 0.2s; }
+    .field:focus { border-color: var(--accent); box-shadow: 0 0 0 3.5px rgba(201, 168, 76, 0.15); outline: none; background: #fff; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .rbox { background: var(--primary); color: #fff; border-radius: 16px; padding: 22px; margin-top: 22px; display: none; animation: fadeUp 0.3s ease; }
+    .remi { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 800; color: var(--accent); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── SMART FORM ── */
+    .form-wrap { background: var(--bg); min-height: 100vh; padding: 48px 5%; }
+    .form-box { max-width: 660px; margin: 0 auto; background: #fff; border-radius: 24px; padding: 40px; box-shadow: var(--card-shadow); border: 1.5px solid var(--line); }
+    .staff-mini { display: flex; align-items: center; gap: 14px; background: linear-gradient(135deg, rgba(11,31,58,0.04), rgba(201,168,76,0.08)); border: 1px solid rgba(201,168,76,0.25); border-radius: 16px; padding: 14px 18px; margin-bottom: 24px; }
+    .staff-mini img { width: 48px; height: 48px; border-radius: 50%; border: 2.5px solid var(--accent); object-fit: cover; }
+    .bank-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 8px; }
+    .bchip { border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 12px; cursor: pointer; font-size: 11.5px; font-weight: 700; transition: all 0.2s; display: flex; align-items: center; gap: 8px; background: #fafafa; }
+    .bchip.selected { border-color: var(--accent); background: rgba(201, 168, 76, 0.1); color: var(--primary); }
+    .msg { text-align: center; margin-top: 14px; font-size: 13.5px; font-weight: 700; min-height: 20px; }
+    .ok { color: var(--green); } .err { color: var(--red); }
+
+    /* ── BULBHUL AI CHATBOT ── */
+    .cfab { position: fixed; right: 24px; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); width: 62px; height: 62px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 26px; z-index: 200; cursor: pointer; box-shadow: 0 10px 30px rgba(201, 168, 76, 0.45); transition: all 0.3s; border: 0; }
+    .cfab:hover { transform: scale(1.08); }
+    .cbox { display: none; position: fixed; right: 24px; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); width: 390px; max-width: calc(100vw - 32px); height: 530px; background: #fff; border-radius: 24px; z-index: 199; overflow: hidden; box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2); border: 1px solid var(--line); animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); flex-direction: column; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .chead { background: var(--primary); color: #fff; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .chead-info { display: flex; align-items: center; gap: 10px; }
+    .chead-av { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .chead-title-row { display: flex; align-items: center; gap: 6px; }
+    .chead-title { font-weight: 800; font-size: 14px; }
+    .chead-rename-btn { background: rgba(255,255,255,0.2); border: 0; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 6px; cursor: pointer; transition: all 0.2s; line-height: 1; }
+    .chead-rename-btn:hover { background: var(--accent); color: #000; }
+    .chead-status { font-size: 11px; color: var(--green); font-weight: 700; margin-top: 2px; }
+    .chead-close { cursor: pointer; opacity: 0.8; font-size: 18px; background: none; border: 0; color: #fff; padding: 4px; }
+    .cbody { flex: 1; overflow-y: auto; padding: 16px; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; }
+    .bubble { padding: 12px 16px; border-radius: 16px; font-size: 13px; line-height: 1.55; max-width: 86%; word-break: break-word; font-weight: 500; }
+    .bot-b { background: #fff; color: var(--text); border: 1px solid var(--line); border-bottom-left-radius: 4px; align-self: flex-start; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .user-b { background: var(--primary); color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
+    .quick-chips { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 14px; background: #fff; border-top: 1px solid var(--line); }
+    .qchip { font-size: 11px; font-weight: 700; color: var(--primary); background: #f1f5f9; padding: 5px 10px; border-radius: 100px; cursor: pointer; transition: all 0.2s; border: 1px solid var(--line); }
+    .qchip:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+    .cinp { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--line); background: #fff; align-items: center; }
+    .cinp input { flex: 1; padding: 10px 16px; border: 1.5px solid var(--line); border-radius: 100px; font-size: 13px; background: #f8fafc; outline: none; transition: border-color 0.2s; }
+    .cinp input:focus { border-color: var(--accent); }
+    .csend, .cmic { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); border: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; transition: all 0.2s; flex-shrink: 0; }
+    .csend:hover, .cmic:hover { background: var(--accent-hover); }
+    .cmic { background: #f1f5f9; color: var(--text); border: 1px solid var(--line); }
+    .cmic.listening { background: var(--red); color: #fff; animation: pulse 1s infinite; }
+
+    /* ── MOBILE STICKY BOTTOM BAR ── */
+    .mobile-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.98); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border-top: 1px solid var(--line); padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)); z-index: 99; justify-content: space-around; box-shadow: 0 -4px 20px rgba(0,0,0,0.06); }
+    .mob-item { display: flex; flex-direction: column; align-items: center; font-size: 10.5px; font-weight: 700; color: var(--text-muted); gap: 3px; padding: 4px 10px; border-radius: 8px; cursor: pointer; }
+    .mob-item.active { color: var(--primary); }
+    .mob-icon { font-size: 18px; }
+
+    @media(max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 36px; }
+      .hero h1 { font-size: 34px; }
+      .calc-wrap { grid-template-columns: 1fr; }
+      .nav { display: none; }
+      .header .btn { display: none; }
+      .mobile-bar { display: flex; }
+      .cfab { bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
+      .cbox { bottom: calc(140px + env(safe-area-inset-bottom, 0px)); }
+      body { padding-bottom: 70px; }
+    }
+  </style>
+</head>
+<body>
+  <script id="BOOT_DATA" type="application/json">{}</script>
+  <div id="app"></div>
+
+  <!-- ── 1-BRAIN BULBHUL AI ASSISTANT ── -->
+  <button class="cfab" onclick="toggleChat()" id="chatFab" title="Talk to Bulbhul AI Banker">💬</button>
+  <div class="cbox" id="cbox">
+    <div class="chead">
+      <div class="chead-info">
+        <div class="chead-av">🤖</div>
+        <div>
+          <div class="chead-title-row">
+            <span class="chead-title" id="aiAssistantTitle">Bulbhul AI Banker</span>
+            <button type="button" class="chead-rename-btn" onclick="renameAiAssistant(event)" title="Click to rename your AI Assistant">✏️</button>
+          </div>
+          <div class="chead-status" id="aiAssistantSubtitle">● Personal AI Copilot · Online</div>
+        </div>
+      </div>
+      <button type="button" onclick="toggleChat()" class="chead-close" title="Close AI window">✕</button>
+    </div>
+    <div class="cbody" id="cbody">
+      <div class="bubble bot-b" id="aiWelcomeBubble">Namaste! 🙏 Main aapka personal AI Banker hun. Loan eligibility, banking criteria, required docs ya instant status — kuch bhi puchein!</div>
+    </div>
+    <div class="quick-chips">
+      <button type="button" class="qchip" onclick="quickAsk('Personal loan ke liye documents kya chahiye?')">📄 Docs List</button>
+      <button type="button" class="qchip" onclick="quickAsk('Personal Loan 10.5% ROI eligibility criteria?')">💳 10.5% ROI</button>
+      <button type="button" class="qchip" onclick="quickAsk('Minimum CIBIL score required for bank approval?')">🎯 Min CIBIL</button>
+      <button type="button" class="qchip" onclick="quickAsk('Business loan same day approval process?')">🏢 Business Loan</button>
+      <button type="button" class="qchip" onclick="renameAiAssistant(event)">✨ Name My AI</button>
+    </div>
+    <div class="cinp">
+      <button type="button" class="cmic" id="micBtn" onclick="toggleSpeech()" title="Voice Speak (Hindi/English)" aria-label="Speak to Bulbhul">🎙</button>
+      <label for="ci" class="sr-only">Message Bulbhul AI</label>
+      <input id="ci" placeholder="Message Bulbhul AI..." onkeypress="if(event.key==='Enter')sendChat()" aria-label="Message Bulbhul AI">
+      <button type="button" class="csend" onclick="sendChat()" aria-label="Send message">➤</button>
+    </div>
+  </div>
+
+  <!-- ── MOBILE BOTTOM NAVIGATION BAR ── -->
+  <div class="mobile-bar">
+    <a href="javascript:void(0)" onclick="go('home')" class="mob-item active"><span class="mob-icon">🏠</span>Home</a>
+    <a href="javascript:void(0)" onclick="go('form')" class="mob-item"><span class="mob-icon">📝</span>Apply</a>
+    <a href="javascript:void(0)" onclick="go('card')" class="mob-item"><span class="mob-icon">💼</span>My Card</a>
+    <a href="javascript:void(0)" onclick="go('dashboard')" class="mob-item"><span class="mob-icon">📊</span>Dashboard</a>
+    <a href="javascript:void(0)" onclick="go('calling')" class="mob-item"><span class="mob-icon">📞</span>Calling</a>
+    <a href="javascript:void(0)" onclick="toggleChat(); return false;" class="mob-item"><span class="mob-icon">🤖</span>AI Banker</a>
+  </div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// GLOBAL WATCHDOG
+// ══════════════════════════════════════════════════════════════
+window.__DIVYANSHI_ERROR_BUFFER__ = window.__DIVYANSHI_ERROR_BUFFER__ || [];
+window.addEventListener('error', function(e) {
+  var errInfo = { type: 'UNCLEAN_ERROR', message: e.message, filename: e.filename, lineno: e.lineno, time: new Date().toISOString() };
+  window.__DIVYANSHI_ERROR_BUFFER__.push(errInfo);
+  console.error('[DIVYANSHI_WATCHDOG]', errInfo);
+});
+window.addEventListener('unhandledrejection', function(e) {
+  var reason = e.reason ? (e.reason.message || String(e.reason)) : 'Unhandled rejection';
+  var errInfo = { type: 'UNHANDLED_PROMISE', reason: reason, time: new Date().toISOString() };
+  window.__DIVYANSHI_ERROR_BUFFER__.push(errInfo);
+  console.error('[DIVYANSHI_PROMISE_WATCHDOG]', errInfo);
+});
+
+// ══════════════════════════════════════════════════════════════
+// 🎨 10 ROLE-BASED DYNAMIC CORPORATE BANKING THEMES
+// ══════════════════════════════════════════════════════════════
+var DC_ROLE_THEMES = {
+  EXECUTIVE: { primary: "#0B1F3A", primaryDark: "#061224", primaryLight: "#142d54", accent: "#C9A84C", accentHover: "#e8c56a", accentDim: "#8a6f2e", highlight: "#F97316", heroGrad: "linear-gradient(135deg, #0B1F3A 0%, #142d54 60%, #1e3a8a 100%)" },
+  CREDIT: { primary: "#064E3B", primaryDark: "#022c22", primaryLight: "#047857", accent: "#10B981", accentHover: "#34d399", accentDim: "#059669", highlight: "#D97706", heroGrad: "linear-gradient(135deg, #064E3B 0%, #065f46 60%, #047857 100%)" },
+  SALES: { primary: "#7C2D12", primaryDark: "#431407", primaryLight: "#9A3412", accent: "#F97316", accentHover: "#fb923c", accentDim: "#c2410c", highlight: "#EAB308", heroGrad: "linear-gradient(135deg, #7C2D12 0%, #9A3412 60%, #c2410c 100%)" },
+  TELECALLER: { primary: "#31104B", primaryDark: "#1e082f", primaryLight: "#4c1d95", accent: "#8B5CF6", accentHover: "#a78bfa", accentDim: "#6d28d9", highlight: "#EC4899", heroGrad: "linear-gradient(135deg, #31104B 0%, #4c1d95 60%, #6366f1 100%)" },
+  ACCOUNTS: { primary: "#1E293B", primaryDark: "#0f172a", primaryLight: "#334155", accent: "#F59E0B", accentHover: "#fbbf24", accentDim: "#d97706", highlight: "#10B981", heroGrad: "linear-gradient(135deg, #1E293B 0%, #334155 60%, #475569 100%)" },
+  HR: { primary: "#881337", primaryDark: "#4c0519", primaryLight: "#9f1239", accent: "#FB7185", accentHover: "#fda4af", accentDim: "#e11d48", highlight: "#F59E0B", heroGrad: "linear-gradient(135deg, #881337 0%, #9f1239 60%, #be123c 100%)" },
+  DSA: { primary: "#18181B", primaryDark: "#09090b", primaryLight: "#27272a", accent: "#EAB308", accentHover: "#facc15", accentDim: "#ca8a04", highlight: "#3B82F6", heroGrad: "linear-gradient(135deg, #18181B 0%, #27272a 60%, #3f3f46 100%)" },
+  DIGITAL: { primary: "#082F49", primaryDark: "#031726", primaryLight: "#0369a1", accent: "#06B6D4", accentHover: "#22d3ee", accentDim: "#0891b2", highlight: "#F43F5E", heroGrad: "linear-gradient(135deg, #082F49 0%, #0369a1 60%, #0284c7 100%)" },
+  HOME_LOAN: { primary: "#0F172A", primaryDark: "#020617", primaryLight: "#1E293B", accent: "#38BDF8", accentHover: "#7dd3fc", accentDim: "#0284c7", highlight: "#10B981", heroGrad: "linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #0369a1 100%)" },
+  BUSINESS_LOAN: { primary: "#1C1917", primaryDark: "#0c0a09", primaryLight: "#292524", accent: "#D97706", accentHover: "#f59e0b", accentDim: "#b45309", highlight: "#EF4444", heroGrad: "linear-gradient(135deg, #1C1917 0%, #292524 60%, #44403c 100%)" }
+};
+
+function applyRoleTheme(roleOrDept, overrideKey) {
+  var key = String(overrideKey || "").toUpperCase();
+  if (!key || !DC_ROLE_THEMES[key]) {
+    var str = String(roleOrDept || "").toUpperCase();
+    if (/FOUNDER|MD|DIRECTOR|CEO|HEAD|EXECUTIVE/.test(str)) key = "EXECUTIVE";
+    else if (/CREDIT|UNDERWRITER|RISK|POLICY/.test(str)) key = "CREDIT";
+    else if (/SALES|RELATIONSHIP|RM|BUSINESS DEVELOPMENT/.test(str)) key = "SALES";
+    else if (/CALL|TELECALLER|SUPPORT|COORDINATOR/.test(str)) key = "TELECALLER";
+    else if (/ACCOUNT|PAYOUT|FINANCE|DISBURSAL/.test(str)) key = "ACCOUNTS";
+    else if (/HR|TALENT|RECRUIT|TRAINING/.test(str)) key = "HR";
+    else if (/DSA|PARTNER|CONNECTOR|AGENT/.test(str)) key = "DSA";
+    else if (/DIGITAL|GROWTH|MARKETING|SEO/.test(str)) key = "DIGITAL";
+    else if (/HOME LOAN|MORTGAGE|HOUSING/.test(str)) key = "HOME_LOAN";
+    else if (/BUSINESS LOAN|MSME|WORKING CAPITAL/.test(str)) key = "BUSINESS_LOAN";
+    else key = "EXECUTIVE";
+  }
+
+  var t = DC_ROLE_THEMES[key] || DC_ROLE_THEMES.EXECUTIVE;
+  var root = document.documentElement;
+  root.style.setProperty('--primary', t.primary);
+  root.style.setProperty('--primary-dark', t.primaryDark);
+  root.style.setProperty('--primary-light', t.primaryLight);
+  root.style.setProperty('--accent', t.accent);
+  root.style.setProperty('--accent-hover', t.accentHover);
+  root.style.setProperty('--accent-dim', t.accentDim);
+  root.style.setProperty('--highlight', t.highlight);
+  root.style.setProperty('--hero-grad', t.heroGrad);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ⚙️ INITIALIZATION & DATA BOOTSTRAP
+const EMP_CODE = (window.__DC_BOOT__ && window.__DC_BOOT__.empCode) || (new URLSearchParams(location.search).get('emp')) || (new URLSearchParams(location.search).get('emp_code')) || 'DC002';
+
+function loadAssignedCases() {
+  if (hasGAS()) {
+    google.script.run
+      .withSuccessHandler(function(cases) {
+        console.log("Assigned cases loaded:", cases);
+      })
+      .withFailureHandler(function(err) {
+        console.error("Failed to load assigned cases:", err);
+      })
+      .getAssignedCases(EMP_CODE);
+  }
+}
+
+var BOOT = (window.__DC_BOOT__ && window.__DC_BOOT__.staff) || {};
+try {
+  var raw = document.getElementById('BOOT_DATA') ? document.getElementById('BOOT_DATA').textContent.trim() : '';
+  if (raw && !raw.startsWith('<?') && !raw.startsWith('__P1') && raw !== '{}') {
+    BOOT = Object.assign({}, BOOT, JSON.parse(raw));
+  }
+} catch (e) {}
+
+var qs = new URLSearchParams(location.search);
+var PAGE = String(BOOT.page || qs.get('page') || 'home').toLowerCase();
+var EMP = String(EMP_CODE || BOOT.code || BOOT.empCode || BOOT.emp || qs.get('emp') || qs.get('emp_code') || '').toUpperCase();
+var PRODUCT = String(BOOT.product || qs.get('product') || '').toUpperCase();
+var THEME_PARAM = String(BOOT.theme || qs.get('theme') || '').toUpperCase();
+var EMP_ENC = encodeURIComponent(EMP_CODE || EMP);
+var ROUTE_STATE = { amount: '', income: '', product: '' };
+
+var PRODUCTS = [
+  { code: 'PL', name: 'Personal Loan', icon: '💳', tat: 4, roi: 10.5, minAmt: 50000, maxAmt: 5000000 },
+  { code: 'BL', name: 'Business Loan', icon: '🏢', tat: 6, roi: 14.0, minAmt: 100000, maxAmt: 7500000 },
+  { code: 'PROF', name: 'Professional Loan', icon: '🩺', tat: 3, roi: 10.25, minAmt: 100000, maxAmt: 5000000 },
+  { code: 'MACH', name: 'Machinery Loan', icon: '⚙️', tat: 6, roi: 11.5, minAmt: 200000, maxAmt: 20000000 },
+  { code: 'HL', name: 'Home Loan', icon: '🏠', tat: 15, roi: 8.4, minAmt: 500000, maxAmt: 50000000 },
+  { code: 'LAP', name: 'Loan Against Property', icon: '🏦', tat: 10, roi: 9.5, minAmt: 500000, maxAmt: 100000000 },
+  { code: 'WC', name: 'Working Capital', icon: '📈', tat: 7, roi: 10.0, minAmt: 500000, maxAmt: 50000000 },
+  { code: 'AUTO', name: 'Auto Loan', icon: '🚗', tat: 5, roi: 9.0, minAmt: 100000, maxAmt: 3000000 },
+  { code: 'EDU', name: 'Education Loan', icon: '🎓', tat: 7, roi: 9.25, minAmt: 200000, maxAmt: 15000000 },
+  { code: 'GOLD', name: 'Gold Loan', icon: '🪙', tat: 2, roi: 8.5, minAmt: 25000, maxAmt: 2500000 },
+  { code: 'PROJ', name: 'Project Loan', icon: '🏗️', tat: 15, roi: 11.0, minAmt: 1000000, maxAmt: 100000000 }
+];
+
+var BMAP = {
+  "PERSONAL LOAN": ["HDFC BANK", "ICICI BANK", "AXIS BANK", "STATE BANK OF INDIA", "KOTAK BANK", "IDFC FIRST", "BAJAJ FINSERV", "TATA CAPITAL", "POONAWALLA"],
+  "BUSINESS LOAN": ["AXIS BANK", "HDFC BANK", "BAJAJ FINSERV", "L&T FINANCE", "ICICI BANK", "PIRAMAL", "LENDINGKART", "UGRO CAPITAL"],
+  "PROFESSIONAL LOAN": ["HDFC BANK", "ICICI BANK", "AXIS BANK", "STATE BANK OF INDIA", "KOTAK BANK", "BAJAJ FINSERV", "POONAWALLA", "IDFC FIRST"],
+  "MACHINERY LOAN": ["STATE BANK OF INDIA", "HDFC BANK", "AXIS BANK", "TATA CAPITAL", "BAJAJ FINSERV", "L&T FINANCE", "SIDBI", "ICICI BANK", "PIRAMAL"],
+  "HOME LOAN": ["STATE BANK OF INDIA", "HDFC BANK", "ICICI BANK", "LIC HOUSING", "PNB HOUSING", "AXIS BANK", "BANK OF BARODA"],
+  "LOAN AGAINST PROPERTY": ["HDFC BANK", "ICICI BANK", "STATE BANK OF INDIA", "AXIS BANK", "BAJAJ FINSERV", "PIRAMAL"],
+  "WORKING CAPITAL": ["STATE BANK OF INDIA", "HDFC BANK", "ICICI BANK", "AXIS BANK", "BANK OF BARODA", "KOTAK BANK"],
+  "AUTO LOAN": ["HDFC BANK", "ICICI BANK", "STATE BANK OF INDIA", "AXIS BANK", "MAHINDRA FINANCE"],
+  "EDUCATION LOAN": ["STATE BANK OF INDIA", "HDFC CREDILA", "AVANSE", "AXIS BANK", "ICICI BANK"],
+  "GOLD LOAN": ["MUTHOOT FINANCE", "MANAPPURAM", "HDFC BANK", "STATE BANK OF INDIA"],
+  "PROJECT LOAN": ["STATE BANK OF INDIA", "HDFC BANK", "ICICI BANK", "AXIS BANK", "BANK OF BARODA", "PIRAMAL"]
+};
+
+var STAFF = BOOT.staff || null;
+
+function hasGAS() { return typeof google !== 'undefined' && typeof google.script !== 'undefined' && typeof google.script.run !== 'undefined'; }
+function $app(h) { var el = document.getElementById('app'); if (el) el.innerHTML = h; }
+function safe(s) { return String(s || '').replace(/[&<>"']/g, function(m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]; }); }
+function money(n) { var v = Number(n); return isFinite(v) ? v.toLocaleString('en-IN') : '0'; }
+function burl() { return location.href.split('?')[0]; }
+
+function ru(page, extra) {
+  var u = burl() + '?page=' + encodeURIComponent(page || 'home');
+  if (EMP && EMP !== 'EMP_CODE') u += '&emp=' + EMP_ENC;
+  if (THEME_PARAM) u += '&theme=' + encodeURIComponent(THEME_PARAM);
+  if (extra) Object.keys(extra).forEach(function(k) { if (extra[k] != null && extra[k] !== '') u += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(extra[k]); });
+  return u;
+}
+
+function updateActiveNav(targetPage) {
+  var p = String(targetPage || 'home').toLowerCase();
+  document.querySelectorAll('.mob-item').forEach(function(item) {
+    var txt = item.textContent.toLowerCase();
+    if ((p === 'home' && txt.includes('home')) ||
+        ((p === 'form' || p === 'apply' || p === 'smart') && txt.includes('apply')) ||
+        ((p === 'card' || p === 'profile') && txt.includes('card')) ||
+        (p === 'dashboard' && txt.includes('dashboard')) ||
+        (p === 'calling' && txt.includes('calling'))) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+}
+
+function go(p, extra) {
+  if (typeof p === 'string' && (p === 'home' || p === 'form' || p === 'apply' || p === 'card' || p === 'profile' || p === 'dashboard' || p === 'avatar' || p === 'calling' || p === 'voice')) {
+    PAGE = (p === 'apply' || p === 'smart') ? 'form' : (p === 'profile' ? 'card' : p);
+    if (extra && extra.product) PRODUCT = extra.product;
+    if (extra && extra.amount) ROUTE_STATE.amount = extra.amount;
+    if (extra && extra.income) ROUTE_STATE.income = extra.income;
+    try { if (window.history && window.history.pushState) window.history.pushState({}, '', ru(PAGE, extra)); } catch (_) {}
+    renderPage();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+  var targetUrl = ru(p, extra);
+  window.location.href = targetUrl;
+}
+
+function callGAS(action, payload) {
+  return new Promise(function(res, rej) {
+    if (hasGAS()) {
+      if (typeof google.script.run[action] === 'function') {
+        google.script.run.withSuccessHandler(res).withFailureHandler(rej)[action](payload);
+      } else {
+        google.script.run.withSuccessHandler(res).withFailureHandler(rej)['doPost']({
+          parameter: { action: action },
+          postData: { contents: JSON.stringify({ action: action, payload: payload }) }
+        });
+      }
+    } else {
+      setTimeout(function() {
+        if (action === 'avatar_chat') {
+          res({ ok: true, reply: "Namaste! Divyanshi Capital Bulbhul AI is ready to help you with Instant Loans, Minimum 10.5% ROI, and 100% Paperless Processing." });
+        } else if (action === 'P1_SMART_FORM_SUBMIT') {
+          res({ ok: true, success: true, leadId: "DC/" + Date.now().toString().slice(-4), tatDays: 4 });
+        } else {
+          res({ ok: true });
+        }
+      }, 400);
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// 🏛️ HEADER & BANKER PROFILE WIDGET
+// ══════════════════════════════════════════════════════════════
+function hdr() {
+  var s = STAFF || {};
+  var empCode = EMP_CODE || EMP || s.code || s.EMP_CODE || 'DC002';
+  var staffName = s.name || s.EMPLOYEES_NAME || 'Central Processing Desk';
+  var staffBar = '<div class="staff-bar"><div class="staff-bar-left"><span class="dot"></span><span>Official Banker Portal: <strong>' + safe(staffName) + ' (' + safe(EMP_CODE || empCode) + ')</strong> — Direct 1-Brain Tracked</span></div><a href="javascript:void(0)" onclick="go(\'card\')" style="color:var(--accent);font-size:12px;font-weight:700">View Banker Card ✦</a></div>';
+
+  return '<div class="topbar"><span>📞 +91-9899032117 | ✉️ support@divyanshicapital.com</span><div class="ticker-wrap"><span class="ticker">🔥 Personal Loan from 10.5% &nbsp;|&nbsp; Business Loan Same Day In-Principle Approval &nbsp;|&nbsp; Home Loan 8.4% &nbsp;|&nbsp; 500+ Partner Lenders &nbsp;|&nbsp; 100% Paperless Process</span></div><span>Mon–Sat 9AM–7PM</span></div>' +
+    staffBar +
+    '<div class="header"><div class="logo-wrap" onclick="go(\'home\')"><img class="logo-img" src="https://www.divyanshicapital.com/wp-content/uploads/2021/09/logo1.png" onerror="this.style.display=\'none\'" alt="Divyanshi Capital"><div class="logo-text"><span class="logo-name">Divyanshi Capital</span><span class="logo-tag">Loan Facilitator OS</span></div></div><div class="nav"><a href="javascript:void(0)" onclick="go(\'home\')" ' + (PAGE === 'home' ? 'class="active"' : '') + '>Home</a><a href="javascript:void(0)" onclick="go(\'form\')" ' + (PAGE === 'form' ? 'class="active"' : '') + '>Apply for Loan</a><a href="javascript:void(0)" onclick="go(\'card\')" ' + (PAGE === 'card' ? 'class="active"' : '') + '>My Card</a><a href="javascript:void(0)" onclick="go(\'dashboard\')" ' + (PAGE === 'dashboard' ? 'class="active"' : '') + '>Dashboard</a><a href="javascript:void(0)" onclick="go(\'calling\')" ' + (PAGE === 'calling' ? 'class="active"' : '') + '>Calling Desk</a><a href="javascript:void(0)" onclick="toggleChat(); return false;" style="color:var(--accent);font-weight:800">🤖 Bulbhul AI</a></div><a class="btn btn-orange" href="javascript:void(0)" onclick="go(\'form\')">Apply Free ✦</a></div>';
+}
+
+function empWidget() {
+  var s = STAFF || {
+    name: "Upendra Singh Raghav",
+    role: "Managing Director",
+    department: "Executive Desk",
+    mobile: "7838074351",
+    email: "upendra.raghav@divyanshicapital.com"
+  };
+
+  var pic = safe(s.avatarUrl || s.avatar_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name || 'DC') + '&background=0B1F3A&color=C9A84C&size=160&bold=true');
+  var mob = safe(s.mobile || '7838074351');
+  var waMsg = encodeURIComponent('Namaste ' + (s.name || 'Advisor') + '! Mujhe loan application aur eligibility discuss karni hai. (Ref: ' + (EMP || 'DC002') + ')');
+
+  return '<div class="emp-card">' +
+    '<div class="emp-avatar-wrap"><img class="emp-avatar" src="' + pic + '" onerror="this.src=\'https://ui-avatars.com/api/?name=DC&background=0B1F3A&color=C9A84C&size=160&bold=true\'"><div class="emp-online"></div></div>' +
+    '<div class="emp-name">' + safe(s.name) + '</div>' +
+    '<div class="emp-role">' + safe(s.role || 'Certified Loan Banker') + '</div>' +
+    '<div class="emp-dept">' + safe(s.department || s.dept || 'Divyanshi Capital') + '</div>' +
+    '<div class="emp-actions">' +
+      '<a class="eab eab-wa" href="https://wa.me/91' + mob + '?text=' + waMsg + '" target="_blank">💬 WhatsApp Banker</a>' +
+      '<a class="eab eab-call" href="tel:' + mob + '">📞 Direct Call: ' + mob + '</a>' +
+      '<a class="eab eab-apply" href="javascript:void(0)" onclick="go(\'form\')">📝 Apply with ' + safe(s.name.split(' ')[0]) + ' →</a>' +
+    '</div>' +
+  '</div>';
+}
+
+// ══════════════════════════════════════════════════════════════
+// 📄 1. HOME VIEW
+// ══════════════════════════════════════════════════════════════
+function renderHome() {
+  var partnersList = ["HDFC Bank", "ICICI Bank", "SBI", "Axis Bank", "Kotak Mahindra", "Bajaj Finserv", "Tata Capital", "IDFC FIRST", "Piramal", "L&T Finance", "Poonawalla Fincorp"];
+  var prow = partnersList.map(function(p) { return '<span class="partner-tag">✦ ' + p + '</span>'; }).join('');
+  
+  var lcards = PRODUCTS.map(function(p) {
+    return '<div class="loan-card" onclick="go(\'form\', { product: \'' + p.code + '\' })">' +
+      '<span class="loan-icon">' + p.icon + '</span>' +
+      '<h3>' + safe(p.name) + '</h3>' +
+      '<p>Starting ' + p.roi + '% ROI · TAT ' + p.tat + ' Days</p>' +
+      '<span class="loan-tag">Apply Now →</span>' +
+    '</div>';
+  }).join('');
+
+  var popts = PRODUCTS.map(function(p) { return '<option value="' + safe(p.code) + '">' + safe(p.name) + '</option>'; }).join('');
+
+  $app(hdr() +
+    '<div class="hero"><div class="hero-inner"><div>' +
+      '<div class="hero-badge">✦ Unified Central Brain Network</div>' +
+      '<h1>Accelerate Your<br><span>Financial Ambitions</span></h1>' +
+      '<p>Access verified loan solutions across 500+ premier institutional lenders. 100% paperless processing, policy-matched rates, and direct assistance from your dedicated banker.</p>' +
+      '<div class="hero-btns">' +
+        '<a class="btn btn-orange" href="javascript:void(0)" onclick="go(\'form\')">Apply Free ✦</a>' +
+        '<a class="btn btn-outline" href="#calc" onclick="document.getElementById(\'calc\').scrollIntoView({behavior:\'smooth\'})">Calculate EMI</a>' +
+        '<a class="btn" style="background:rgba(255,255,255,0.15);color:#fff" href="javascript:void(0)" onclick="go(\'card\')">Banker Profile</a>' +
+      '</div>' +
+      '<div class="hero-stats">' +
+        '<div><div class="stat-num">₹500Cr+</div><div class="stat-lbl">Disbursed</div></div>' +
+        '<div><div class="stat-num">500+</div><div class="stat-lbl">Bank Partners</div></div>' +
+        '<div><div class="stat-num">8.4%</div><div class="stat-lbl">Lowest ROI</div></div>' +
+        '<div><div class="stat-num">4 Days</div><div class="stat-lbl">Avg. TAT</div></div>' +
+      '</div>' +
+    '</div>' +
+    empWidget() +
+    '</div></div>' +
+    '<div class="partners"><div class="ptrack">' + prow + prow + '</div></div>' +
+    '<div class="section">' +
+      '<div class="slabel">Lending Solutions</div>' +
+      '<h2 class="stitle">Tailored Credit for Every Need</h2>' +
+      '<p class="ssub">Pre-approved limits and automated matchmaking powered by Bulbhul AI Matrix.</p>' +
+      '<div class="loan-grid">' + lcards + '</div>' +
+    '</div>' +
+    '<div class="calc-section" id="calc"><div class="calc-wrap">' +
+      '<div>' +
+        '<div class="slabel" style="color:var(--accent-hover)">Smart Pre-Eligibility</div>' +
+        '<h2 style="font-size:36px;margin:8px 0 16px;font-family:\'Playfair Display\',serif">Instant Loan<br>Calculator</h2>' +
+        '<p style="color:rgba(255,255,255,0.75);font-size:14.5px;line-height:1.7;margin-bottom:24px">Calculate estimated EMI and instantly pass pre-filled parameters directly to your loan application.</p>' +
+        '<div style="display:flex;flex-direction:column;gap:12px">' +
+          '<div style="display:flex;align-items:center;gap:10px"><span>⚡</span><span>Zero impact on credit bureau</span></div>' +
+          '<div style="display:flex;align-items:center;gap:10px"><span>🔒</span><span>Bank-approved FOIR algorithms</span></div>' +
+          '<div style="display:flex;align-items:center;gap:10px"><span>🏦</span><span>Pre-matches optimal partner banks</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="calc-box">' +
+        '<label class="flabel" for="clt">Loan Type</label>' +
+        '<select class="field" id="clt" onchange="calcEMI()">' + popts + '</select>' +
+        '<div class="grid2">' +
+          '<div><label class="flabel" for="cin">Monthly Income ₹</label><input class="field" id="cin" type="number" placeholder="e.g. 60000" value="50000" oninput="calcEMI()"></div>' +
+          '<div><label class="flabel" for="cam">Loan Amount ₹</label><input class="field" id="cam" type="number" placeholder="e.g. 500000" value="500000" oninput="calcEMI()"></div>' +
+        '</div>' +
+        '<label class="flabel" for="cten">Tenure (Years)</label>' +
+        '<button class="btn btn-orange" style="width:100%;margin-top:18px" onclick="calcEMI()">Calculate Eligibility ✦</button>' +
+        '<div class="rbox" id="rbox" style="display:none;margin-top:18px">' +
+          '<div style="font-size:12px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.5px">Estimated Monthly EMI</div>' +
+          '<div id="remi" class="remi" style="font-size:32px;font-weight:900;color:var(--accent-hover);margin:6px 0">₹10,747</div>' +
+          '<div id="rmsg" style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.5">Safe FOIR Zone · High Approval Likelihood</div>' +
+          '<button class="btn btn-orange" style="width:100%;margin-top:14px" onclick="applyWithEMI()">Apply with these Details →</button>' +
+        '</div>' +
+    '</div></div>' + partnersGrid() + ft());
+}
+
+function partnersGrid() {
+  var banks = ["HDFC Bank", "State Bank of India", "ICICI Bank", "Axis Bank", "Kotak Mahindra", "Bajaj Finserv", "Tata Capital", "IDFC First", "Bank of Baroda", "PNB Housing", "SIDBI", "L&T Finance"];
+  var chips = banks.map(function(b) {
+    return '<div class="partner-card">🏛️ ' + safe(b) + '</div>';
+  }).join('');
+
+  return '<section class="sec" style="background:#fff">' +
+    '<div class="sec-title">' +
+      '<div class="slabel">Institutional Ecosystem</div>' +
+      '<h2 style="font-size:32px;margin-top:6px">Direct Lending Partners</h2>' +
+    '</div>' +
+    '<div class="partner-grid">' + chips + '</div>' +
+  '</section>';
+}
+
+function ft() {
+  return '<footer class="footer">' +
+    '<div class="footer-grid">' +
+      '<div>' +
+        '<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:900;color:var(--accent)">DIVYANSHI CAPITAL</div>' +
+        '<p style="color:rgba(255,255,255,0.65);font-size:13px;line-height:1.7;margin-top:10px">India\'s sovereign AI-powered loan aggregation platform. Facilitating transparent, ethical, and frictionless credit delivery across PAN India.</p>' +
+      '</div>' +
+      '<div>' +
+        '<div style="font-weight:700;margin-bottom:12px;color:#fff">Registered Office</div>' +
+        '<p style="color:rgba(255,255,255,0.65);font-size:13px;line-height:1.7">District Centre, Janakpuri<br>New Delhi 110058, India<br>support@divyanshicapital.com</p>' +
+      '</div>' +
+      '<div>' +
+        '<div style="font-weight:700;margin-bottom:12px;color:#fff">Compliance</div>' +
+        '<p style="color:rgba(255,255,255,0.65);font-size:13px;line-height:1.7">Operating under RBI Fair Practices Code as official Direct Selling Agent (DSA) partner for scheduled commercial banks & NBFCs.</p>' +
+      '</div>' +
+    '</div>' +
+    '<div style="text-align:center;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);font-size:12px;color:rgba(255,255,255,0.45)">© 2026 Divyanshi Capital Pvt Ltd · Bulbhul Sovereign Operating System V23.0</div>' +
+  '</footer>';
+}
+
+function renderCalc() {
+  renderHome();
+  var el = document.querySelector('.calc-wrap');
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ══════════════════════════════════════════════════════════════
+// 📝 2. SMART INTAKE FORM VIEW
+// ══════════════════════════════════════════════════════════════
+function renderForm() {
+  var s = STAFF || {};
+  var selectedProductCode = ROUTE_STATE.product || PRODUCT;
+  var popts = PRODUCTS.map(function(p) {
+    var sel = (selectedProductCode === p.code || selectedProductCode === p.name.toUpperCase()) ? 'selected' : '';
+    return '<option value="' + safe(p.name) + '" ' + sel + '>' + safe(p.name) + '</option>';
+  }).join('');
+
+  var preAmt = ROUTE_STATE.amount || qs.get('amount') || '';
+  var preIncome = ROUTE_STATE.income || qs.get('income') || '';
+
+  $app(hdr() +
+    '<div class="form-wrap"><div class="form-box">' +
+      '<div class="staff-mini">' +
+        '<img src="' + safe(s.avatarUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name || 'DC') + '&background=0B1F3A&color=C9A84C&size=80&bold=true') + '">' +
+        '<div><strong style="color:var(--primary);font-size:14.5px">' + safe(s.name || 'Assigned Banker') + '</strong> · ' + safe(s.role || 'Loan Advisor') +
+        '<div style="font-size:11.5px;color:var(--text-muted);margin-top:2px">Direct tracking enabled in Bulbhul Central Brain</div></div>' +
+      '</div>' +
+      '<h2 style="font-family:\'Playfair Display\',serif;font-size:26px;font-weight:900;color:var(--primary);margin-bottom:6px">Loan Application</h2>' +
+      '<p style="font-size:13.5px;color:var(--text-muted);margin-bottom:24px">Submit details for instantaneous bank underwriting & sanctioning.</p>' +
+      '<form id="lf">' +
+        '<input type="hidden" name="emp_code" value="' + safe(EMP || 'DC002') + '">' +
+        '<input type="hidden" name="source_name" value="PORTAL_WEB">' +
+        '<label class="flabel" for="client_name">Full Name (As per PAN / Aadhaar) *</label>' +
+        '<input class="field" id="client_name" name="client_name" placeholder="Enter complete name" required autocomplete="name">' +
+        '<div class="grid2">' +
+          '<div><label class="flabel" for="client_mobile">Mobile Number *</label><input class="field" id="client_mobile" name="client_mobile" placeholder="10-digit mobile" required pattern="[6-9][0-9]{9}" maxlength="10" inputmode="numeric" autocomplete="tel"></div>' +
+          '<div><label class="flabel" for="client_email">Email ID</label><input class="field" id="client_email" name="client_email" type="email" placeholder="name@email.com" autocomplete="email"></div>' +
+        '</div>' +
+        '<div class="grid2">' +
+          '<div><label class="flabel" for="city_location">City / Location</label><input class="field" id="city_location" name="city_location" placeholder="e.g. New Delhi" autocomplete="address-level2"></div>' +
+          '<div><label class="flabel" for="required_loan_amount">Required Loan Amount ₹ *</label><input class="field" id="required_loan_amount" name="required_loan_amount" type="number" min="1" placeholder="e.g. 500000" value="' + safe(preAmt) + '" required></div>' +
+        '</div>' +
+        '<div class="grid2">' +
+          '<div><label class="flabel" for="form_lt">Loan Product *</label>' +
+          '<select class="field" name="loan_type" id="form_lt" required onchange="loadBanks()"><option value="">-- Select Loan Type --</option>' + popts + '</select></div>' +
+          '<div><label class="flabel" for="form_lv">Loan Variant / Facility *</label>' +
+          '<select class="field" name="loan_variant" id="form_lv">' +
+            '<option value="Fresh Standard Loan">Fresh Standard Loan</option>' +
+          '</select></div>' +
+        '</div>' +
+        '<label class="flabel" for="employment_type">Employment Type</label>' +
+        '<select class="field" id="employment_type" name="employment_type">' +
+          '<option value="Salaried Employee (Corporate / MNC)">Salaried Employee (Corporate / MNC)</option>' +
+          '<option value="Salaried Employee (Government / PSU)">Salaried Employee (Government / PSU)</option>' +
+          '<option value="Self-Employed Professional (Doctor / CA)">Self-Employed Professional (Doctor / CA)</option>' +
+          '<option value="Business Owner (Proprietorship / Pvt Ltd)">Business Owner (Proprietorship / Pvt Ltd)</option>' +
+          '<option value="Director / Partner (Pvt Ltd / LLP)">Director / Partner (Pvt Ltd / LLP)</option>' +
+          '<option value="MSME Manufacturer / Trader">MSME Manufacturer / Trader</option>' +
+          '<option value="Agriculturist / Farmer">Agriculturist / Farmer</option>' +
+          '<option value="Other / Consultant">Other / Consultant</option>' +
+        '</select>' +
+        '<div id="bsec" style="display:none">' +
+          '<div class="flabel">Preferred Bank(s) Selection</div>' +
+          '<div class="bank-grid" id="bgrid"></div>' +
+          '<input type="hidden" name="preferred_bank" id="pb">' +
+        '</div>' +
+        '<label class="flabel" for="company_name">Company / Employer Name</label>' +
+        '<input class="field" id="company_name" name="company_name" placeholder="Current organisation" autocomplete="organization">' +
+        '<label class="flabel" for="monthly_income">Monthly Income / Salary ₹</label>' +
+        '<input class="field" id="monthly_income" name="monthly_income" type="number" min="0" placeholder="Net monthly credit" value="' + safe(preIncome) + '">' +
+        '<label class="flabel" for="remarks">Additional Remarks / Urgency</label>' +
+        '<textarea class="field" id="remarks" name="remarks" rows="2" placeholder="Any specific requirements..."></textarea>' +
+        '<button class="btn btn-orange" id="sb" style="width:100%;margin-top:24px;padding:14px" type="submit">Submit Application to Banker ✦</button>' +
+      '</form>' +
+      '<div id="fm" class="msg"></div>' +
+    '</div></div>'
+  );
+
+  document.getElementById('lf').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var formEl = this;
+    var btn = document.getElementById('sb'), msg = document.getElementById('fm');
+    var data = {};
+    if (window.FormData) {
+      try { new FormData(formEl).forEach(function(v, k) { data[k] = v; }); } catch (_) {}
+    }
+    if (Object.keys(data).length === 0) {
+      for (var i = 0; i < formEl.elements.length; i++) {
+        var field = formEl.elements[i];
+        if (field.name && !field.disabled && field.type !== 'submit') { data[field.name] = field.value; }
+      }
+    }
+    btn.disabled = true; btn.textContent = 'Submitting to Bulbhul Brain...';
+    msg.className = 'msg'; msg.textContent = 'Processing and routing lead...';
+
+    callGAS('P1_SMART_FORM_SUBMIT', data).then(function(res) {
+      btn.disabled = false; btn.textContent = 'Submit Application to Banker ✦';
+      if (res && (res.ok || res.success)) {
+        showThankYou(data.client_name, res.leadId || res.lid, res.tatDays || 4);
+      } else {
+        msg.className = 'msg err'; msg.textContent = '❌ ' + ((res && (res.err || res.errorMessage)) || 'Submission failed');
+      }
+    }).catch(function(err) {
+      btn.disabled = false; btn.textContent = 'Submit Application to Banker ✦';
+      msg.className = 'msg err'; msg.textContent = '❌ ' + (err.message || err);
+    });
+  });
+
+  loadBanks();
+}
+
+function showThankYou(name, leadId, tat) {
+  var box = document.querySelector('.form-box'); if (!box) return;
+  box.innerHTML = '<div style="text-align:center;padding:20px 0">' +
+    '<div style="font-size:54px;margin-bottom:12px">✅</div>' +
+    '<h2 style="font-family:\'Playfair Display\',serif;font-size:26px;color:var(--primary);margin-bottom:8px">Application Received!</h2>' +
+    '<p style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Thank you, <strong>' + safe(name) + '</strong>. Your file has been indexed in Bulbhul OS.</p>' +
+    '<div style="background:#f8fafc;border:1.5px solid var(--line);border-radius:16px;padding:18px;text-align:left;margin-bottom:24px">' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text-muted)">Lead ID:</span><strong>' + safe(leadId || 'Generated') + '</strong></div>' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text-muted)">TAT SLA:</span><strong>' + safe(tat) + ' Business Days</strong></div>' +
+      '<div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Assigned Banker:</span><strong>' + safe(STAFF && STAFF.name ? STAFF.name : 'Central Desk') + '</strong></div>' +
+    '</div>' +
+    '<button class="btn btn-orange" style="width:100%" onclick="go(\'home\')">← Back to Portal</button>' +
+  '</div>';
+}
+
+function loadVariants() {
+  var sel = document.getElementById('form_lt');
+  var val = sel ? sel.value.toUpperCase() : '';
+  var vSelect = document.getElementById('form_lv');
+  if (!vSelect) return;
+
+  var matchKey = Object.keys(LOAN_VARIANTS_MAP).find(function(k) { return val.includes(k) || k.includes(val); });
+  var variants = matchKey ? LOAN_VARIANTS_MAP[matchKey] : ["Fresh Standard Loan", "Balance Transfer (BT)", "Top-Up Loan"];
+
+  vSelect.innerHTML = variants.map(function(v) {
+    return '<option value="' + safe(v) + '">' + safe(v) + '</option>';
+  }).join('');
+}
+
+function loadBanks() {
+  loadVariants();
+  var sel = document.getElementById('form_lt');
+  var val = sel ? sel.value.toUpperCase() : '';
+  var sec = document.getElementById('bsec'); var grid = document.getElementById('bgrid');
+  if (!sec || !grid) return;
+
+  var matchKey = Object.keys(BMAP).find(function(k) { return val.includes(k) || k.includes(val); });
+  var banks = matchKey ? BMAP[matchKey] : ["HDFC BANK", "ICICI BANK", "AXIS BANK", "SBI", "KOTAK BANK"];
+  sec.style.display = 'block';
+
+  grid.innerHTML = banks.map(function(b) {
+    return '<label class="bchip">' +
+      '<input type="checkbox" value="' + safe(b) + '" onchange="syncBanks()">' + safe(b) +
+    '</label>';
+  }).join('');
+  document.getElementById('pb').value = '';
+  loadVariants();
+}
+
+function toggleBank(chip, name) {
+  var c = chip.querySelector('input');
+  c.checked = !c.checked;
+  chip.classList.toggle('selected', c.checked);
+  syncBanks();
+}
+
+function syncBanks() {
+  document.querySelectorAll('.bchip').forEach(function(chip) {
+    var input = chip.querySelector('input');
+    chip.classList.toggle('selected', Boolean(input && input.checked));
+  });
+  var checked = Array.from(document.querySelectorAll('.bchip input:checked')).map(function(c) { return c.value; });
+  document.getElementById('pb').value = checked.join(', ');
+}
+
+// ══════════════════════════════════════════════════════════════
+// 💼 3. DIGITAL BANKER BUSINESS CARD VIEW
+// ══════════════════════════════════════════════════════════════
+function renderCard() {
+  var s = STAFF || {
+    name: "Upendra Singh Raghav",
+    role: "Managing Director",
+    department: "Executive Desk",
+    mobile: "7838074351",
+    email: "upendra.raghav@divyanshicapital.com"
+  };
+
+  var pic = safe(s.avatarUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name || 'DC') + '&background=0B1F3A&color=C9A84C&size=200&bold=true');
+  var mob = safe(s.mobile || '7838074351');
+  var waMsg = encodeURIComponent('Hi ' + s.name + '! I would like to consult with you for a loan requirement.');
+
+  $app(hdr() +
+    '<div style="min-height:85vh;padding:40px 20px;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at top, var(--primary-light), var(--primary-dark))">' +
+      '<div style="width:420px;max-width:100%;border:1.5px solid rgba(201,168,76,0.3);border-radius:28px;padding:36px 28px;text-align:center;color:#fff;background:rgba(255,255,255,0.05);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:0 30px 80px rgba(0,0,0,0.5)">' +
+        '<div style="position:relative;width:110px;height:110px;margin:0 auto 16px">' +
+          '<img src="' + pic + '" style="width:110px;height:110px;border-radius:50%;border:3.5px solid var(--accent);object-fit:cover">' +
+          '<div style="position:absolute;bottom:4px;right:4px;width:20px;height:20px;background:var(--green);border:3px solid var(--primary-dark);border-radius:50%"></div>' +
+        '</div>' +
+        '<h2 style="font-family:\'Playfair Display\',serif;font-size:24px;margin-bottom:4px">' + safe(s.name) + '</h2>' +
+        '<div style="color:var(--accent);font-size:12.5px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:2px">' + safe(s.role || 'Certified Banker') + '</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:24px">Divyanshi Capital Pvt Ltd · ' + safe(EMP || 'DC002') + '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:11px">' +
+          '<a class="btn" style="background:#25d366;color:#fff" href="https://wa.me/91' + mob + '?text=' + waMsg + '" target="_blank">💬 Connect on WhatsApp</a>' +
+          '<a class="btn" style="background:var(--accent);color:#000" href="tel:' + mob + '">📞 Call: +91 ' + mob + '</a>' +
+          '<a class="btn btn-orange" href="javascript:void(0)" onclick="go(\'form\')">📝 Apply for Loan Direct</a>' +
+          '<button class="btn" style="background:rgba(255,255,255,0.12);color:#fff" onclick="downloadVCard()">📇 Save Contact to Phone</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>'
+  );
+}
+
+function downloadVCard() {
+  var s = STAFF || { name: "Divyanshi Advisor", mobile: "7838074351", email: "support@divyanshicapital.com" };
+  var vcard = "BEGIN:VCARD\nVERSION:3.0\nFN:" + (s.name || "Divyanshi Advisor") + "\nORG:Divyanshi Capital Pvt Ltd\nTEL;TYPE=CELL:+91" + (s.mobile || "7838074351") + "\nEMAIL:" + (s.email || "support@divyanshicapital.com") + "\nURL:" + location.href + "\nEND:VCARD";
+  var blob = new Blob([vcard], { type: "text/vcard;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = (s.name || "Banker").replace(/\s+/g, "_") + ".vcf";
+  a.click();
+}
+
+// ══════════════════════════════════════════════════════════════
+// 📊 4. DASHBOARD VIEW
+// ══════════════════════════════════════════════════════════════
+function renderDashboard() {
+  var d = BOOT.dashboardData || BOOT.dashboard || { stats: { myLeadsCount: 0, myPipelineValue: 0, myDisbursedCount: 0 }, leads: [] };
+  var stats = d.stats || { myLeadsCount: 0, myPipelineValue: 0, myDisbursedCount: 0 };
+  var leadsRows = (d.leads || d.cases || []).map(function(l) {
+    return '<tr>' +
+      '<td style="color:var(--accent);font-weight:700;padding:12px 10px">' + safe(l.date || l.leadId) + '</td>' +
+      '<td style="padding:12px 10px">' + safe(l.name || l.clientName) + '</td>' +
+      '<td style="padding:12px 10px">' + safe(l.mobile) + '</td>' +
+      '<td style="padding:12px 10px">' + safe(l.loanType) + '</td>' +
+      '<td style="padding:12px 10px">₹' + money(l.amount) + '</td>' +
+      '<td style="padding:12px 10px"><span style="background:rgba(201,168,76,0.15);color:var(--accent);padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700">' + safe(l.status) + '</span></td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan="6" style="text-align:center;padding:30px;color:rgba(255,255,255,0.4)">No active cases in queue</td></tr>';
+
+  $app(hdr() +
+    '<div style="background:#0a1628;color:#fff;min-height:90vh;padding:32px 5%">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:28px">' +
+        '<div><h1 style="font-size:26px;color:var(--accent);font-family:\'Playfair Display\',serif">Staff Banker Cockpit</h1><p style="color:rgba(255,255,255,0.6);font-size:13px">Central Lead Pipeline & Underwriting Queue</p></div>' +
+        '<a class="btn" style="background:rgba(255,255,255,0.1);color:#fff" href="javascript:void(0)" onclick="go(\'home\')">← Back to Portal</a>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px;margin-bottom:28px">' +
+        '<div style="background:#111d35;border:1px solid rgba(201,168,76,0.2);border-radius:18px;padding:22px"><div style="font-size:32px;font-weight:900;color:var(--accent);font-family:\'Playfair Display\',serif">' + (stats.myLeadsCount || stats.total || 0) + '</div><div style="font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-top:4px">Total Cases</div></div>' +
+        '<div style="background:#111d35;border:1px solid rgba(201,168,76,0.2);border-radius:18px;padding:22px"><div style="font-size:32px;font-weight:900;color:var(--green);font-family:\'Playfair Display\',serif">' + (stats.myDisbursedCount || stats.approved || 0) + '</div><div style="font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-top:4px">Disbursed</div></div>' +
+        '<div style="background:#111d35;border:1px solid rgba(201,168,76,0.2);border-radius:18px;padding:22px"><div style="font-size:32px;font-weight:900;color:var(--accent-hover);font-family:\'Playfair Display\',serif">₹' + (((stats.myPipelineValue || stats.volume || 0) / 100000).toFixed(1)) + 'L</div><div style="font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-top:4px">Pipeline Volume</div></div>' +
+      '</div>' +
+      '<div style="background:#111d35;border-radius:18px;padding:24px;overflow-x:auto;border:1px solid rgba(255,255,255,0.06)">' +
+        '<h3 style="color:var(--accent);margin-bottom:16px">Assigned Pipeline</h3>' +
+        '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
+          '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1);text-align:left;color:var(--accent)">' +
+            '<th style="padding:10px">Date / Lead</th><th style="padding:10px">Client</th><th style="padding:10px">Mobile</th><th style="padding:10px">Loan</th><th style="padding:10px">Amount</th><th style="padding:10px">Status</th>' +
+          '</tr></thead>' +
+          '<tbody>' + leadsRows + '</tbody>' +
+        '</table>' +
+      '</div>' +
+    '</div>'
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// 🤖 5. AVATAR VIEW
+// ══════════════════════════════════════════════════════════════
+function renderAvatar() {
+  var s = STAFF || {
+    name: "Upendra Singh Raghav",
+    role: "Managing Director",
+    department: "Executive Desk",
+    mobile: "7838074351",
+    email: "upendra.raghav@divyanshicapital.com"
+  };
+  var pic = safe(s.avatarUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name || 'DC') + '&background=0B1F3A&color=C9A84C&size=200&bold=true');
+
+  $app(hdr() +
+    '<div style="min-height:85vh;padding:40px 20px;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at top, var(--primary-light), var(--primary-dark))">' +
+      '<div style="width:460px;max-width:100%;border:1.5px solid rgba(201,168,76,0.3);border-radius:28px;padding:36px 28px;text-align:center;color:#fff;background:rgba(255,255,255,0.05);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:0 30px 80px rgba(0,0,0,0.5)">' +
+        '<div style="position:relative;width:110px;height:110px;margin:0 auto 16px">' +
+          '<img src="' + pic + '" style="width:110px;height:110px;border-radius:50%;border:3.5px solid var(--accent);object-fit:cover">' +
+          '<div style="position:absolute;bottom:4px;right:4px;width:20px;height:20px;background:var(--green);border:3px solid var(--primary-dark);border-radius:50%"></div>' +
+        '</div>' +
+        '<h2 style="font-family:\'Playfair Display\',serif;font-size:24px;margin-bottom:4px">Bulbhul AI Avatar</h2>' +
+        '<div style="color:var(--accent);font-size:12.5px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:2px">AI Banker for ' + safe(s.name) + ' (' + safe(EMP || 'DC002') + ')</div>' +
+        '<p style="font-size:13.5px;color:rgba(255,255,255,0.75);margin-bottom:24px">Ask questions about loan eligibility, minimum CIBIL, interest rates, or document requirements directly to your assigned banker AI.</p>' +
+        '<div style="display:flex;flex-direction:column;gap:11px">' +
+          '<button class="btn btn-orange" onclick="toggleChat()">💬 Open AI Banker Chat</button>' +
+          '<a class="btn" style="background:var(--accent);color:#000" href="javascript:void(0)" onclick="go(\'form\')">📝 Apply with ' + safe(s.name.split(' ')[0]) + ' →</a>' +
+          '<a class="btn" style="background:rgba(255,255,255,0.12);color:#fff" href="javascript:void(0)" onclick="go(\'home\')">← Back to Portal</a>' +
+        '</div>' +
+      '</div>' +
+    '</div>'
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// 📞 6. CALLING & 7. VOICE ROUTER BRANCHES
+// ══════════════════════════════════════════════════════════════
+function renderCalling() {
+  window.location.href = ru('calling');
+}
+
+function renderVoice() {
+  window.location.href = ru('voice');
+}
+
+// ══════════════════════════════════════════════════════════════
+// ⚡ EMI CALCULATOR ENGINE
+// ══════════════════════════════════════════════════════════════
+function calcEMI() {
+  var code = document.getElementById('clt') ? document.getElementById('clt').value : '';
+  var inc = Number(document.getElementById('cin') ? document.getElementById('cin').value : 0) || 0;
+  var amt = Number(document.getElementById('cam') ? document.getElementById('cam').value : 0) || 0;
+  var yrs = Number(document.getElementById('cten') ? document.getElementById('cten').value : 1) || 1;
+
+  if (!inc || !amt || !yrs) { return; }
+  var prod = PRODUCTS.find(function(p) { return p.code === code; }) || PRODUCTS[0];
+  var r = (prod.roi || 10.5) / 12 / 100;
+  var n = yrs * 12;
+  var emi = Math.round(amt * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1));
+  var isEligible = emi <= inc * 0.55;
+
+  var rbox = document.getElementById('rbox');
+  if (rbox) {
+    rbox.style.display = 'block';
+    document.getElementById('remi').textContent = '₹' + money(emi) + ' / month';
+    var rmsg = document.getElementById('rmsg');
+    if (isEligible) {
+      rmsg.textContent = '✅ Pre-Approved Eligibility Profile! (' + (prod.roi || 10.5) + '% ROI)';
+      rmsg.style.color = '#10b981';
+    } else {
+      rmsg.textContent = '⚠️ High FOIR Ratio. Consider extending tenure or adjusting amount.';
+      rmsg.style.color = '#f59e0b';
+    }
+  }
+}
+
+function applyWithEMI() {
+  var code = document.getElementById('clt') ? document.getElementById('clt').value : '';
+  var amt = document.getElementById('cam') ? document.getElementById('cam').value : '';
+  var inc = document.getElementById('cin') ? document.getElementById('cin').value : '';
+  go('form', { product: code, amount: amt, income: inc });
+}
+
+// ══════════════════════════════════════════════════════════════
+// 🤖 1-BRAIN BULBHUL AI CHAT ENGINE + CUSTOM ASSISTANT NAMING
+// ══════════════════════════════════════════════════════════════
+var chatOpen = false;
+var chatInFlight = false;
+var speechRecognizer = null;
+var isListening = false;
+
+function getAiCustomName() {
+  var emp = EMP_CODE || EMP || 'DC002';
+  return localStorage.getItem('DC_AI_NAME_' + emp) || '';
+}
+
+function updateAiHeaderDisplay() {
+  var s = STAFF || {};
+  var staffName = s.name ? s.name.split(' ')[0] : 'Officer';
+  var customName = getAiCustomName();
+  var titleEl = document.getElementById('aiAssistantTitle');
+  var subEl = document.getElementById('aiAssistantSubtitle');
+  if (titleEl) {
+    titleEl.textContent = customName || (staffName + "'s AI Banker");
+  }
+  if (subEl) {
+    subEl.textContent = '● ' + staffName + "'s AI Copilot · Online";
+  }
+}
+
+function renameAiAssistant(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  var current = getAiCustomName();
+  var s = STAFF || {};
+  var staffName = s.name ? s.name.split(' ')[0] : 'Officer';
+  var promptMsg = 'Apne personal AI Assistant ko naya naam dein:\n(Jaise: ' + staffName + ' Copilot, Jarvis, Bulbhul Pro, My Banker)';
+  var newName = window.prompt(promptMsg, current || (staffName + "'s AI Banker"));
+  if (newName !== null && newName.trim() !== '') {
+    var cleaned = newName.trim();
+    var emp = EMP_CODE || EMP || 'DC002';
+    localStorage.setItem('DC_AI_NAME_' + emp, cleaned);
+    updateAiHeaderDisplay();
+    var body = document.getElementById('cbody');
+    if (body) {
+      body.innerHTML += '<div class="bubble bot-b">✨ **Zabardast!** Aapka AI Assistant ab **' + safe(cleaned) + '** ke naam se active hai! Main aapke sabhi banking & client tasks me 24x7 help karunga.</div>';
+      body.scrollTop = body.scrollHeight;
+    }
+  }
+}
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  var box = document.getElementById('cbox');
+  if (box) {
+    box.style.display = chatOpen ? 'flex' : 'none';
+    if (chatOpen) {
+      updateAiHeaderDisplay();
+      var ci = document.getElementById('ci');
+      if (ci) ci.focus();
+    }
+  }
+}
+
+function quickAsk(text) {
+  var ci = document.getElementById('ci');
+  if (ci) {
+    ci.value = text;
+    sendChat();
+  }
+}
+
+function renderMarkdownText(text) {
+  var t = safe(text);
+  t = t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+  t = t.replace(/\n/g, '<br>');
+  return t;
+}
+
+function evaluateOfflineAi(query) {
+  var q = String(query || '').toLowerCase().trim();
+  var s = STAFF || {};
+  var staffName = s.name ? s.name.split(' ')[0] : 'Officer';
+  var num = q.replace(/\D/g, '');
+
+  if (num.length >= 10 || q.includes('dc/')) {
+    return '📋 **Lead Inquiry for Client (' + (num ? ('+91-' + num.slice(-10)) : 'Lead ID') + ')**:\n' +
+           '• **Status**: **OPEN / Active Processing**\n' +
+           '• **Assigned Officer**: ' + safe(staffName) + '\n' +
+           '• **Matched Bank**: HDFC Bank / State Bank of India\n' +
+           '• **Action**: Call client & collect KYC docs for login.';
+  }
+  if (q.includes('doc') || q.includes('paper') || q.includes('kagaz')) {
+    if (q.includes('bl') || q.includes('business')) {
+      return '📑 **Business Loan (BL) Documents Checklist**:\n' +
+             '1. Aadhaar & PAN Card (All Partners/Directors)\n' +
+             '2. 12 Months Current Account Statement (PDF)\n' +
+             '3. 2–3 Years ITR with Computation & Balance Sheet\n' +
+             '4. GST Certificate + 12 Months GSTR-3B\n' +
+             '5. Business Place Electricity Bill or Rent Agreement\n' +
+             '⚡ *Disbursal in 3–5 days without collateral!*';
+    }
+    if (q.includes('home') || q.includes('hl') || q.includes('property') || q.includes('lap')) {
+      return '🏠 **Home Loan / LAP Documents Checklist**:\n' +
+             '1. PAN & Aadhaar Card of Applicant & Co-applicant\n' +
+             '2. 3 Months Salary Slips & 6 Months Bank Statement (Salaried)\n' +
+             '3. 3 Years ITR with Financials (Self-Employed)\n' +
+             '4. Complete Chain of Property Title Documents\n' +
+             '⚡ *ROI from 8.40% p.a. | Tenure up to 30 Years!*';
+    }
+    return '📄 **Personal Loan (PL) Documents Checklist**:\n' +
+           '1. PAN Card & Aadhaar Card\n' +
+           '2. Latest 3 Months Salary Slips\n' +
+           '3. Latest 6 Months Salary Account Statement\n' +
+           '4. Company ID Card / Work Email Verification\n' +
+           '⚡ *10.5% Special Rate for Prime Salaried Profiles!*';
+  }
+  if (q.includes('roi') || q.includes('rate') || q.includes('byaj') || q.includes('10.5')) {
+    return '📊 **Bank Interest Rate Matrix (2026)**:\n' +
+           '• **Personal Loan**: 10.50% – 13.50% (HDFC, SBI, ICICI, Axis)\n' +
+           '• **Business Loan**: 14.00% – 18.00% (Unsecured MSME)\n' +
+           '• **Home Loan**: 8.40% – 9.15% (SBI, HDFC, LIC)\n' +
+           '• **LAP**: 9.50% – 11.00%\n' +
+           '💡 *CIBIL > 750 gets immediate lowest 10.5% slab!*';
+  }
+  if (q.includes('cibil') || q.includes('score')) {
+    return '🎯 **CIBIL Score Policy Rules**:\n' +
+           '• **750+**: Approved instantly in Tier-1 Banks @ 10.5% ROI.\n' +
+           '• **700–749**: Approved in standard banks without delinquency.\n' +
+           '• **650–699**: NBFCs route (Bajaj / Tata / Poonawalla).\n' +
+           '⚠️ *No written-off or settled accounts in past 24 months.*';
+  }
+  if (q.includes('script') || q.includes('pitch') || q.includes('call') || q.includes('kaise')) {
+    return '📞 **Winning Telecalling Pitch for ' + safe(staffName) + '**:\n' +
+           '*"Namaste Sir, main ' + safe(staffName) + ' baat kar raha hun Divyanshi Capital se. Sir aapke profile par pre-approved Personal Loan 10.5% ROI par activate hua hai bina branch visit ke. Kya main WhatsApp par instant calculation bhej doon?"*';
+  }
+  if (q.includes('emi') || q.includes('calc')) {
+    return '🧮 **Quick EMI Guide (@ 10.5% ROI)**:\n' +
+           '• **₹5,00,000 for 5 Yrs**: ₹10,747 / mo\n' +
+           '• **₹10,00,000 for 5 Yrs**: ₹21,494 / mo\n' +
+           '• **₹25,00,000 for 5 Yrs**: ₹53,735 / mo\n' +
+           '💡 *FOIR: Up to 50–60% of monthly net income allowed.*';
+  }
+  return 'Namaste ' + safe(staffName) + '! 🙏 Main aapka AI Banking Copilot hun. Aap mujhse documents checklist, ROI rates, CIBIL eligibility ya telecalling pitch ke bare me pooch sakte hain.';
+}
+
+function sendChat() {
+  if (chatInFlight) return;
+  var inp = document.getElementById('ci');
+  var txt = inp ? inp.value.trim() : '';
+  if (!txt) return;
+
+  chatInFlight = true;
+  var body = document.getElementById('cbody');
+  body.innerHTML += '<div class="bubble user-b">' + safe(txt) + '</div>';
+  inp.value = ''; body.scrollTop = body.scrollHeight;
+
+  var loadingDiv = document.createElement('div');
+  loadingDiv.className = 'bubble bot-b';
+  loadingDiv.textContent = 'Analyzing banking criteria...';
+  body.appendChild(loadingDiv);
+  body.scrollTop = body.scrollHeight;
+
+  // Immediate offline instant fallback if backend delayed
+  var responded = false;
+  var timer = setTimeout(function() {
+    if (!responded) {
+      responded = true;
+      var offlineReply = evaluateOfflineAi(txt);
+      loadingDiv.innerHTML = renderMarkdownText(offlineReply);
+      body.scrollTop = body.scrollHeight;
+      chatInFlight = false;
+    }
+  }, 1200);
+
+  callGAS('avatar_chat', { message: txt, empCode: EMP_CODE || EMP || 'DC002', avatarMode:true }).then(function(res) {
+    if (!responded) {
+      responded = true;
+      clearTimeout(timer);
+      var rawReply = typeof res === 'string' ? res : ((res && (res.reply || res.text)) || evaluateOfflineAi(txt));
+      loadingDiv.innerHTML = renderMarkdownText(rawReply);
+      body.scrollTop = body.scrollHeight;
+    }
+  }).catch(function(err) {
+    if (!responded) {
+      responded = true;
+      clearTimeout(timer);
+      var errMsg = (err && err.message) ? err.message : 'Sorry, response timeout.';
+      var offlineReply = evaluateOfflineAi(txt) || errMsg;
+      loadingDiv.innerHTML = renderMarkdownText(offlineReply);
+      body.scrollTop = body.scrollHeight;
+    }
+  }).finally(function() {
+    chatInFlight = false;
+  });
+}
+var sendAvatarChat = sendChat;
+
+function toggleSpeech() {
+  var mic = document.getElementById('micBtn');
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { alert('Speech recognition not supported in this browser.'); return; }
+
+  if (isListening && speechRecognizer) {
+    speechRecognizer.stop();
+    return;
+  }
+
+  speechRecognizer = new SpeechRecognition();
+  speechRecognizer.lang = 'hi-IN';
+  speechRecognizer.interimResults = false;
+
+  speechRecognizer.onstart = function() {
+    isListening = true;
+    if (mic) mic.classList.add('listening');
+  };
+
+  speechRecognizer.onresult = function(e) {
+    var transcript = e.results[0][0].transcript;
+    var ci = document.getElementById('ci');
+    if (ci) { ci.value = transcript; sendChat(); }
+  };
+
+  speechRecognizer.onerror = function() {
+    isListening = false;
+    if (mic) mic.classList.remove('listening');
+  };
+
+  speechRecognizer.onend = function() {
+    isListening = false;
+    if (mic) mic.classList.remove('listening');
+  };
+
+  speechRecognizer.start();
+}
+
+// ══════════════════════════════════════════════════════════════
+// 🚀 BOOTSTRAP & DYNAMIC THEME MOUNT
+// ══════════════════════════════════════════════════════════════
+var __STAFF_CACHE__ = {};
+function bootstrapApp() {
+  if (BOOT.staff || STAFF) {
+    STAFF = BOOT.staff || STAFF;
+    applyRoleTheme(STAFF.role || STAFF.department, THEME_PARAM);
+    renderPage();
+  } else if (EMP && EMP !== 'EMP_CODE') {
+    var cached = __STAFF_CACHE__[EMP];
+    if (!cached) {
+      try {
+        var raw = sessionStorage.getItem('DC_STAFF_' + EMP);
+        if (raw) cached = JSON.parse(raw);
+      } catch (_) {}
+    }
+    if (cached && cached.staff) {
+      STAFF = cached.staff;
+      applyRoleTheme(STAFF.role || STAFF.department, THEME_PARAM);
+      renderPage();
+      return;
+    }
+    callGAS('P1_STAFF_PUBLIC_', EMP).then(function(res) {
+      if (res && res.staff) {
+        STAFF = res.staff;
+        __STAFF_CACHE__[EMP] = res;
+        try { sessionStorage.setItem('DC_STAFF_' + EMP, JSON.stringify(res)); } catch (_) {}
+        applyRoleTheme(STAFF.role || STAFF.department, THEME_PARAM);
+      } else {
+        applyRoleTheme('EXECUTIVE', THEME_PARAM);
+      }
+      renderPage();
+    }).catch(function() {
+      applyRoleTheme('EXECUTIVE', THEME_PARAM);
+      renderPage();
+    });
+  } else {
+    applyRoleTheme('EXECUTIVE', THEME_PARAM);
+    renderPage();
+  }
+}
+
+function renderPage() {
+  updateActiveNav(PAGE);
+  updateAiHeaderDisplay();
+  if (PAGE === 'form' || PAGE === 'apply' || PAGE === 'smart') renderForm();
+  else if (PAGE === 'card' || PAGE === 'profile') renderCard();
+  else if (PAGE === 'dashboard') renderDashboard();
+  else if (PAGE === 'avatar') renderAvatar();
+  else if (PAGE === 'calling') renderCalling();
+  else if (PAGE === 'voice') renderVoice();
+  else renderHome();
+}
+
+bootstrapApp();
+</script>
+</body>
+</html>
